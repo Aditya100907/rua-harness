@@ -31,3 +31,9 @@ One entry per result: what was tested, the number with its episode count and int
 - **Normalization:** heavy tails in near-constant dims (PickPlace base action dim 2 has a q01..q99 range of 0.02, so rare base moves map to z-scores of 10+; base height in the state has ranges of 0.0001 to 0.007).
 - **Rules out:** eval-time input mismatch (the model fails on training frames too); render corruption.
 - **Live hypotheses, tested now:** (a) undertraining of the flow model, (b) dispersive term dominating, (c) batch 64 too small, (d) outliers from the quantile normalization, (e) head learning rate. Ablations abl_nodisp, abl_bs128, abl_clip3, abl_lrhead3e4 (5k steps, 3 tasks) against run1 5k; eval-only tests of run1 20k with z0 = 0 and with 4 sampling steps; a one-demo overfitting test on the Mac.
+
+## Nov 27, 07:05. One-demo overfitting test (Mac, MPS)
+- **Tested:** train on OpenDrawer demo 0 only (334 frames), batch 8, 400 steps (about 10 passes), recipe defaults (head lr 1e-4, dispersive 0.25); open-loop on that same demo.
+- **Numbers:** raw_mse 1.20 to 0.69. Open-loop arm MAE 0.182 vs 0.157 for the mean action and 0.062 for repeating the current action. Gripper sign 66%.
+- **Means:** the model cannot memorize one demo in 400 steps. Not decisive on its own: DEM's own toy test needs 1,200 steps at lr 3e-4 and batch 256 to contract onto a single 2-D point, so MeanFlow converges slowly. The DEM paper trained on 8 H100s for 300k steps, so its effective batch was likely 8x ours or more.
+- **Next:** the same test with lr 3e-4 and no dispersive term (Mac, running); a 3,000-step, batch-64 version on Bouchet once SSH is back.
