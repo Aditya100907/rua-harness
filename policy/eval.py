@@ -33,11 +33,12 @@ COLS = ["task", "episode", "seed", "success", "seconds", "llm_calls", "input_tok
 class PolicyRunner:
     """Wraps a checkpoint + norm_stats: raw obs in, raw LeRobot-order actions out."""
 
-    def __init__(self, ckpt: str, device: str = "cuda", cams=("left", "right"), nfe: int = 1):
+    def __init__(self, ckpt: str, device: str = "cuda", cams=("left", "right"), nfe: int = 1, z0: str = "random"):
         import torch
         from policy.data import load_norm_stats
         from policy.model import load_policy
         self.torch, self.device, self.cams, self.nfe = torch, device, list(cams), nfe
+        self.z0 = z0          # "random" (fresh noise per call) or "zero" (deterministic, the noise mean)
         self.policy = load_policy(ckpt).to(device).eval()
         ck_dir = Path(ckpt).parent
         self.stats = load_norm_stats(ck_dir / "norm_stats.json")
@@ -137,10 +138,10 @@ class PolicyRunner:
         if extra is None and self.format in ("points_3d", "points_3d_rgb"):
             from policy.commands_gt import points_tensor_input
             extra = {"points": torch.as_tensor(points_tensor_input(self.cmd, sim.state16(obs)), device=self.device)[None]}
-        if extra:
-            a = self.policy.act(None, st, vis_tokens=vis.float(), nfe=self.nfe, **extra)
-        else:
-            a = self.policy.act(None, st, vis_tokens=vis.float(), nfe=self.nfe)
+        extra = dict(extra or {})
+        if self.z0 == "zero":
+            extra["z0"] = torch.zeros(1, 16, 12, device=self.device)
+        a = self.policy.act(None, st, vis_tokens=vis.float(), nfe=self.nfe, **extra)
         return qa.unnormalize(a[0].float().cpu().numpy())          # [16, 12] raw LeRobot order
 
 
@@ -207,6 +208,8 @@ def main() -> None:
     ap.add_argument("--distractor", action="store_true", help="N2/F6: grasp point on a distractor object")
     ap.add_argument("--drop", default="", choices=["", "point", "name", "source"], help="N3: drop a field")
     ap.add_argument("--rename", default="", help="N4: call the object by this name")
+    ap.add_argument("--z0", default="random", choices=["random", "zero"], help="sampling noise")
+    ap.add_argument("--nfe", type=int, default=1, help="MeanFlow steps per action chunk")
     ap.add_argument("--demo-scenes", default="", help="JSON task -> demo episode ids: replay those initial scenes")
     args = ap.parse_args()
     import torch
@@ -214,7 +217,7 @@ def main() -> None:
 
     runner, step, run_id, fmt = None, "", "", "sentence"
     if not args.wiring:
-        runner = PolicyRunner(args.ckpt, device=dev)
+        runner = PolicyRunner(args.ckpt, device=dev, nfe=args.nfe, z0=args.z0)
         fmt = runner.format
         ck = Path(args.ckpt)
         step = int(ck.stem.split("_")[-1]) if ck.stem.startswith("ckpt_") else ""
