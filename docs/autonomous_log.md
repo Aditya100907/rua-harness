@@ -43,3 +43,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 16:30 Added --objective mse|fm; launched abl_mse and abl_fm (5k steps, 3 tasks).
 - 16:33 Launched overfit1_mse and overfit1_meanflow (1 OpenDrawer demo, 2000 steps, batch 64) on Bouchet.
 - 16:38 Chained CPU checks after each run (cond_check for abl_mse with zero noise via act z0, abl_fm with 10 steps; open-loop for both overfits, zero noise for mse). Waiting for GPUs.
+- 16:45 Adi: match the DEM paper: scene + wrist cameras, quantiles from the dataset's shipped meta/stats.json (not recomputed); compare shipped vs recomputed on base dims; rerun the one-demo test.

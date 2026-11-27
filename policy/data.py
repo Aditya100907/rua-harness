@@ -54,13 +54,27 @@ class Quantile:
         return np.where(self.valid, x, self.lo)
 
 
-def norm_stats_from_arrays(per_task: dict[str, tuple[np.ndarray, np.ndarray]], clip: float = 0.0) -> dict:
-    """per_task: task -> (states [N, 16], actions [N, 12]) over every frame. `clip` clips stage-1 values."""
-    out = {"per_task": {}, "zscore": {}, "clip": clip}
+def shipped_quantiles(task: str) -> tuple[tuple, tuple]:
+    """q01/q99 for state and action from the dataset's own meta/stats.json (as the DEM research code used)."""
+    with open(paths.task_dir(task) / "meta" / "stats.json") as f:
+        st = json.load(f)
+    return ((np.asarray(st["observation.state"]["q01"]), np.asarray(st["observation.state"]["q99"])),
+            (np.asarray(st["action"]["q01"]), np.asarray(st["action"]["q99"])))
+
+
+def norm_stats_from_arrays(per_task: dict[str, tuple[np.ndarray, np.ndarray]], clip: float = 0.0,
+                           quantiles: str = "recompute") -> dict:
+    """per_task: task -> (states [N, 16], actions [N, 12]) over every frame. `clip` clips stage-1 values.
+    `quantiles`: "recompute" (over the given frames) or "dataset" (the shipped meta/stats.json; the z-score
+    stage is still computed here, since the research norm.pt is not public)."""
+    out = {"per_task": {}, "zscore": {}, "clip": clip, "quantiles": quantiles}
     s1_s, s1_a = [], []
     for task, (s, a) in per_task.items():
-        qs = (np.quantile(s, 0.01, 0), np.quantile(s, 0.99, 0))
-        qa = (np.quantile(a, 0.01, 0), np.quantile(a, 0.99, 0))
+        if quantiles == "dataset":
+            qs, qa = shipped_quantiles(task)
+        else:
+            qs = (np.quantile(s, 0.01, 0), np.quantile(s, 0.99, 0))
+            qa = (np.quantile(a, 0.01, 0), np.quantile(a, 0.99, 0))
         out["per_task"][task] = {"state": {"q01": qs[0].tolist(), "q99": qs[1].tolist()},
                                  "action": {"q01": qa[0].tolist(), "q99": qa[1].tolist()}}
         ns, na = Quantile(*qs).normalize(s), Quantile(*qa).normalize(a)
@@ -113,7 +127,7 @@ class RoboCasaDataset:
 
     def __init__(self, tasks: list[str], cams: tuple[str, ...] = ("left", "right"), chunk: int = CHUNK,
                  norm_stats: dict | None = None, frames_base: Path | None = None, episodes: dict | None = None,
-                 use_video: bool = False, clip: float = 0.0):
+                 use_video: bool = False, clip: float = 0.0, quantiles: str = "recompute"):
         """`episodes`: optional task -> list of episode ids to keep (for held-out splits)."""
         self.tasks, self.cams, self.chunk = list(tasks), list(cams), chunk
         self.tables = [load_task_table(t) for t in self.tasks]
@@ -124,7 +138,8 @@ class RoboCasaDataset:
             rows = np.concatenate([np.arange(tb["starts"][e], tb["starts"][e] + tb["lens"][e]) for e in keep])
             return tb["states"][rows], tb["actions"][rows]
         self.clip = clip if not norm_stats else norm_stats.get("clip", 0.0)
-        self.norm_stats = norm_stats or norm_stats_from_arrays({t["task"]: kept(t) for t in self.tables}, clip)
+        self.norm_stats = norm_stats or norm_stats_from_arrays({t["task"]: kept(t) for t in self.tables}, clip,
+                                                                    quantiles)
         self.quant = [task_quantiles(self.norm_stats, t) for t in self.tasks]
         self.frames_base, self.use_video = frames_base, use_video
         self._stores: dict = {}

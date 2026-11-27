@@ -63,6 +63,8 @@ def parse_args(argv=None):
     ap.add_argument("--objective", default="meanflow", choices=["meanflow", "fm", "mse"],
                     help="meanflow (DEM recipe); fm = plain flow matching (r = t, sample with --nfe > 1); "
                          "mse = deterministic regression (evaluate with --z0 zero)")
+    ap.add_argument("--quantiles", default="recompute", choices=["recompute", "dataset"],
+                    help="stage-1 q01/q99: recompute over training frames, or the dataset's shipped meta/stats.json")
     ap.add_argument("--clip-norm", type=float, default=0.0, help="clip stage-1 normalized state/actions to +-this (0 = off)")
     a = ap.parse_args(argv)
     if a.all_tasks:
@@ -113,7 +115,7 @@ def main(argv=None) -> None:
     episodes = json.loads(Path(args.episodes_json).read_text()) if args.episodes_json else None
     from policy.model import wrap_dataset
     ds = RoboCasaDataset(args.tasks, cams=tuple(args.cams), norm_stats=stats, episodes=episodes,
-                         use_video=args.video, clip=args.clip_norm)
+                         use_video=args.video, clip=args.clip_norm, quantiles=args.quantiles)
     ds = wrap_dataset(ds, args)
     stats = ds.norm_stats
     if not resuming:

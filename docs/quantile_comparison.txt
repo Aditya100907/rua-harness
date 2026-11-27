@@ -1,0 +1,45 @@
+== PickPlaceCounterToCabinet  (131904 frames)
+  observ  0 base_pos_x    shipped [ 0.50174,  5.60842] range 5.10668 | recomputed [ 0.50174,  5.60842] range 5.10668
+  observ  1 base_pos_y    shipped [-4.30718, -0.61164] range 3.69553 | recomputed [-4.30718, -0.61164] range 3.69553
+  observ  2 base_pos_z    shipped [ 0.69999,  0.70262] range 0.00262 | recomputed [ 0.69999,  0.70262] range 0.00262
+  observ  3 base_qx       shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  observ  4 base_qy       shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  observ  5 base_qz       shipped [-1.00000,  1.00000] range 2.00000 | recomputed [-1.00000,  1.00000] range 2.00000
+  observ  6 base_qw       shipped [ 0.00000,  1.00000] range 1.00000 | recomputed [ 0.00000,  1.00000] range 1.00000
+  action  0 base_vx       shipped [ 0.00000,  0.43571] range 0.43571 | recomputed [ 0.00000,  0.43571] range 0.43571
+  action  1 base_vy       shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  action  2 base_yaw      shipped [ 0.00000,  0.02000] range 0.02000 | recomputed [ 0.00000,  0.02000] range 0.02000
+  action  3 torso         shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  action  4 control_mode  shipped [-1.00000,  1.00000] range 2.00000 | recomputed [-1.00000,  1.00000] range 2.00000
+  max |diff| over all observation.state dims: q01 0.00000, q99 0.00000
+  max |diff| over all action dims: q01 0.00000, q99 0.00000
+== OpenDrawer  (137431 frames)
+  observ  0 base_pos_x    shipped [ 0.85205,  5.49118] range 4.63914 | recomputed [ 0.85205,  5.49118] range 4.63914
+  observ  1 base_pos_y    shipped [-4.94060, -0.77314] range 4.16747 | recomputed [-4.94060, -0.77314] range 4.16747
+  observ  2 base_pos_z    shipped [ 0.69998,  0.70673] range 0.00674 | recomputed [ 0.69998,  0.70673] range 0.00674
+  observ  3 base_qx       shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  observ  4 base_qy       shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  observ  5 base_qz       shipped [-1.00000,  1.00000] range 2.00000 | recomputed [-1.00000,  1.00000] range 2.00000
+  observ  6 base_qw       shipped [ 0.00000,  1.00000] range 1.00000 | recomputed [ 0.00000,  1.00000] range 1.00000
+  action  0 base_vx       shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  action  1 base_vy       shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  action  2 base_yaw      shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  action  3 torso         shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  action  4 control_mode  shipped [-1.00000, -1.00000] range 0.00000 | recomputed [-1.00000, -1.00000] range 0.00000
+  max |diff| over all observation.state dims: q01 0.00000, q99 0.00000
+  max |diff| over all action dims: q01 0.00000, q99 0.00000
+== TurnOnMicrowave  (80439 frames)
+  observ  0 base_pos_x    shipped [ 0.72146,  5.02468] range 4.30322 | recomputed [ 0.72146,  5.02469] range 4.30322
+  observ  1 base_pos_y    shipped [-4.22660, -0.82097] range 3.40563 | recomputed [-4.22660, -0.82097] range 3.40563
+  observ  2 base_pos_z    shipped [ 0.69993,  0.70005] range 0.00012 | recomputed [ 0.69993,  0.70005] range 0.00012
+  observ  3 base_qx       shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  observ  4 base_qy       shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  observ  5 base_qz       shipped [-1.00000,  1.00000] range 2.00000 | recomputed [-1.00000,  1.00000] range 2.00000
+  observ  6 base_qw       shipped [ 0.00000,  1.00000] range 1.00000 | recomputed [ 0.00000,  1.00000] range 1.00000
+  action  0 base_vx       shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  action  1 base_vy       shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  action  2 base_yaw      shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  action  3 torso         shipped [ 0.00000,  0.00000] range 0.00000 | recomputed [ 0.00000,  0.00000] range 0.00000
+  action  4 control_mode  shipped [-1.00000, -1.00000] range 0.00000 | recomputed [-1.00000, -1.00000] range 0.00000
+  max |diff| over all observation.state dims: q01 0.00000, q99 0.00000
+  max |diff| over all action dims: q01 0.00000, q99 0.00000
