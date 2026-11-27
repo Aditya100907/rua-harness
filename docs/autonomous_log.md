@@ -68,3 +68,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 17:26 Determinism rerun: with fix 21/50, no-fix rerun 22/50, original 22/50. No meaningful change; per-seed agreement 47/50 and 48/50.
 - 17:28 fs_mse_sentence 5k: OpenDrawer 8/50, PickPlace 5/50, Microwave 4/50 (first pick-place and microwave successes). 10k scoring running.
 - 17:34 Bouchet scene check (34895814, seeds 1000-1004, 3 smoke tasks): HexaShell target split in its own env (b4684e6 patched) matches our eval 15/15, positions identical; repeats on both sides agree. 50-seed check 34894785 running. docs/hexashell_target_check.md.
+- 17:35 HexaShell helper done: target split matches our eval scene for scene on 15/15 (3 tasks x 5 seeds); patch in setup/patches; SAM 3 service up at http://a1125u42n01:18300 (job 34895235 until 23:04), smoke test passed (microwave 0.82, cabinet 0.79, counter 0.75; 57 ms per prompt). Marked decision 6 resolved (fix already applied).
