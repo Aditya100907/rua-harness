@@ -48,21 +48,72 @@ class PolicyRunner:
         self.format = self.cfg.get("format", "sentence")
         self.quant = None
 
-    def set_task(self, task: str, instruction: str):
+    def set_task(self, task: str, instruction: str, env=None, cmd_opts: dict | None = None,
+                 rng: np.random.Generator | None = None) -> dict:
+        """Returns the command used (for formats other than `sentence`, built from ground truth at reset)."""
         from policy.data import task_quantiles
         if task not in self.stats["per_task"]:
             raise KeyError(f"{task} was not in this checkpoint's training tasks")
         self.quant = task_quantiles(self.stats, task)
-        self.policy.set_instruction(instruction)
+        self.cmd = None
+        if self.format == "sentence":
+            self.policy.set_instruction(instruction)
+            return {"text": instruction}
+        if self.format == "pose_path":
+            # demo-scene evaluation: the "perfect" path is the held-out demo's own future (time-indexed)
+            self.cmd = {"kv_text": (cmd_opts or {}).get("kv_text", instruction)}
+            self.policy.set_instruction(self.cmd["kv_text"])
+            return {"text": self.cmd["kv_text"]}
+        from policy.commands_gt import perfect_command
+        self.cmd = perfect_command(env, task, rng=rng, **(cmd_opts or {}))
+        self.policy.set_instruction(self.cmd["kv_text"])
+        return {"text": self.cmd["kv_text"], **self.cmd}
+
+    def set_demo(self, states: np.ndarray, t_ref: list):
+        """pose_path: recorded 16-number states of the demo whose scene is being replayed."""
+        self.demo_states, self.t_ref = states, t_ref
+
+    def demo_path(self, obs: dict) -> np.ndarray:
+        from scipy.spatial.transform import Rotation as R
+        from policy.variants import PATH_LEN, PATH_STRIDE
+        t = self.t_ref[0]
+        st = sim.state16(obs)
+        n = len(self.demo_states)
+        fut = self.demo_states[np.minimum(t + PATH_STRIDE * np.arange(1, PATH_LEN + 1), n - 1)]
+        p_w = fut[:, 0:3] + R.from_quat(fut[:, 3:7]).apply(fut[:, 7:10])
+        p_b = R.from_quat(st[3:7]).inv().apply(p_w - st[0:3])
+        q_b = R.from_quat(st[3:7]).inv() * (R.from_quat(fut[:, 3:7]) * R.from_quat(fut[:, 10:14]))
+        return np.concatenate([p_b, q_b.as_quat()], 1).astype(np.float32)
+
+    def _images(self, obs: dict) -> np.ndarray:
+        imgs = sim.images(obs, self.cams)
+        if self.format == "points_2d" and self.cmd is not None:
+            from policy.variants import CAM_IN_BASE, base_to_pixel, draw_points, world_to_base
+            st = sim.state16(obs)
+            out = []
+            for k, cam in enumerate(self.cams):
+                if cam in CAM_IN_BASE:
+                    uv = [base_to_pixel(world_to_base(self.cmd[key], st), cam) if h else None
+                          for key, h in zip(("grasp_world", "place_world"), self.cmd["has"])]
+                    out.append(draw_points(imgs[k], uv))
+                else:
+                    out.append(imgs[k])
+            imgs = np.stack(out)
+        return imgs
 
     def act(self, obs: dict, extra: dict | None = None) -> np.ndarray:
         torch = self.torch
         from dem import preprocess_images
         qs, qa = self.quant
-        imgs = preprocess_images(sim.images(obs, self.cams), size=256, device=self.device)[None]
+        imgs = preprocess_images(self._images(obs), size=256, device=self.device)[None]
         st = torch.as_tensor(qs.normalize(sim.state16(obs)), dtype=torch.float32, device=self.device)[None]
         with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16, enabled=self.device.startswith("cuda")):
             vis = self.policy.encode_vision(imgs)
+        if extra is None and self.format == "pose_path":
+            extra = {"path": torch.as_tensor(self.demo_path(obs), device=self.device)[None]}
+        if extra is None and self.format in ("points_3d", "points_3d_rgb"):
+            from policy.commands_gt import points_tensor_input
+            extra = {"points": torch.as_tensor(points_tensor_input(self.cmd, sim.state16(obs)), device=self.device)[None]}
         if extra:
             a = self.policy.act(None, st, vis_tokens=vis.float(), nfe=self.nfe, **extra)
         else:
@@ -127,6 +178,10 @@ def main() -> None:
     ap.add_argument("--horizon", type=int, default=0, help="override the task horizon")
     ap.add_argument("--shard", type=int, default=0, help="run episodes shard, shard + nshards, ...")
     ap.add_argument("--nshards", type=int, default=1)
+    ap.add_argument("--point-error-cm", type=float, default=0.0, help="N1: shift command points by this much")
+    ap.add_argument("--distractor", action="store_true", help="N2/F6: grasp point on a distractor object")
+    ap.add_argument("--drop", default="", choices=["", "point", "name", "source"], help="N3: drop a field")
+    ap.add_argument("--rename", default="", help="N4: call the object by this name")
     args = ap.parse_args()
     import torch
     dev = args.device or ("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
@@ -145,7 +200,8 @@ def main() -> None:
     commit = paths.code_commit()
     new = not out.exists()
     f = open(out, "a", newline="")
-    w = csv.DictWriter(f, fieldnames=COLS + ["model_seconds", "state_err0", "image_err0"], extrasaction="ignore")
+    w = csv.DictWriter(f, fieldnames=COLS + ["model_seconds", "state_err0", "image_err0", "command_mode", "point_error_cm",
+                                       "min_dist_cmd_cm", "min_dist_true_cm"], extrasaction="ignore")
     if new:
         w.writeheader()
     cams = runner.cams if runner else ["left", "right"]
@@ -174,13 +230,60 @@ def main() -> None:
                 instr = sim.episode_extras(ds, i)[2].get("lang", "")
                 r = run_episode(env, task, seed, lambda o, t: acts[t:t + 16], len(acts) + 50,
                                 execute=args.execute, video=frames, reset_obs=obs0, record=args.save_traj)
+            elif runner.format == "pose_path":
+                # held-out demo scenes: episodes not in the run's training split
+                tr = runner.cfg.get("episodes_json")
+                train_eps = set(json.loads(Path(tr).read_text()).get(task, [])) if tr else set()
+                from policy.extract_frames import episode_lengths
+                held = [e for e in range(len(episode_lengths(ds))) if e not in train_eps]
+                ep = held[i % len(held)]
+                obs0 = sim.reset_to_episode(env, ds, ep)
+                from policy.data import load_task_table
+                if not hasattr(runner, "_tables"):
+                    runner._tables = {}
+                if task not in runner._tables:
+                    runner._tables[task] = load_task_table(task)
+                tb = runner._tables[task]
+                n = int(tb["lens"][ep]); g0 = int(tb["starts"][ep])
+                from policy.label_commands import load_labels
+                lbl = {l["episode"]: l for l in load_labels(task, paths.frames_base().parent / "labels")}[ep]
+                t_ref = [0]
+                runner.set_task(task, lbl["kv_text"], env=env, cmd_opts={"kv_text": lbl["kv_text"]})
+                runner.set_demo(tb["states"][g0:g0 + n], t_ref)
+                instr = lbl["kv_text"]
+
+                def act_fn(o, t):
+                    t_ref[0] = t
+                    return runner.act(o)
+                r = run_episode(env, task, seed, act_fn, H, execute=args.execute, video=frames,
+                                reset_obs=obs0, record=args.save_traj)
+                extra_row.update(command_mode=f"demo_scene_{ep}" + ("_TRAINED" if ep in train_eps else ""))
             else:
                 env.rng = np.random.default_rng(seed)
                 obs0 = env.reset()
                 instr = env.get_ep_meta().get("lang", "")
-                runner.set_task(task, instr)
-                r = run_episode(env, task, seed, lambda o, t: runner.act(o), H, execute=args.execute,
+                opts = dict(point_error_cm=args.point_error_cm, distractor=args.distractor, drop=args.drop,
+                            rename=args.rename)
+                cmd = runner.set_task(task, instr, env=env, cmd_opts=opts, rng=np.random.default_rng(seed + 7))
+                instr = cmd["text"]
+                track = {"cmd": [], "true": []}
+                g_cmd, g_true = cmd.get("grasp_world"), cmd.get("true_grasp_world")
+
+                def act_fn(o, t):
+                    e = np.asarray(o["robot0_eef_pos"])
+                    if g_cmd is not None:
+                        track["cmd"].append(np.linalg.norm(e - g_cmd))
+                    if g_true is not None:
+                        track["true"].append(np.linalg.norm(e - g_true))
+                    return runner.act(o)
+                r = run_episode(env, task, seed, act_fn, H, execute=args.execute,
                                 video=frames, reset_obs=obs0, record=args.save_traj)
+                mode = "distractor" if args.distractor else (f"drop_{args.drop}" if args.drop else
+                                                             (f"rename" if args.rename else "perfect"))
+                extra_row.update(command_mode=mode if runner.format != "sentence" else "sentence",
+                                 point_error_cm=args.point_error_cm,
+                                 min_dist_cmd_cm=round(100 * min(track["cmd"]), 1) if track["cmd"] else "",
+                                 min_dist_true_cm=round(100 * min(track["true"]), 1) if track["true"] else "")
             n_ok += r["success"]
             row = dict(task=task, episode=i, seed=seed, success=r["success"], seconds=r["seconds"], llm_calls=0,
                        input_tokens=0, output_tokens=0, cost_usd=0, code_commit=commit, checkpoint_step=step,

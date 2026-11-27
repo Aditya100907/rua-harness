@@ -9,11 +9,12 @@
 #   5. appends one line to $ROOT/logs/watcher.log
 # Queue line format (one experiment per line, '#' comments allowed):
 #   RUN_NAME | train.py arguments
-# Score policy per run (config.json "tasks"): every checkpoint of a run on 3 tasks or fewer;
+# Score policy per run (config.json "tasks"): every 5k steps for a run on 3 tasks or fewer;
 # for bigger runs every 50k steps and the final one. Episodes: 50, or 100 for a run's final checkpoint.
 source /nfs/roberts/project/pi_dr877/ak3288/apollo-lab/rua-harness/policy/slurm/common.sh
 GPU_CAP=${GPU_CAP:-8}
 JOB_CAP=${JOB_CAP:-12}
+EVAL_RESERVE=${EVAL_RESERVE:-2}   # GPUs the queue leaves free for scoring
 CK=$PROJ/checkpoints
 Q=$ROOT/runs/queue.txt
 QDONE=$ROOT/runs/queue_done.txt
@@ -69,6 +70,7 @@ cycle() {
 import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['steps'], ' '.join(c['tasks']))")
     final=0; [ "$step" -ge "$want" ] && final=1
     if [ "$ntasks" -gt 3 ] && [ $final -eq 0 ] && [ $((step % 50000)) -ne 0 ]; then touch $d/scored/$step; continue; fi
+    if [ "$ntasks" -le 3 ] && [ $final -eq 0 ] && [ $((step % 5000)) -ne 0 ]; then touch $d/scored/$step; continue; fi
     eps=50; [ $final -eq 1 ] && eps=100
     free=$((GPU_CAP - $(gpus_in_use)))
     [ $free -le 0 ] && break
@@ -79,7 +81,7 @@ import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['step
     n_eval=$((n_eval+1)); msg="$msg eval:${run}@$step:$j"
   done
   # 3. queue
-  while [ $(gpus_in_use) -lt $GPU_CAP ] && [ $(jobs_in_use) -lt $JOB_CAP ]; do
+  while [ $(gpus_in_use) -lt $((GPU_CAP - EVAL_RESERVE)) ] && [ $(jobs_in_use) -lt $JOB_CAP ]; do
     line=$(grep -v '^\s*#' $Q | grep -v '^\s*$' | head -1)
     [ -z "$line" ] && break
     run=$(echo "$line" | cut -d'|' -f1 | xargs); args=$(echo "$line" | cut -d'|' -f2- | xargs)
