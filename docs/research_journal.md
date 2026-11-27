@@ -77,3 +77,9 @@ One entry per result: what was tested, the number with its episode count and int
 - **Numbers:** original 22/50 (44%); no-fix rerun 22/50 (44%); with fix 21/50 (42%, 95% CI 29 to 56%). Per-seed agreement with the original: no-fix rerun 48/50, with fix 47/50. Without the fix, 1 of 50 OpenDrawer scenes changed between runs (a different instruction).
 - **Scene test (separate processes, seeds 1000 to 1004):** without the fix, PickPlaceCounterToCabinet rebuilt differently for 3 of 5 seeds (seed 1003: different layout and target object), OpenDrawer for 1 of 5; with the fix, all identical.
 - **Means:** the fix matters for reproducibility (especially pick-place) but does not move the OpenDrawer number beyond noise; the gate still passes with it. Every eval after about 17:25 uses it (on by default); results before that ran without it.
+
+## Nov 27, 17:28. Format study, first score: sentence arm at 5k
+- **Tested:** fs_mse_sentence (regression; cameras left + wrist; shipped quantiles; held-out-50 split; seed 0; 5k of 20k steps), 50 episodes per task, seeds 1000 to 1049, with the determinism fix (watcher eval 34895234).
+- **Numbers:** OpenDrawer 8/50 (16%, 95% CI 8 to 29%); PickPlaceCounterToCabinet 5/50 (10%, 4 to 21%); TurnOnMicrowave 4/50 (8%, 3 to 19%). First pick-place and microwave successes of any learned policy here.
+- **Compared with abl_mse at 5k** (left + right, recomputed quantiles, all demos, no determinism fix): 22/50, 0/50, 0/50. Not a clean comparison: cameras, quantile source, training split and the determinism fix all differ (quantiles were shown identical; the fix moved OpenDrawer by 1 episode). The camera change is the likely cause of the shift, but this is not tested as one change.
+- **Counts toward the format study** (gate passed; same protocol for every format). 10k scoring running (34896150).
