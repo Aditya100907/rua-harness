@@ -59,6 +59,8 @@ def parse_args(argv=None):
     ap.add_argument("--labels-dir", default=None, help="hindsight command labels (policy/label_commands.py)")
     ap.add_argument("--video", action="store_true", help="decode mp4 directly (slow, no frame store needed)")
     ap.add_argument("--done-head", action="store_true", help="also train a progress / done output (DoneHead)")
+    ap.add_argument("--dispersive-weight", type=float, default=0.25, help="DEM recipe: 0.25")
+    ap.add_argument("--clip-norm", type=float, default=0.0, help="clip stage-1 normalized state/actions to +-this (0 = off)")
     a = ap.parse_args(argv)
     if a.all_tasks:
         a.tasks = list(paths.ATOMIC_SEEN)
@@ -75,7 +77,8 @@ def lr_lambda(step: int, total: int, warmup: int) -> float:
 def build(args, ds_stats: dict, device: str):
     from policy.model import build_policy
     policy = build_policy(args.format, cams=len(args.cams), offline=args.offline,
-                          freeze_vision=args.freeze_vision)
+                          freeze_vision=args.freeze_vision,
+                          dispersive_weight=getattr(args, "dispersive_weight", 0.25))
     a_norm, p_norm = zscore_normalizers(ds_stats)
     policy.action_norm, policy.proprio_norm = a_norm, p_norm
     return policy.to(device)
@@ -106,7 +109,7 @@ def main(argv=None) -> None:
     episodes = json.loads(Path(args.episodes_json).read_text()) if args.episodes_json else None
     from policy.model import wrap_dataset
     ds = RoboCasaDataset(args.tasks, cams=tuple(args.cams), norm_stats=stats, episodes=episodes,
-                         use_video=args.video)
+                         use_video=args.video, clip=args.clip_norm)
     ds = wrap_dataset(ds, args)
     stats = ds.norm_stats
     if not resuming:

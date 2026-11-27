@@ -126,7 +126,10 @@ class PolicyRunner:
         from dem import preprocess_images
         qs, qa = self.quant
         imgs = preprocess_images(self._images(obs), size=256, device=self.device)[None]
-        st = torch.as_tensor(qs.normalize(sim.state16(obs)), dtype=torch.float32, device=self.device)[None]
+        sn = qs.normalize(sim.state16(obs))
+        if self.stats.get("clip"):
+            sn = np.clip(sn, -self.stats["clip"], self.stats["clip"])
+        st = torch.as_tensor(sn, dtype=torch.float32, device=self.device)[None]
         with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16, enabled=self.device.startswith("cuda")):
             vis = self.policy.encode_vision(imgs)
         if extra is None and self.format == "pose_path":

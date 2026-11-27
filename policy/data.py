@@ -54,17 +54,20 @@ class Quantile:
         return np.where(self.valid, x, self.lo)
 
 
-def norm_stats_from_arrays(per_task: dict[str, tuple[np.ndarray, np.ndarray]]) -> dict:
-    """per_task: task -> (states [N, 16], actions [N, 12]) over every frame."""
-    out = {"per_task": {}, "zscore": {}}
+def norm_stats_from_arrays(per_task: dict[str, tuple[np.ndarray, np.ndarray]], clip: float = 0.0) -> dict:
+    """per_task: task -> (states [N, 16], actions [N, 12]) over every frame. `clip` clips stage-1 values."""
+    out = {"per_task": {}, "zscore": {}, "clip": clip}
     s1_s, s1_a = [], []
     for task, (s, a) in per_task.items():
         qs = (np.quantile(s, 0.01, 0), np.quantile(s, 0.99, 0))
         qa = (np.quantile(a, 0.01, 0), np.quantile(a, 0.99, 0))
         out["per_task"][task] = {"state": {"q01": qs[0].tolist(), "q99": qs[1].tolist()},
                                  "action": {"q01": qa[0].tolist(), "q99": qa[1].tolist()}}
-        s1_s.append(Quantile(*qs).normalize(s))
-        s1_a.append(Quantile(*qa).normalize(a))
+        ns, na = Quantile(*qs).normalize(s), Quantile(*qa).normalize(a)
+        if clip:
+            ns, na = np.clip(ns, -clip, clip), np.clip(na, -clip, clip)
+        s1_s.append(ns)
+        s1_a.append(na)
     S, A = np.concatenate(s1_s), np.concatenate(s1_a)
     out["zscore"] = {"state": {"mean": S.mean(0).tolist(), "std": S.std(0).tolist()},
                      "action": {"mean": A.mean(0).tolist(), "std": A.std(0).tolist()}}
@@ -110,7 +113,7 @@ class RoboCasaDataset:
 
     def __init__(self, tasks: list[str], cams: tuple[str, ...] = ("left", "right"), chunk: int = CHUNK,
                  norm_stats: dict | None = None, frames_base: Path | None = None, episodes: dict | None = None,
-                 use_video: bool = False):
+                 use_video: bool = False, clip: float = 0.0):
         """`episodes`: optional task -> list of episode ids to keep (for held-out splits)."""
         self.tasks, self.cams, self.chunk = list(tasks), list(cams), chunk
         self.tables = [load_task_table(t) for t in self.tasks]
@@ -120,7 +123,8 @@ class RoboCasaDataset:
                 return tb["states"], tb["actions"]
             rows = np.concatenate([np.arange(tb["starts"][e], tb["starts"][e] + tb["lens"][e]) for e in keep])
             return tb["states"][rows], tb["actions"][rows]
-        self.norm_stats = norm_stats or norm_stats_from_arrays({t["task"]: kept(t) for t in self.tables})
+        self.clip = clip if not norm_stats else norm_stats.get("clip", 0.0)
+        self.norm_stats = norm_stats or norm_stats_from_arrays({t["task"]: kept(t) for t in self.tables}, clip)
         self.quant = [task_quantiles(self.norm_stats, t) for t in self.tasks]
         self.frames_base, self.use_video = frames_base, use_video
         self._stores: dict = {}
@@ -162,9 +166,13 @@ class RoboCasaDataset:
         mask = steps < n
         rows = g0 + np.minimum(steps, n - 1)
         qs, qa = self.quant[ti]
+        st_n, ac_n = qs.normalize(tb["states"][g]), qa.normalize(tb["actions"][rows])
+        c = getattr(self, "clip", 0)
+        if c:
+            st_n, ac_n = np.clip(st_n, -c, c), np.clip(ac_n, -c, c)
         return {"images": self._images(ti, ep, t, g),
-                "state": qs.normalize(tb["states"][g]).astype(np.float32),
-                "actions": qa.normalize(tb["actions"][rows]).astype(np.float32),
+                "state": st_n.astype(np.float32),
+                "actions": ac_n.astype(np.float32),
                 "mask": mask, "text": tb["instr"][ep], "task": ti, "episode": ep, "frame": t,
                 "progress": np.float32(t / max(1, n - 1))}
 

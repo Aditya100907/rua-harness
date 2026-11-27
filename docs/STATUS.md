@@ -26,6 +26,8 @@ Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, 
 - Eval wiring test (`policy/eval.py --wiring`) on the Mac: OpenDrawer 3/3, env state matches the recording to 1e-8, rendered image matches the video within 2 grey levels.
 - Nov 27 overnight: replay 10/10 on all 3 smoke tasks on Bouchet; wiring 30/30 and zero test 0/28 on Bouchet; speed test 3.27 steps/s on H100 (batch 64). Hindsight labels for all 18 tasks (`docs/labels_notes.md`). Five command formats (`policy/variants.py`), eval with ground-truth commands and error modes (`policy/commands_gt.py`), held-out object split (`policy/heldout.py`), `run_skill`, the commander (`policy/commander/`), simlib, depth re-render, paper scaffolding. Full list: `docs/MORNING_REPORT.md`.
 
+- Nov 27 (Part S): LIBERO set up on Bouchet as a second benchmark, in its own env `envs/libero` (robosuite 1.4.1, MuJoCo 2.3.7, plus DEM). Demos for libero_spatial and libero_object on scratch. Random episode, replay test, eval wiring and a CPU training smoke test pass. No LIBERO training launched. Details, numbers and the launch command: `docs/libero.md`.
+
 ## Never run
 - Any evaluation of a trained policy (first checkpoints are training now).
 - The container build, the GitHub workflow, the depth re-render on Bouchet beyond the 3 smoke tasks (running).

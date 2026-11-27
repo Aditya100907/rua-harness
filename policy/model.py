@@ -17,12 +17,14 @@ import torch
 FORMATS = ("sentence", "kv_text", "points_2d", "points_3d", "points_3d_rgb", "pose_path")
 
 
-def build_policy(fmt: str = "sentence", cams: int = 2, offline: bool = False, freeze_vision: bool = False):
+def build_policy(fmt: str = "sentence", cams: int = 2, offline: bool = False, freeze_vision: bool = False,
+                 dispersive_weight: float = 0.25):
     from dem import DEM, DEMConfig
     if fmt not in FORMATS:
         raise ValueError(f"unknown format {fmt!r}; choose from {FORMATS}")
     cfg = DEMConfig(action_dim=12, proprio_dim=16, chunk=16, num_cameras=cams, freeze_vision=freeze_vision,
-                    vision_pretrained=not offline, language_pretrained=not offline)
+                    vision_pretrained=not offline, language_pretrained=not offline,
+                    dispersive_weight=dispersive_weight)
     if fmt in ("sentence", "kv_text", "points_2d"):
         return DEM(cfg)
     from policy.variants import PointDEM
