@@ -5,7 +5,9 @@ One sample is one frame t of one demo:
   state   float32 [16]             stage-1 normalized (per-task quantiles to [-1, 1])
   actions float32 [16, 12]         actions t .. t+15, stage-1 normalized; past the episode end
                                    the last action is repeated
-  mask    bool [16]                False where the chunk was padded
+  mask    bool [16]                False where the chunk was padded. The loss does NOT use it (DEM.loss has
+                                   no mask): padded steps train on the repeated last action, a deliberate
+                                   choice that teaches the policy to hold still at the end
   text    str                      the episode's instruction
   task    int                      index into `tasks`
 
@@ -112,8 +114,13 @@ class RoboCasaDataset:
         """`episodes`: optional task -> list of episode ids to keep (for held-out splits)."""
         self.tasks, self.cams, self.chunk = list(tasks), list(cams), chunk
         self.tables = [load_task_table(t) for t in self.tasks]
-        self.norm_stats = norm_stats or norm_stats_from_arrays(
-            {t["task"]: (t["states"], t["actions"]) for t in self.tables})
+        def kept(tb):   # statistics only over the episodes this dataset trains on (held-out splits)
+            keep = episodes.get(tb["task"]) if episodes else None
+            if keep is None:
+                return tb["states"], tb["actions"]
+            rows = np.concatenate([np.arange(tb["starts"][e], tb["starts"][e] + tb["lens"][e]) for e in keep])
+            return tb["states"][rows], tb["actions"][rows]
+        self.norm_stats = norm_stats or norm_stats_from_arrays({t["task"]: kept(t) for t in self.tables})
         self.quant = [task_quantiles(self.norm_stats, t) for t in self.tasks]
         self.frames_base, self.use_video = frames_base, use_video
         self._stores: dict = {}

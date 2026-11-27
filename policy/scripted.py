@@ -204,7 +204,12 @@ def plan_open_drawer(env, obs):
     R_h = rot_from_axes(app, [0, 0, -1 if hp[1] < 0 else 1])
     pull = 0.55 * float(fx.size[1]) + 0.04
     pre = hp - 0.10 * app
-    grasp = hp + 0.01 * app
+    # the bar sits at the front of the handle region box: aim 1.2 cm behind the box's front face
+    m, d = env.sim.model, env.sim.data
+    g = m.geom_name2id(part.names[0])
+    Rg = base_frame(obs)[0].T @ d.geom_xmat[g].reshape(3, 3)
+    half_depth = float((np.abs(Rg) @ m.geom_size[g]) @ np.abs(app))
+    grasp = hp - (half_depth - 0.012) * app
     cur = np.asarray(obs["robot0_base_to_eef_pos"])
     high = np.r_[pre[:2], max(pre[2] + 0.15, cur[2] - 0.2)]
     return [

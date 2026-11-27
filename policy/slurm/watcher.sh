@@ -22,7 +22,8 @@ LOG=$ROOT/logs/watcher.log
 touch $Q $QDONE
 
 gpus_in_use() {  # running + pending GPU jobs of mine (each of our GPU jobs uses 1 GPU)
-  squeue -u $USER -h -r -t R,PD -o "%P" | grep -c "^gpu"     # every job in a gpu* partition uses 1 GPU
+  # running GPU jobs, plus pending GPU jobs with each throttled array counted once (not per element)
+  echo $(( $(squeue -u $USER -h -r -t R -o "%P" | grep -c "^gpu") + $(squeue -u $USER -h -t PD -o "%P" | grep -c "^gpu") ))
 }
 jobs_in_use() { squeue -u $USER -h -r -t R -o "%P" | grep -c "^gpu"; }  # GPU jobs only; CPU arrays do not count
 job_exists() { squeue -u $USER -h -n "$1" | grep -q .; }
@@ -49,6 +50,7 @@ cycle() {
     run=$(basename $d)
     [ -f $d/config.json ] || continue
     [ -f $d/STOP ] && continue
+    [ -f $d/CRASHED ] && continue          # needs a person: see <run>/last_job.log
     grep -q '"untrained": true' $d/config.json && continue
     want=$(python -c "import json;print(json.load(open('$d/config.json'))['steps'])")
     have=$(python -c "import torch;print(torch.load('$d/train_state.pt',weights_only=False)['step'])" 2>/dev/null || echo 0)
@@ -64,7 +66,7 @@ cycle() {
     d=$(dirname $ck); run=$(basename $d)
     step=$(basename $ck .pt | sed 's/ckpt_0*//'); step=${step:-0}
     mkdir -p $d/scored
-    [ -f $d/scored/$step ] && continue
+    [ -f $d/scored/$step ] && { grep -q "objsplit_train" $d/config.json 2>/dev/null && [ ! -f $d/scored/${step}_ho ] || continue; }
     grep -q '"untrained": true' $d/config.json 2>/dev/null && { touch $d/scored/$step; continue; }
     read ntasks want tasks <<< $(python -c "
 import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['steps'], ' '.join(c['tasks']))")
@@ -76,17 +78,19 @@ import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['step
     [ $free -le 0 ] && break
     [ $(jobs_in_use) -ge $JOB_CAP ] && break
     conc=$(( free < ntasks ? free : ntasks ))
-    j=$(CKPT=$ck TASKS="$tasks" EPISODES=$eps sbatch --parsable --job-name=eval_${run}_$step \
-        --array=0-$((ntasks-1))%$conc $REPO/policy/slurm/eval_array.sbatch) && touch $d/scored/$step
-    n_eval=$((n_eval+1)); msg="$msg eval:${run}@$step:$j"
+    if [ ! -f $d/scored/$step ]; then
+      j=$(CKPT=$ck TASKS="$tasks" EPISODES=$eps sbatch --parsable --job-name=eval_${run}_$step \
+          --array=0-$((ntasks-1))%$conc $REPO/policy/slurm/eval_array.sbatch) && touch $d/scored/$step \
+          && n_eval=$((n_eval+1)) && msg="$msg eval:${run}@$step:$j"
+    fi
     # object-split runs: also score the held-out objects (validation half; the test half stays locked)
-    if grep -q "objsplit_train" $d/config.json; then
+    if grep -q "objsplit_train" $d/config.json && [ ! -f $d/scored/${step}_ho ]; then
       vj=$SCR/splits/objsplit_val.json
       vt=$(python -c "import json;print(' '.join(json.load(open('$vj'))))")
       nv=$(echo $vt | wc -w)
       j2=$(CKPT=$ck TASKS="$vt" EPISODES=$eps NOTE=${run}_${step}_heldoutval EVAL_ARGS="--demo-scenes $vj" \
-          sbatch --parsable --job-name=evalho_${run}_$step --array=0-$((nv-1)) $REPO/policy/slurm/eval_array.sbatch)
-      msg="$msg evalheldout:${run}@$step:$j2"
+          sbatch --parsable --job-name=evalho_${run}_$step --array=0-$((nv-1))%1 $REPO/policy/slurm/eval_array.sbatch) \
+          && touch $d/scored/${step}_ho && msg="$msg evalheldout:${run}@$step:$j2"
     fi
   done
   # 3. queue

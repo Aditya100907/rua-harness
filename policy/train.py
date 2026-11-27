@@ -81,10 +81,13 @@ def build(args, ds_stats: dict, device: str):
     return policy.to(device)
 
 
-def save_ckpt(policy, out: Path, step: int) -> Path:
+def save_ckpt(policy, out: Path, step: int, fmt: str = "sentence") -> Path:
     p = out / f"ckpt_{step:07d}.pt"
     tmp = p.with_suffix(".tmp")
     policy.save(tmp)
+    ck = torch.load(tmp, map_location="cpu", weights_only=True)
+    ck.setdefault("rua_format", fmt)          # every checkpoint names its command format
+    torch.save(ck, tmp)
     os.replace(tmp, p)
     return p
 
@@ -147,6 +150,10 @@ def main(argv=None) -> None:
         opt.load_state_dict(st["opt"])
         sched.load_state_dict(st["sched"])
         torch.set_rng_state(st["torch_rng"])
+        if st.get("np_rng") is not None:
+            np.random.set_state(st["np_rng"])
+        if st.get("cuda_rng") is not None and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all(st["cuda_rng"])
         print(f"resumed from {st['ckpt']} at step {step}", flush=True)
     trainable = [p for g_ in opt.param_groups for p in g_["params"]]
 
@@ -192,11 +199,13 @@ def main(argv=None) -> None:
                 t_win, data_t, n_win, losses, mses = time.time(), 0.0, 0, [], []
             out_of_time = args.max_hours and (time.time() - t_start) > args.max_hours * 3600
             if step % args.save_every == 0 or step >= args.steps or out_of_time:
-                ck = save_ckpt(policy, out, step)
+                ck = save_ckpt(policy, out, step, args.format)
                 if done_head is not None:
                     torch.save(done_head.state_dict(), str(ck).replace(".pt", ".done.pt"))
                 torch.save({"step": step, "opt": opt.state_dict(), "sched": sched.state_dict(),
-                            "torch_rng": torch.get_rng_state(), "ckpt": str(ck)}, state_path.with_suffix(".tmp"))
+                            "torch_rng": torch.get_rng_state(), "np_rng": np.random.get_state(),
+                            "cuda_rng": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+                            "ckpt": str(ck)}, state_path.with_suffix(".tmp"))
                 os.replace(state_path.with_suffix(".tmp"), state_path)
                 print(f"saved {ck}", flush=True)
             if step >= args.steps or out_of_time:

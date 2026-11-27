@@ -24,6 +24,7 @@ else
 fi
 D=$REPO/results/parts/${NOTE}_${TASK}
 mkdir -p $D
+rm -f $D/shard*.csv          # a requeued or repeated job starts clean (no double-counted rows)
 echo "task $TASK note $NOTE ckpt ${CKPT:-none} nproc $NPROC on $(hostname) $(nvidia-smi --query-gpu=name --format=csv,noheader)"
 for s in $(seq 0 $((NPROC-1))); do
   python -m policy.eval $CK --tasks $TASK --episodes $EPISODES --shard $s --nshards $NPROC \
@@ -33,7 +34,9 @@ done
 wait
 # retry pass: a shard that crashed (for example GPU out of memory) runs again alone
 for s in $(seq 0 $((NPROC-1))); do
-  if grep -q Traceback $D/shard$s.log; then
+  want=$(python -c "print(len(range($s, $EPISODES, $NPROC)))")
+  have=$(($(wc -l < $D/shard$s.csv 2>/dev/null || echo 1) - 1))
+  if grep -q Traceback $D/shard$s.log || [ "$have" -lt "$want" ]; then
     echo "retrying shard $s"; mv $D/shard$s.log $D/shard$s.failed.log; rm -f $D/shard$s.csv
     python -m policy.eval $CK --tasks $TASK --episodes $EPISODES --shard $s --nshards $NPROC --video 0 \
       --out $D/shard$s.csv --outdir $ROOT/runs/eval_media/${NOTE} ${EVAL_ARGS:-} > $D/shard$s.log 2>&1
@@ -44,11 +47,15 @@ import csv, glob
 rows = []
 for f in sorted(glob.glob("$D/shard*.csv")):
     rows += list(csv.DictReader(open(f)))
+rows = list({(r["task"], r["episode"]): r for r in rows}.values())     # dedupe
 rows.sort(key=lambda r: int(r["episode"]))
+expected = $EPISODES
+if len(rows) != expected:
+    print(f"EVAL_INCOMPLETE $TASK: {len(rows)} of {expected} episodes")
 out = "$REPO/results/$(date +%F)_policy_only_${NOTE}_${TASK}.csv"
 if rows:
     w = csv.DictWriter(open(out, "w", newline=""), fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
 ok = sum(int(r["success"]) for r in rows)
-print(f"EVAL_DONE $TASK {ok}/{len(rows)} -> {out}")
+print(f"EVAL_DONE $TASK {ok}/{len(rows)} (expected {expected}) -> {out}")
 PY
 grep -h "Error\|Traceback" $D/shard*.log | head -5

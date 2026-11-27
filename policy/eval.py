@@ -45,7 +45,11 @@ class PolicyRunner:
         self.cfg = json.loads(cfg_p.read_text()) if cfg_p.exists() else {}
         if self.cfg.get("cams"):
             self.cams = list(self.cfg["cams"])
-        self.format = self.cfg.get("format", "sentence")
+        import torch as _t
+        ck_fmt = _t.load(ckpt, map_location="cpu", weights_only=True).get("rua_format")
+        self.format = ck_fmt or self.cfg.get("format", "sentence")
+        if ck_fmt and self.cfg.get("format") and ck_fmt != self.cfg["format"]:
+            raise ValueError(f"checkpoint format {ck_fmt} != config.json format {self.cfg['format']}")
         self.quant = None
         self.env = None
 
@@ -138,7 +142,7 @@ class PolicyRunner:
 
 
 def run_episode(env, task: str, seed: int, act_fn, horizon: int, execute: int = 8, video=None,
-                reset_obs: dict | None = None, record: bool = False) -> dict:
+                reset_obs: dict | None = None, record: bool = False, on_step=None) -> dict:
     """act_fn(obs, t) -> [H, 12] raw LeRobot actions. Returns a result dict."""
     t0 = time.time()
     if reset_obs is None:
@@ -157,6 +161,8 @@ def run_episode(env, task: str, seed: int, act_fn, horizon: int, execute: int = 
         for a in sim.lerobot_to_env_action(np.asarray(chunk)[:execute]):
             obs, _, _, _ = env.step(a)
             t += 1
+            if on_step is not None:
+                on_step(obs)
             if video is not None:
                 video.append(np.concatenate(list(sim.images(obs, ["left", "right"])), axis=1))
             if record:
@@ -231,6 +237,7 @@ def main() -> None:
         for i in range(args.shard, args.episodes, args.nshards):
             seed = args.seed0 + i
             frames = [] if i < args.video else None
+            torch.manual_seed(seed)              # policy noise is reproducible per episode seed
             extra_row = {}
             if args.wiring:
                 # demo i: reset to its saved state, check the obs pipeline against the recording,
@@ -251,9 +258,11 @@ def main() -> None:
             elif runner.format == "pose_path":
                 # held-out demo scenes: episodes not in the run's training split
                 tr = runner.cfg.get("episodes_json")
-                train_eps = set(json.loads(Path(tr).read_text()).get(task, [])) if tr else set()
                 from policy.extract_frames import episode_lengths
-                held = [e for e in range(len(episode_lengths(ds))) if e not in train_eps]
+                n_eps = len(episode_lengths(ds))
+                # no split recorded: the run trained on every demo, so every scene is a training scene
+                train_eps = set(json.loads(Path(tr).read_text()).get(task, [])) if tr else set(range(n_eps))
+                held = [e for e in range(n_eps) if e not in train_eps] or list(range(n_eps))
                 ep = held[i % len(held)]
                 obs0 = sim.reset_to_episode(env, ds, ep)
                 from policy.data import load_task_table
@@ -294,15 +303,14 @@ def main() -> None:
                 track = {"cmd": [], "true": []}
                 g_cmd, g_true = cmd.get("grasp_world"), cmd.get("true_grasp_world")
 
-                def act_fn(o, t):
+                def on_step(o):
                     e = np.asarray(o["robot0_eef_pos"])
                     if g_cmd is not None:
                         track["cmd"].append(np.linalg.norm(e - g_cmd))
                     if g_true is not None:
                         track["true"].append(np.linalg.norm(e - g_true))
-                    return runner.act(o)
-                r = run_episode(env, task, seed, act_fn, H, execute=args.execute,
-                                video=frames, reset_obs=obs0, record=args.save_traj)
+                r = run_episode(env, task, seed, lambda o, t: runner.act(o), H, execute=args.execute,
+                                video=frames, reset_obs=obs0, record=args.save_traj, on_step=on_step)
                 mode = "distractor" if args.distractor else (f"drop_{args.drop}" if args.drop else
                                                              (f"rename" if args.rename else "perfect"))
                 extra_row.update(command_mode=mode if runner.format != "sentence" else "sentence",
