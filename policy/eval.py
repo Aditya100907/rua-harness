@@ -215,10 +215,15 @@ def main() -> None:
     ap.add_argument("--distractor", action="store_true", help="N2/F6: grasp point on a distractor object")
     ap.add_argument("--drop", default="", choices=["", "point", "name", "source"], help="N3: drop a field")
     ap.add_argument("--rename", default="", help="N4: call the object by this name")
+    ap.add_argument("--no-determinism-fix", action="store_true",
+                    help="run without HexaShell's counter-region determinism fix (policy/determinism.py)")
     ap.add_argument("--z0", default="random", choices=["random", "zero"], help="sampling noise")
     ap.add_argument("--nfe", type=int, default=1, help="MeanFlow steps per action chunk")
     ap.add_argument("--demo-scenes", default="", help="JSON task -> demo episode ids: replay those initial scenes")
     args = ap.parse_args()
+    if args.no_determinism_fix:
+        import os as _os
+        _os.environ["RUA_DETERMINISM_FIX"] = "0"
     import torch
     dev = args.device or ("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
@@ -238,7 +243,7 @@ def main() -> None:
     f = open(out, "a", newline="")
     w = csv.DictWriter(f, fieldnames=COLS + ["model_seconds", "state_err0", "image_err0", "command_mode", "point_error_cm",
                                        "min_dist_cmd_cm", "min_dist_true_cm", "demo_episode", "img_rowdiff0",
-                                       "objective", "nfe", "z0"], extrasaction="ignore")
+                                       "objective", "nfe", "z0", "determinism_fix"], extrasaction="ignore")
     if new:
         w.writeheader()
     cams = runner.cams if runner else ["left", "right"]
@@ -342,7 +347,8 @@ def main() -> None:
                        format=fmt, run_id=run_id or "wiring", steps=r["steps"], instruction=instr,
                        model_seconds=r["model_seconds"],
                        objective=getattr(runner, "objective", ""), nfe=getattr(runner, "nfe", ""),
-                       z0=getattr(runner, "z0", ""), **extra_row)
+                       z0=getattr(runner, "z0", ""),
+                       determinism_fix=int(__import__("policy.determinism", fromlist=["x"]).enabled()), **extra_row)
             w.writerow(row)
             f.flush()
             print(json.dumps({k: row[k] for k in ("task", "episode", "success", "steps", "seconds", "instruction")}

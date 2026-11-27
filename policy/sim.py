@@ -69,6 +69,8 @@ def make_env(ds_dir: Path, cams: list[str] | None = None, size: int = 256, depth
     """robosuite env with the dataset's own kwargs. `cams` None means no rendering at all."""
     import robocasa  # noqa: F401  (registers environments)
     import robosuite
+    from policy import determinism
+    determinism.apply()            # HexaShell's counter-region fix (policy/determinism.py); RUA_DETERMINISM_FIX=0 to skip
     meta = dataset_env_meta(ds_dir)
     kw = copy.deepcopy(meta["env_kwargs"])
     kw["env_name"] = meta["env_name"]
