@@ -13,3 +13,12 @@ Times are ET.
 - 23:28 B1: `policy/extract_frames.py` (JPEG q95, one file per task and camera) and `policy/data.py` written. Frame extraction array 34840595 (18 tasks, day partition) submitted.
 - 23:29 E6 and M4 done by helper: `docs/related_notes.md`, `docs/agent_on_cluster.md`.
 - 23:35 I1 to I4 done by helper: `paper/` builds a PDF with tectonic (ICML 2026 style; 2027 kit not out). `scripts/make_tables.py`, `scripts/make_plots.py`, tests pass.
+- 23:37 Asset re-download done (aigen_objs and lightwheel now present). SIMTEST OK (job 34841443, gpu_devel H200, EGL; 35.6 s for env creation plus 20 steps).
+- 23:38 Frame extraction done for all 18 tasks, 0 length mismatches between videos and parquet. About 2 to 4 GB per camera per task.
+- 23:40 Bouchet limits found: gpu_devel 1 job submitted at a time and 12 CPUs; gpu_h200 at most 6 CPUs per GPU. Training jobs use 6 CPUs and 5 loader workers.
+- 23:41 C1: 50 Mac steps (MPS, batch 4, pretrained towers), loss 4.79 to 0.79; resume from step 30 continued to 50. Pass.
+- 23:44 D1 wiring on the Mac: OpenDrawer 3/3; state at reset matches the recording to 1e-8; rendered left image vs video frame 0 mean error 1.7 to 2.5 grey levels.
+- 23:46 C2 speed test (job 34841772, H100 80GB, batch 64, 3 tasks): 3.27 it/s steady, GPU 83% busy, data wait 0%, 32.2 GB peak. Loss 0.75 to -0.26 (MeanFlow loss with the dispersive term can go negative). Checkpoint reloads.
+- 23:47 D1 wiring on Bouchet (job 34841796): 10/10 on each of the 3 smoke tasks. D1 zero test (untrained checkpoint, job 34841793): PickPlaceCounterToCabinet 0/8, OpenDrawer 0/10, TurnOnMicrowave 0/10. 2 PickPlace shards died of GPU out-of-memory with 10 processes on one GPU; now 6 processes plus a retry pass.
+- 23:48 E2: hindsight labels for the 3 smoke tasks. PickPlaceCounterToCabinet, 20 demos checked in the simulator: eef from the state vector equals the simulator's eef (0.0 cm). Grasp point to object origin: median 2.1 cm, p95 8.3 cm, max 8.6 cm, 14/20 within 5 cm. All 20 lie inside the object's bounding sphere; the 6 over 5 cm are larger objects grasped away from their origin. OpenDrawer: all 514 by gripper close. TurnOnMicrowave: 492 by gripper close, 51 by success frame (no close).
+- 23:49 C3: run 1 (3 tasks, 20k steps) and run 2 (18 tasks, 300k steps) submitted to gpu_b200 (H100 2-day jobs would not start until 06:13). Jobs 34842499, 34842500.

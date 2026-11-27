@@ -13,7 +13,7 @@
 source /nfs/roberts/project/pi_dr877/ak3288/apollo-lab/rua-harness/policy/slurm/common.sh
 T=($TASKS)
 TASK=${T[$SLURM_ARRAY_TASK_ID]}
-NPROC=${NPROC:-10}
+NPROC=${NPROC:-6}
 EPISODES=${EPISODES:-50}
 if [ -n "${CKPT:-}" ]; then
   RUNID=$(basename $(dirname $CKPT)); STEP=$(basename $CKPT .pt | sed 's/ckpt_0*//'); STEP=${STEP:-0}
@@ -31,6 +31,14 @@ for s in $(seq 0 $((NPROC-1))); do
     > $D/shard$s.log 2>&1 &
 done
 wait
+# retry pass: a shard that crashed (for example GPU out of memory) runs again alone
+for s in $(seq 0 $((NPROC-1))); do
+  if grep -q Traceback $D/shard$s.log; then
+    echo "retrying shard $s"; mv $D/shard$s.log $D/shard$s.failed.log; rm -f $D/shard$s.csv
+    python -m policy.eval $CK --tasks $TASK --episodes $EPISODES --shard $s --nshards $NPROC --video 0 \
+      --out $D/shard$s.csv --outdir $ROOT/runs/eval_media/${NOTE} ${EVAL_ARGS:-} > $D/shard$s.log 2>&1
+  fi
+done
 python - <<PY
 import csv, glob
 rows = []

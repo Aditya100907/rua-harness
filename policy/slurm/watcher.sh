@@ -1,0 +1,103 @@
+#!/bin/bash
+# The cluster drives itself (Part M). A plain bash loop, no LLM. Submit once:
+#   sbatch policy/slurm/watcher.sbatch
+# Every 10 minutes it:
+#   1. resubmits training runs that died before reaching their --steps (unless <run>/STOP exists)
+#   2. submits an evaluation for every checkpoint that has none (marker files in <run>/scored/)
+#   3. launches the next line of $ROOT/runs/queue.txt when GPUs are free under the cap
+#   4. rebuilds the results tables
+#   5. appends one line to $ROOT/logs/watcher.log
+# Queue line format (one experiment per line, '#' comments allowed):
+#   RUN_NAME | train.py arguments
+# Score policy per run (config.json "tasks"): every checkpoint of a run on 3 tasks or fewer;
+# for bigger runs every 50k steps and the final one. Episodes: 50, or 100 for a run's final checkpoint.
+source /nfs/roberts/project/pi_dr877/ak3288/apollo-lab/rua-harness/policy/slurm/common.sh
+GPU_CAP=${GPU_CAP:-8}
+JOB_CAP=${JOB_CAP:-12}
+CK=$PROJ/checkpoints
+Q=$ROOT/runs/queue.txt
+QDONE=$ROOT/runs/queue_done.txt
+LOG=$ROOT/logs/watcher.log
+touch $Q $QDONE
+
+gpus_in_use() {  # running + pending GPU jobs of mine (each of our GPU jobs uses 1 GPU)
+  squeue -u $USER -h -r -t R,PD -o "%b|%P" | grep -c "gpu"
+}
+jobs_in_use() { squeue -u $USER -h -r -t R | wc -l; }
+job_exists() { squeue -u $USER -h -n "$1" | grep -q .; }
+
+best_partition() {  # earliest predicted start among the partitions we train on
+  local best="" bt=99999999999 p t
+  for p in ${TRAIN_PARTS:-gpu_b200 gpu_h100 gpu_h200}; do
+    t=$(RUN=x ARGS=x sbatch --test-only --partition=$p $REPO/policy/slurm/train.sbatch 2>&1 | grep -o "start at [0-9T:-]*" | awk '{print $3}')
+    [ -z "$t" ] && continue
+    t=$(date -d "$t" +%s 2>/dev/null) || continue
+    if [ "$t" -lt "$bt" ]; then bt=$t; best=$p; fi
+  done
+  echo ${best:-gpu_h100}
+}
+
+launch_train() {  # run args
+  bash $REPO/policy/slurm/launch_train.sh "$1" "$2"
+}
+
+cycle() {
+  local msg="" n_resub=0 n_eval=0 n_queue=0
+  # 1. dead training runs
+  for d in $CK/*/; do
+    run=$(basename $d)
+    [ -f $d/config.json ] || continue
+    [ -f $d/STOP ] && continue
+    grep -q '"untrained": true' $d/config.json && continue
+    want=$(python -c "import json;print(json.load(open('$d/config.json'))['steps'])")
+    have=$(python -c "import torch;print(torch.load('$d/train_state.pt',weights_only=False)['step'])" 2>/dev/null || echo 0)
+    if [ "$have" -lt "$want" ] && ! job_exists $run; then
+      args=$(cat $d/args.txt 2>/dev/null)
+      if [ -n "$args" ] && [ $(gpus_in_use) -lt $GPU_CAP ]; then
+        j=$(launch_train $run "$args"); n_resub=$((n_resub+1)); msg="$msg resub:$run@$have:$j"
+      fi
+    fi
+  done
+  # 2. unscored checkpoints
+  for ck in $(ls $CK/*/ckpt_*.pt 2>/dev/null); do
+    d=$(dirname $ck); run=$(basename $d)
+    step=$(basename $ck .pt | sed 's/ckpt_0*//'); step=${step:-0}
+    mkdir -p $d/scored
+    [ -f $d/scored/$step ] && continue
+    grep -q '"untrained": true' $d/config.json 2>/dev/null && { touch $d/scored/$step; continue; }
+    read ntasks want tasks <<< $(python -c "
+import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['steps'], ' '.join(c['tasks']))")
+    final=0; [ "$step" -ge "$want" ] && final=1
+    if [ "$ntasks" -gt 3 ] && [ $final -eq 0 ] && [ $((step % 50000)) -ne 0 ]; then touch $d/scored/$step; continue; fi
+    eps=50; [ $final -eq 1 ] && eps=100
+    free=$((GPU_CAP - $(gpus_in_use)))
+    [ $free -le 0 ] && break
+    [ $(jobs_in_use) -ge $JOB_CAP ] && break
+    conc=$(( free < ntasks ? free : ntasks ))
+    j=$(CKPT=$ck TASKS="$tasks" EPISODES=$eps sbatch --parsable --job-name=eval_${run}_$step \
+        --array=0-$((ntasks-1))%$conc $REPO/policy/slurm/eval_array.sbatch) && touch $d/scored/$step
+    n_eval=$((n_eval+1)); msg="$msg eval:${run}@$step:$j"
+  done
+  # 3. queue
+  while [ $(gpus_in_use) -lt $GPU_CAP ] && [ $(jobs_in_use) -lt $JOB_CAP ]; do
+    line=$(grep -v '^\s*#' $Q | grep -v '^\s*$' | head -1)
+    [ -z "$line" ] && break
+    run=$(echo "$line" | cut -d'|' -f1 | xargs); args=$(echo "$line" | cut -d'|' -f2- | xargs)
+    # remove the line from the queue first, so a failure cannot launch it twice
+    grep -vxF "$line" $Q > $Q.tmp; mv $Q.tmp $Q
+    if [ -d $CK/$run ] || job_exists $run; then echo "$(date +%F_%T) SKIP exists $line" >> $QDONE; continue; fi
+    mkdir -p $CK/$run; echo "$args" > $CK/$run/args.txt
+    j=$(launch_train $run "$args"); echo "$(date +%F_%T) $j $line" >> $QDONE
+    n_queue=$((n_queue+1)); msg="$msg queue:$run:$j"
+  done
+  # 4. tables
+  (cd $REPO && python scripts/make_tables.py > /dev/null 2>&1) || msg="$msg tables:FAILED"
+  echo "$(date +%F_%T) gpus=$(gpus_in_use)/$GPU_CAP jobs=$(jobs_in_use) resub=$n_resub eval=$n_eval queue=$n_queue qleft=$(grep -cv '^\s*#\|^\s*$' $Q)$msg" >> $LOG
+}
+
+if [ "${1:-}" = "once" ]; then cycle; exit 0; fi
+while true; do
+  cycle
+  [ -f $ROOT/runs/WATCHER_STOP ] && { echo "$(date +%F_%T) stop file seen" >> $LOG; exit 0; }
+  sleep ${PERIOD:-600}
+done

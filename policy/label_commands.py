@@ -150,6 +150,13 @@ def verify(task: str, labels: list[dict], n: int) -> list[dict]:
         if "obj" in getattr(env, "obj_body_id", {}):
             obj = np.asarray(env.sim.data.body_xpos[env.obj_body_id["obj"]])
             row["grasp_to_obj_cm"] = round(100 * float(np.linalg.norm(obj - lb["grasp_world"])), 2)
+            from simlib.truth import object_geom_ids
+            gids = object_geom_ids(env, "obj")
+            if gids:   # distance to the nearest geom's bounding sphere: 0 means inside the object's extent
+                gp = env.sim.data.geom_xpos[gids]
+                rb = env.sim.model.geom_rbound[gids]
+                d = np.linalg.norm(gp - np.asarray(lb["grasp_world"]), axis=1) - rb
+                row["grasp_to_obj_surface_cm"] = round(100 * float(max(0.0, d.min())), 2)
         rows.append(row)
         print(row, flush=True)
     env.close()
@@ -178,6 +185,10 @@ def main() -> None:
             if len(d):
                 summary.update(grasp_to_obj_cm_median=float(np.median(d)), p95=float(np.percentile(d, 95)),
                                max=float(d.max()), within_5cm=int((d <= 5).sum()))
+                sd = np.array([r["grasp_to_obj_surface_cm"] for r in rows if "grasp_to_obj_surface_cm" in r])
+                if len(sd):
+                    summary.update(surface_cm_median=float(np.median(sd)), surface_cm_max=float(sd.max()),
+                                   surface_within_5cm=int((sd <= 5).sum()))
             print("VERIFY", json.dumps(summary), flush=True)
             (out_dir / f"{t}_verify.json").write_text(json.dumps({"summary": summary, "rows": rows}, indent=1))
 
