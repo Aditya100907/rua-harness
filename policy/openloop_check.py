@@ -25,6 +25,7 @@ def main():
     ap.add_argument("--n", type=int, default=200)
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--nfe", type=int, default=1)
+    ap.add_argument("--z0", default="random", choices=["random", "zero"])
     ap.add_argument("--episodes", default=None, help="JSON task -> episode ids to sample frames from")
     a = ap.parse_args()
     from dem import preprocess_images
@@ -52,7 +53,8 @@ def main():
         st = torch.as_tensor(s["state"], device=a.device)[None]  # stage-1 normalized, as eval passes
         pol.set_instruction(s["text"])
         with torch.no_grad():
-            pred = pol.act(img, st, nfe=a.nfe)[0].float().cpu().numpy()
+            z0 = torch.zeros(1, 16, 12) if a.z0 == "zero" else None
+            pred = pol.act(img, st, nfe=a.nfe, z0=z0)[0].float().cpu().numpy()
         pred = qa.unnormalize(pred)
         err_m.append(np.abs(pred - true)[:8, 5:11].mean())        # arm deltas, executed part
         err_m1.append(np.abs(pred[0] - true[0])[5:11].mean())
