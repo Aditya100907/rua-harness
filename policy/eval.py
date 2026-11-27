@@ -49,6 +49,13 @@ class PolicyRunner:
         import torch as _t
         ck_fmt = _t.load(ckpt, map_location="cpu", weights_only=True).get("rua_format")
         self.format = ck_fmt or self.cfg.get("format", "sentence")
+        # sampling follows the training objective unless the caller asked for something else
+        obj = self.cfg.get("objective", "meanflow")
+        self.objective = obj
+        if obj == "mse" and z0 == "random":
+            self.z0 = "zero"                  # regression: the action is -u(0); noise would be wrong
+        if obj == "fm" and nfe == 1:
+            self.nfe = 10                     # plain flow matching needs several integration steps
         if ck_fmt and self.cfg.get("format") and ck_fmt != self.cfg["format"]:
             raise ValueError(f"checkpoint format {ck_fmt} != config.json format {self.cfg['format']}")
         self.quant = None
@@ -230,7 +237,8 @@ def main() -> None:
     new = not out.exists()
     f = open(out, "a", newline="")
     w = csv.DictWriter(f, fieldnames=COLS + ["model_seconds", "state_err0", "image_err0", "command_mode", "point_error_cm",
-                                       "min_dist_cmd_cm", "min_dist_true_cm", "demo_episode", "img_rowdiff0"], extrasaction="ignore")
+                                       "min_dist_cmd_cm", "min_dist_true_cm", "demo_episode", "img_rowdiff0",
+                                       "objective", "nfe", "z0"], extrasaction="ignore")
     if new:
         w.writeheader()
     cams = runner.cams if runner else ["left", "right"]
@@ -332,7 +340,9 @@ def main() -> None:
             row = dict(task=task, episode=i, seed=seed, success=r["success"], seconds=r["seconds"], llm_calls=0,
                        input_tokens=0, output_tokens=0, cost_usd=0, code_commit=commit, checkpoint_step=step,
                        format=fmt, run_id=run_id or "wiring", steps=r["steps"], instruction=instr,
-                       model_seconds=r["model_seconds"], **extra_row)
+                       model_seconds=r["model_seconds"],
+                       objective=getattr(runner, "objective", ""), nfe=getattr(runner, "nfe", ""),
+                       z0=getattr(runner, "z0", ""), **extra_row)
             w.writerow(row)
             f.flush()
             print(json.dumps({k: row[k] for k in ("task", "episode", "success", "steps", "seconds", "instruction")}
