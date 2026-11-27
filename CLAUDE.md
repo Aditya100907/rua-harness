@@ -22,6 +22,18 @@ An LLM agent hands physical jobs to a small fast robot policy (DEM), in the Robo
 - On the Mac GPU set `PYTORCH_ENABLE_MPS_FALLBACK=1`. On a Linux cluster with no screen set `MUJOCO_GL=egl`.
 - Real training runs on Yale's Bouchet cluster through its job queue. Submit jobs and check logs. Do not hold a terminal open waiting.
 
+## Bouchet (Yale's cluster): how to work on it from Adi's Mac
+- Connect with `ssh bouchet`. It reuses one approved connection for 8 hours, so commands like `ssh bouchet "squeue -u ak3288"` run with no prompt. If a command asks for Duo or says the connection is closed, stop and ask Adi to run `ssh bouchet` once and approve it. The Yale VPN must be on when off campus.
+- Paths: project `/nfs/roberts/project/pi_dr877/ak3288` (code, environment, checkpoints to keep), scratch `/nfs/roberts/scratch/pi_dr877/ak3288` (datasets and caches, purged after 30 days). Home has a 500,000-file limit, so install nothing there.
+- Code on the cluster: `$PROJ/apollo-lab/{rua-harness,decoupled-embodiment-model,robosuite,robocasa,runs,logs}`. Environment: `module load miniconda; conda activate /nfs/roberts/project/pi_dr877/ak3288/envs/dem`.
+- Demos: `$SCR/datasets/v1.0/target/atomic/<Task>/<date>/lerobot/`.
+- Send code with `rsync -a --exclude .git --exclude __pycache__ ./ bouchet:/nfs/roberts/project/pi_dr877/ak3288/apollo-lab/rua-harness/`. Edit on the Mac, commit, rsync, then run on the cluster. Do not edit code on the cluster.
+- Login nodes are for editing, installs and submitting jobs. Anything that uses a GPU or runs longer than a few minutes goes through `sbatch`. `gpu_devel` is for tests (6 hours, 1 running job). `gpu`, `gpu_h100`, `gpu_h200` are for training (2 days per job, so save checkpoints and support resume). Request a GPU with `--gpus=1` or a type such as `--gpus=rtx_5000_ada:1`.
+- Jobs with no screen need `MUJOCO_GL=egl`.
+- Before starting any background download or job, check it is not already running (`pgrep -u ak3288 -af <name>` or `squeue -u ak3288`). Never start a second copy.
+- `setup/setup_bouchet.sh` has `env`, `assets`, `data`, `simtest`.
+- YCRC support is closed until Mon Nov 30.
+
 ## Key facts
 - DEM: `dem/policy.py` in the DEM repo. 2 cameras at 256, 32 language tokens (frozen NeoBERT), 16-number robot state, 12-number action, predicts 16 actions and executes 8.
 - Data: RoboCasa "target, human" split, 500 demos per task, LeRobot format (parquet state and actions, mp4 per camera, `tasks.jsonl`, plus `extras/` with saved simulator states and per-episode metadata). Download with `python -m robocasa.scripts.download_datasets --split target --source human`.

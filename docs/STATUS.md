@@ -16,7 +16,8 @@ Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, 
 
 - SSH from the Mac works: `ssh bouchet` (config in `~/.ssh/config`, one Duo approval lasts 8 hours through a shared connection).
 - Test GPU job on `gpu_devel` started with no queue wait (Nov 26, 9:24 pm, holiday evening) and got an RTX 5000 Ada with 32 GB. The cluster has `miniconda/26.9.4` as a module and `git`. No `conda` on the path until `module load miniconda`.
-- `setup/setup_bouchet.sh` written (env, assets, data, simtest). Not yet run.
+- Bouchet environment built with `setup/setup_bouchet.sh env` (Nov 26, about 9:55 pm): numpy 2.2.5, torch 2.15.0 with CUDA, MuJoCo 3.3.1, DEM tests pass. Hugging Face login done on the cluster.
+- Kitchen assets and the 18-task demo download started on Bouchet at about 10:05 pm (one copy each). **Not yet verified:** that both finished, that each task has 500 episodes, and `setup_bouchet.sh simtest`.
 
 ## Never run
 - `scripts/render_geometry.py` (depth, mask and point map for one scene, with a self-check).
@@ -25,10 +26,13 @@ Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, 
 ## Running
 - Nothing.
 
+## Overnight Nov 26 to 27
+An agent works through `docs/OVERNIGHT.md` on branch `overnight-nov26`. It supersedes the short list below where they differ. Its log is `docs/overnight_log.md` and its summary is `docs/MORNING_REPORT.md`.
+
 ## Next: policy track (Adi)
 Each item is done only when its test passes.
-1. **Bouchet first job.** Log in, build the `dem` environment there, submit a GPU job that imports torch and prints the GPU name. Record the queue wait here.
-2. **Download demos.** All 18 tasks on Bouchet, the 3 smoke-test tasks on the Mac. Test: each task folder has 500 episodes and an `extras/` folder with `states.npz`.
+1. **Verify the Bouchet downloads and run the simulator test.** Check no download is still running. Count episodes per task under `$SCR/datasets/v1.0/target/atomic/` (expect 18 tasks with 500 each) and confirm each has saved simulator states. Then run `bash setup/setup_bouchet.sh simtest` and confirm the log ends with `SIMTEST OK`. Record sizes and results here.
+2. **Look at one dataset before writing code.** Print the folder tree of one task, `meta/info.json`, `meta/modality.json`, one parquet file's columns and shapes, and the video list. Write what you find to `docs/dataset_notes.md`. Download the 3 smoke-test tasks on the Mac for local debugging.
 3. **Data loader** in `policy/data.py`. Reads LeRobot files and yields what `DEM.loss` expects: two camera images, robot state, instruction, a 16-step action chunk. Test: one batch has the right shapes and value ranges, and the two cameras are the left and right agent views in that order.
 4. **Replay test** in `policy/replay_test.py`. Reset the simulator to a demo's saved state, play its recorded actions, check `env._check_success()`. Test: succeeds on at least 9 of 10 demos for each smoke-test task.
 5. **Training script** in `policy/train.py`, built from the DEM repo's `examples/train_minimal.py`. Real loader, action and state normalization saved with the checkpoint, checkpoints every N steps, loss logging. Test: 50 steps on the Mac with falling loss, then a job on Bouchet.
