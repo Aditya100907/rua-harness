@@ -1,0 +1,150 @@
+diff --git a/hexashell/benches/robocasa/protocol.py b/hexashell/benches/robocasa/protocol.py
+index c0bc323..eb50907 100644
+--- a/hexashell/benches/robocasa/protocol.py
++++ b/hexashell/benches/robocasa/protocol.py
+@@ -1,6 +1,6 @@
+ """The RoboCasa test protocol: which tasks, kitchens and seeds, and what an episode may use.
+ 
+-Two splits (sets of kitchens), both of RoboCasa's pretraining scenes with the pretraining objects:
++Three splits (sets of kitchens).  The first two are RoboCasa's pretraining scenes with the pretraining objects:
+ 
+ - ``pretrain``: RoboCasa's own evaluation split, as ``create_env(split="pretrain")`` builds it:
+   layouts and styles 11-60, the seed drawing the kitchen (a kitchen in which the task cannot be
+@@ -10,6 +10,12 @@ Two splits (sets of kitchens), both of RoboCasa's pretraining scenes with the pr
+   for the test.  A kitchen in which RoboCasa cannot build a task is replaced by the next kitchen of the
+   same set that the task can use.
+ 
++The third, ``target`` (added for rua-harness), is RoboCasa's target split exactly as its "target, human"
++demonstration datasets record it in ``extras/dataset_meta.json``: layouts and styles (1, 1) to (10, 10),
++``obj_instance_split="target"``, ``clutter_mode=1`` and the datasets' controller config.  Seed ``s`` sets
++``env.rng = default_rng(s)`` before the reset and nothing else draws the kitchen, so the same seed builds the
++same scene as a plain ``robosuite.make(**dataset env kwargs)``; ``env.rng = default_rng(s); env.reset()``.
++
+ The tasks are RoboCasa's 50 target tasks: 18 atomic (seen), 16 composite seen, 16 composite unseen,
+ each with its official horizon (20 Hz control steps).  The episode ends at the first step at which
+ ``env._check_success()`` holds, or at the horizon.
+@@ -54,9 +60,13 @@ HORIZON = {task: steps for tasks in TASKS.values() for task, steps in tasks}
+ TASK_SET = {task: name for name, tasks in TASKS.items() for task, _ in tasks}
+ 
+ #: the splits; the first is the default
+-SPLITS = ("pretrain50", "pretrain")
++SPLITS = ("pretrain50", "pretrain", "target")
+ #: robocasa's scene registry id of the pretraining kitchens (layouts and styles 11-60), as create_env uses it
+ PRETRAIN_SCENES = -2
++#: the kitchens (layout id, style id) of split target, as the target datasets' env kwargs list them
++TARGET_SCENES = tuple((i, i) for i in range(1, 11))
++#: the target datasets' clutter mode
++TARGET_CLUTTER_MODE = 1
+ #: the 50 kitchens (layout id, style id) of split pretrain50
+ PRETRAIN50 = ((54, 28), (29, 54), (34, 60), (56, 34), (33, 19), (58, 17), (26, 14), (53, 57), (19, 20), (60, 58),
+               (38, 30), (55, 18), (16, 46), (17, 50), (48, 43), (51, 25), (45, 59), (49, 33), (13, 48), (35, 11),
+diff --git a/hexashell/benches/robocasa/sim.py b/hexashell/benches/robocasa/sim.py
+index ba1826a..6931377 100644
+--- a/hexashell/benches/robocasa/sim.py
++++ b/hexashell/benches/robocasa/sim.py
+@@ -15,6 +15,7 @@ direction), y is the line the fingers open along, z = x × y.
+ from __future__ import annotations
+ 
+ import contextlib
++import copy
+ import time
+ 
+ import numpy as np
+@@ -35,6 +36,30 @@ ROBOT_PREFIXES = ("robot0_", "gripper0_", "mobilebase0_")
+ SITE_TO_TOOL = A.PANDA_SITE_TO_TOOL
+ #: stream that keeps the reset's unseeded generators apart from env.rng (seeded with the bare seed)
+ FALLBACK_STREAM = 0x5EED
++#: split target: the controller config of RoboCasa's target datasets (extras/dataset_meta.json); it differs
++#: from robosuite's PandaOmron default only in composite_controller_specific_configs
++TARGET_CONTROLLER = {
++    "type": "HYBRID_MOBILE_BASE",
++    "body_parts": {
++        "right": {"type": "OSC_POSE", "input_max": 1, "input_min": -1,
++                  "output_max": [0.05, 0.05, 0.05, 0.5, 0.5, 0.5], "output_min": [-0.05, -0.05, -0.05, -0.5, -0.5, -0.5],
++                  "kp": 150, "damping_ratio": 1, "impedance_mode": "fixed", "kp_limits": [0, 300],
++                  "damping_ratio_limits": [0, 10], "position_limits": None, "orientation_limits": None,
++                  "uncouple_pos_ori": True, "input_type": "delta", "input_ref_frame": "base", "interpolation": None,
++                  "ramp_ratio": 0.2, "gripper": {"type": "GRIP"}},
++        "torso": {"type": "JOINT_POSITION", "interpolation": "null", "kp": 2000},
++        "base": {"type": "JOINT_VELOCITY", "interpolation": "null"},
++    },
++    "composite_controller_specific_configs": {
++        "body_part_ordering": ["right", "right_gripper", "base", "torso"],
++        "right2arm_transform": [[0, 0.7071068, 0.7071068, 0], [1, 0, 0, 0], [0, 0.7071068, -0.7071068, 0], [0, 0, 0, 1]],
++        "right2finger_transform": [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
++        "left2arm_transform": [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
++        "left2finger_transform": [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
++        "right_offset": [-0.15, 0.0, 0.35],
++        "left_offset": [0.0, 0.0, 0.0],
++    },
++}
+ 
+ 
+ def make(task: str, size: int = P.IMAGE_SIZE, split: str = "pretrain50"):
+@@ -44,14 +69,21 @@ def make(task: str, size: int = P.IMAGE_SIZE, split: str = "pretrain50"):
+     import robosuite
+     from robosuite.controllers import load_composite_controller_config
+ 
+-    if P.split_of(split) == "pretrain":  # create_env(split="pretrain"): the seed draws the kitchen
++    split = P.split_of(split)
++    controller = load_composite_controller_config(controller=None, robot=P.ROBOT)
++    objects = dict(obj_instance_split="pretrain")
++    if split == "pretrain":  # create_env(split="pretrain"): the seed draws the kitchen
+         scene = dict(layout_ids=P.PRETRAIN_SCENES, style_ids=P.PRETRAIN_SCENES, layout_and_style_ids=None)
++    elif split == "target":  # the target datasets' env kwargs: the seed draws one of the 10 kitchens
++        scene = dict(layout_ids=None, style_ids=None, layout_and_style_ids=[list(k) for k in P.TARGET_SCENES])
++        objects = dict(obj_instance_split="target", clutter_mode=P.TARGET_CLUTTER_MODE)
++        controller = copy.deepcopy(TARGET_CONTROLLER)
+     else:  # reset() narrows the list to the kitchen of the seed
+         scene = dict(layout_ids=None, style_ids=None, layout_and_style_ids=[tuple(k) for k in P.PRETRAIN50])
+     return robosuite.make(
+         env_name=task,
+         robots=P.ROBOT,
+-        controller_configs=load_composite_controller_config(controller=None, robot=P.ROBOT),
++        controller_configs=controller,
+         camera_names=list(P.CAMERAS.values()),
+         camera_widths=size,
+         camera_heights=size,
+@@ -62,7 +94,7 @@ def make(task: str, size: int = P.IMAGE_SIZE, split: str = "pretrain50"):
+         translucent_robot=False,
+         generative_textures=None,
+         randomize_cameras=False,
+-        obj_instance_split="pretrain",
++        **objects,
+         **scene,
+         ignore_done=True,
+     )
+@@ -111,6 +143,8 @@ class CasaSim:
+         np.random.seed(seed)
+         if env.sim is not None and env.hard_reset and not env.deterministic_reset:
+             env._destroy_sim()  # robosuite frees the old sim only for its own viewer: it would leak
++        # split target: env.rng as above is all that draws the scene (as `env.rng = default_rng(seed);
++        # env.reset()` on the dataset env kwargs); the fallbacks only seed generators outside env.rng
+         with _seeded_fallbacks(seed):
+             env.reset()
+         if self.split != "pretrain50":  # the kitchen the seed drew
+diff --git a/hexashell/benches/run.py b/hexashell/benches/run.py
+index be6bd55..9fcae37 100644
+--- a/hexashell/benches/run.py
++++ b/hexashell/benches/run.py
+@@ -9,8 +9,9 @@ Machine settings: ``--python``, the benchmark's own Python (default ``$HEXASHELL
+ ``--env-file``, a file of ``export`` lines its server needs (``$HEXASHELL_<BENCH>_ENV``); ``--egl``,
+ the GPU that renders (``$HEXASHELL_EGL_DEVICE``); ``--sim-socket``, a warm simulator server to play on
+ (:mod:`hexashell.benches.daemon`) instead of starting one.  The record goes under ``--out``.
+-RoboCasa's kitchens: ``--split`` (``$HEXASHELL_ROBOCASA_SPLIT``), ``pretrain50`` (the default) or
+-``pretrain``, RoboCasa's own evaluation split (:mod:`.robocasa.protocol`).
++RoboCasa's kitchens: ``--split`` (``$HEXASHELL_ROBOCASA_SPLIT``), ``pretrain50`` (the default),
++``pretrain``, RoboCasa's own evaluation split, or ``target``, the 10 target kitchens and objects of the
++target datasets (:mod:`.robocasa.protocol`).
+ """
+ 
+ from __future__ import annotations
+@@ -138,7 +139,7 @@ def main(argv: list[str] | None = None) -> int:
+     ap.add_argument("--sim-socket", default=None,
+                     help="play on the warm simulator server at this unix socket (python -m hexashell.benches.daemon)")
+     ap.add_argument("--split", default=None,
+-                    help="RoboCasa's kitchens: pretrain50 (default) or pretrain ($HEXASHELL_ROBOCASA_SPLIT)")
++                    help="RoboCasa's kitchens: pretrain50 (default), pretrain or target ($HEXASHELL_ROBOCASA_SPLIT)")
+     ap.add_argument("--set", action="append", default=[], metavar="NAME=VALUE")
+     args = ap.parse_args(argv)
+ 
