@@ -1,7 +1,7 @@
 # Status
 
 Keep this current. A new session reads it first and continues from "Next".
-Last updated: Fri Nov 27, 2026, about 16:40 ET.
+Last updated: Fri Nov 27, 2026, 16:30 ET.
 
 ## Goal for Sun Nov 29, night
 Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, agent plus policy. Success, seconds, LLM calls and tokens per episode.
@@ -35,7 +35,7 @@ Stock DEM trained with the MeanFlow recipe does not learn usable actions here: r
 - A policy that scores above 20% on any smoke task (the gate).
 - The container build and the GitHub workflow.
 
-## Running (Nov 27, about 16:40; live view: `bash scripts/status.sh`)
+## Running (Nov 27, 16:30; live view: `bash scripts/status.sh`)
 - Gate evals, 50 episodes per smoke task on CPU nodes: abl_mse 5k with zero noise (34893757); abl_fm 5k with 10 sampling steps (34893765, starts when abl_fm finishes).
 - mf_ddp4_bs256 (34893775): MeanFlow on 4 GPUs, global batch 256, 3 tasks, 5k steps; the batch-size test. Conditioning check chained (34893776). No other MeanFlow run until it answers.
 - Diagnostics: overfit1_paper (left + wrist, shipped quantiles, DEM recipe, 1 demo) and overfit1_meanflow, with open-loop checks chained; mmBERT converter test (34893756); depth spot check (34893778).
