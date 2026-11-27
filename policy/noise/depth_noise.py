@@ -44,7 +44,7 @@ class StereoCamera:
     min_z: float               # nearer than this: no depth
     max_z: float               # farther than this: no depth
     corr_px: int = 3           # box size (rendered px) of spatially correlated noise; 1 = iid
-    edge_rel: float = 0.05     # a neighbour differing by this fraction of depth marks an edge
+    edge_rel: float = 0.05     # edge threshold: relative 2nd difference of inverse depth
     edge_drop_prob: float = 0.5   # edge pixel -> 0
     edge_fly_prob: float = 0.3    # edge pixel -> random depth between near and far neighbour
     shadow: bool = True        # occlusion shadow beside near objects
@@ -130,10 +130,19 @@ def _neighbour_minmax(z: np.ndarray):
 
 
 def edge_mask(z: np.ndarray, rel: float) -> np.ndarray:
-    """Pixels next to a depth jump larger than `rel` times their depth."""
-    lo, hi = _neighbour_minmax(z)
+    """Pixels at a depth discontinuity.
+
+    Uses the second difference of inverse depth along rows and columns, relative to the pixel's
+    inverse depth. Inverse depth is linear in pixel coordinates on any plane, so slanted
+    surfaces (a counter seen at a grazing angle) are NOT edges; only real jumps are.
+    """
+    with np.errstate(divide="ignore"):
+        inv = np.where(z > 0, 1.0 / np.maximum(z, 1e-9), 0.0)
+    p = np.pad(inv, 1, mode="reflect", reflect_type="odd")  # linear extrapolation at borders
+    d2x = np.abs(p[1:-1, :-2] - 2 * inv + p[1:-1, 2:])
+    d2y = np.abs(p[:-2, 1:-1] - 2 * inv + p[2:, 1:-1])
     with np.errstate(invalid="ignore", divide="ignore"):
-        return ((hi - lo) / np.maximum(z, 1e-6)) > rel
+        return (np.maximum(d2x, d2y) / np.maximum(inv, 1e-9)) > rel
 
 
 def occlusion_shadow(z: np.ndarray, fx: float, baseline_m: float, side: str = "left",

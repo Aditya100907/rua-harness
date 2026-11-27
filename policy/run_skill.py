@@ -56,6 +56,7 @@ def run_skill(env, instruction: str, max_seconds: float = 30.0, checkpoint: str 
             raise ValueError(f"checkpoint format {runner.format!r} needs a `command` dict")
         runner.quant = task_quantiles(runner.stats, task)
         runner.cmd = command
+        runner.env = env
         runner.policy.set_instruction(command["kv_text"])
     if obs is None:
         obs = env._get_observations(force_update=True)

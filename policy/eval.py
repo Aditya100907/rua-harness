@@ -47,6 +47,7 @@ class PolicyRunner:
             self.cams = list(self.cfg["cams"])
         self.format = self.cfg.get("format", "sentence")
         self.quant = None
+        self.env = None
 
     def set_task(self, task: str, instruction: str, env=None, cmd_opts: dict | None = None,
                  rng: np.random.Generator | None = None) -> dict:
@@ -56,6 +57,7 @@ class PolicyRunner:
             raise KeyError(f"{task} was not in this checkpoint's training tasks")
         self.quant = task_quantiles(self.stats, task)
         self.cmd = None
+        self.env = env
         if self.format == "sentence":
             self.policy.set_instruction(instruction)
             return {"text": instruction}
@@ -86,6 +88,20 @@ class PolicyRunner:
         return np.concatenate([p_b, q_b.as_quat()], 1).astype(np.float32)
 
     def _images(self, obs: dict) -> np.ndarray:
+        if self.format == "points_3d":      # point map from live depth, in the current base frame
+            from policy.variants import pointmap_to_image
+            from simlib.camera import views
+            if self.env is None:
+                raise RuntimeError("points_3d needs the env (build it with depth=True)")
+            v = views(self.env, obs, [sim.CAMERAS[c] for c in self.cams])
+            st = sim.state16(obs)
+            from scipy.spatial.transform import Rotation as R
+            out = []
+            for c in self.cams:
+                pm = v[sim.CAMERAS[c]].point_map()                      # [H, W, 3] world
+                pb = R.from_quat(st[3:7]).inv().apply(pm.reshape(-1, 3) - st[0:3]).reshape(pm.shape)
+                out.append(pointmap_to_image(pb.transpose(2, 0, 1)))
+            return np.stack(out)
         imgs = sim.images(obs, self.cams)
         if self.format == "points_2d" and self.cmd is not None:
             from policy.variants import CAM_IN_BASE, base_to_pixel, draw_points, world_to_base
@@ -209,7 +225,8 @@ def main() -> None:
     for task in args.tasks:
         ds = paths.task_dir(task)
         H = args.horizon or paths.horizon(task)
-        env = sim.make_env(ds, cams=sorted(set(cams) | {"left", "right"}), size=256)
+        env = sim.make_env(ds, cams=sorted(set(cams) | {"left", "right"}), size=256,
+                           depth=bool(runner and runner.format == "points_3d"))
         n_ok = 0
         for i in range(args.shard, args.episodes, args.nshards):
             seed = args.seed0 + i

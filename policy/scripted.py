@@ -199,14 +199,20 @@ def plan_open_drawer(env, obs):
     d_open[2] = 0
     d_open /= np.linalg.norm(d_open)
     app = -d_open                                    # gripper points into the drawer face
-    R_h = rot_from_axes(app, [0, 0, -1])             # fingers close vertically on the bar
+    # fingers close vertically on the bar; the demos roll the hand the other way for a drawer
+    # on the robot's left (the last wrist joint runs out of range otherwise)
+    R_h = rot_from_axes(app, [0, 0, -1 if hp[1] < 0 else 1])
     pull = 0.55 * float(fx.size[1]) + 0.04
     pre = hp - 0.10 * app
     grasp = hp + 0.01 * app
     cur = np.asarray(obs["robot0_base_to_eef_pos"])
+    high = np.r_[pre[:2], max(pre[2] + 0.15, cur[2] - 0.2)]
     return [
-        Phase("orient", pos=np.r_[cur[:2] - 0.05 * app[:2], cur[2]], rot=R_h, tol=0.03, rot_tol=0.25, max_steps=50),
-        Phase("pre_grasp_high", pos=np.r_[pre[:2], max(pre[2] + 0.15, cur[2] - 0.2)], rot=R_h, tol=0.03),
+        # move sideways first with the starting orientation, then turn: turning first and
+        # then swinging to a drawer on the robot's left gets the hand stuck
+        Phase("over_handle", pos=np.r_[pre[:2], cur[2]], tol=0.03, max_steps=80),
+        Phase("orient", pos=np.r_[pre[:2], cur[2]], rot=R_h, tol=0.03, rot_tol=0.25, max_steps=50),
+        Phase("pre_grasp_high", pos=high, rot=R_h, tol=0.03),
         Phase("pre_grasp", pos=pre, rot=R_h, tol=0.01),
         Phase("approach", pos=grasp, rot=R_h, tol=0.01, speed=0.4),
         Phase("close", pos=grasp, rot=R_h, grip=1, wait=15),

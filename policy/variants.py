@@ -31,6 +31,14 @@ CAM_IN_BASE = {
 K256 = np.array([[221.703, 0, 128.0], [0, 221.703, 128.0], [0, 0, 1]])
 PATH_LEN, PATH_STRIDE = 8, 8
 POINT_FORMATS = ("points_3d", "points_3d_rgb")
+POINTMAP_FORMATS = ("points_3d",)          # color replaced by the point map (needs re-rendered depth)
+PM_RANGE = 1.5                              # metres: base-frame xyz in [-1.5, 1.5] -> [0, 1]
+
+
+def pointmap_to_image(pm: np.ndarray) -> np.ndarray:
+    """[3, H, W] base-frame xyz (NaN = invalid) -> uint8 [H, W, 3] image for the vision encoder."""
+    x = np.nan_to_num((pm + PM_RANGE) / (2 * PM_RANGE), nan=0.0)
+    return (np.clip(x, 0, 1) * 255).round().astype(np.uint8).transpose(1, 2, 0)
 TEXT_FORMATS = ("kv_text", "points_2d", "points_3d", "points_3d_rgb", "pose_path")
 
 
@@ -80,6 +88,7 @@ class CommandDataset:
         self.labels = [{lb["episode"]: lb for lb in load_labels(t, ld)} for t in base.tasks]
         self.norm_stats, self.tables, self.tasks = base.norm_stats, base.tables, base.tasks
         self.rng = None          # a fresh generator per sample, so DataLoader workers do not share noise
+        self._pm = None
 
     def __len__(self):
         return len(self.base)
@@ -116,6 +125,12 @@ class CommandDataset:
                 else:
                     imgs.append(s["images"][k])
             s["images"] = np.stack(imgs)
+        if self.fmt in POINTMAP_FORMATS:
+            if self._pm is None:
+                from policy.rerender import PointMapStore
+                self._pm = PointMapStore()
+            s["images"] = np.stack([pointmap_to_image(self._pm.point_map(self.tasks[ti], ep, t, cam=c, frame="base"))
+                                    for c in self.base.cams])
         if self.fmt in POINT_FORMATS:
             s["points"] = np.concatenate([np.stack(pts).astype(np.float32),
                                           np.asarray(mask, np.float32)[:, None]], 1)   # [2, 4]
