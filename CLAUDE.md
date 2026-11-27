@@ -53,5 +53,11 @@ An LLM agent hands physical jobs to a small fast robot policy (DEM), in the Robo
 - **If a number looks too good, or is exactly zero, stop and check** before building on it.
 - **Blocked on something only a person can do** (an access request, a budget, a decision about the claim): write it under "Blocked" in `docs/STATUS.md` and move to the next item.
 
+## Autonomous sessions (overnight runs, loops, routines)
+- **Keep a running log** in `docs/autonomous_log.md`: start a dated section for the session, and update it every few minutes with what you are trying, bugs you hit, how you solved them, and when and why you stop or stall (including idle gaps you notice afterwards). Commit and push it with your other work.
+- **Commit and push after every piece of progress**, even small ones, on the working branch.
+- **Never end a turn with only a long helper or job pending.** Keep a short background timer so the session wakes up and checks.
+- **On the Mac, run long sessions under `caffeinate`** so the machine does not sleep, and ask Adi to approve Duo (`ssh bouchet true` in his own terminal) before the 8-hour SSH connection expires.
+
 ## Writing style
 Short, plain, no em dashes, active voice. Define a term the first time. State what was run and what was not.
