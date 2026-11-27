@@ -21,9 +21,8 @@ QDONE=$ROOT/runs/queue_done.txt
 LOG=$ROOT/logs/watcher.log
 touch $Q $QDONE
 
-gpus_in_use() {  # running + pending GPU jobs of mine (each of our GPU jobs uses 1 GPU)
-  # running GPU jobs, plus pending GPU jobs with each throttled array counted once (not per element)
-  echo $(( $(squeue -u $USER -h -r -t R -o "%P" | grep -c "^gpu") + $(squeue -u $USER -h -t PD -o "%P" | grep -c "^gpu") ))
+gpus_in_use() {  # sum of GPUs requested by my running and pending jobs (a 4-GPU job counts 4)
+  squeue -u $USER -h -t R,PD -O "tres-per-job:40" | grep -o "gpu:[0-9]*" | cut -d: -f2 | awk '{s+=$1} END {print s+0}'
 }
 jobs_in_use() { squeue -u $USER -h -r -t R -o "%P" | grep -c "^gpu"; }  # GPU jobs only; CPU arrays do not count
 job_exists() { squeue -u $USER -h -n "$1" | grep -q .; }
