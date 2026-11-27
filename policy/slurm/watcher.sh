@@ -22,9 +22,9 @@ LOG=$ROOT/logs/watcher.log
 touch $Q $QDONE
 
 gpus_in_use() {  # running + pending GPU jobs of mine (each of our GPU jobs uses 1 GPU)
-  squeue -u $USER -h -r -t R,PD -o "%b|%P" | grep -c "gpu"
+  squeue -u $USER -h -r -t R,PD -o "%P" | grep -c "^gpu"     # every job in a gpu* partition uses 1 GPU
 }
-jobs_in_use() { squeue -u $USER -h -r -t R -o "%b" | grep -c gpu; }  # GPU jobs only; CPU arrays do not count
+jobs_in_use() { squeue -u $USER -h -r -t R -o "%P" | grep -c "^gpu"; }  # GPU jobs only; CPU arrays do not count
 job_exists() { squeue -u $USER -h -n "$1" | grep -q .; }
 
 best_partition() {  # earliest predicted start among the partitions we train on
