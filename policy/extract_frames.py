@@ -59,9 +59,11 @@ def decode_jpeg(b: bytes | np.ndarray) -> np.ndarray:
     return cv2.imdecode(arr, cv2.IMREAD_COLOR)[:, :, ::-1]
 
 
-def extract_task(task: str, cams: list[str], out_base: Path, quality: int = 95) -> dict:
+def extract_task(task: str, cams: list[str], out_base: Path, quality: int = 95,
+                 max_episodes: int | None = None) -> dict:
+    """`max_episodes` keeps only the first episodes (for tests); global frame indices stay valid."""
     ds = paths.task_dir(task)
-    lens = episode_lengths(ds)
+    lens = episode_lengths(ds)[:max_episodes]
     out = out_base / task
     out.mkdir(parents=True, exist_ok=True)
     info = {"task": task, "episodes": len(lens), "frames": int(sum(lens)), "cams": {}, "quality": quality}
