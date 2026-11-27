@@ -83,3 +83,15 @@ One entry per result: what was tested, the number with its episode count and int
 - **Numbers:** OpenDrawer 8/50 (16%, 95% CI 8 to 29%); PickPlaceCounterToCabinet 5/50 (10%, 4 to 21%); TurnOnMicrowave 4/50 (8%, 3 to 19%). First pick-place and microwave successes of any learned policy here.
 - **Compared with abl_mse at 5k** (left + right, recomputed quantiles, all demos, no determinism fix): 22/50, 0/50, 0/50. Not a clean comparison: cameras, quantile source, training split and the determinism fix all differ (quantiles were shown identical; the fix moved OpenDrawer by 1 episode). The camera change is the likely cause of the shift, but this is not tested as one change.
 - **Counts toward the format study** (gate passed; same protocol for every format). 10k scoring running (34896150).
+
+## Nov 27, 18:00. Format study, early scores (one seed; 50 episodes per task; determinism fix on)
+| Format, step | OpenDrawer | PickPlace | Microwave |
+|---|---|---|---|
+| sentence 5k | 8/50 (16%) | 5/50 (10%) | 4/50 (8%) |
+| sentence 10k | 10/50 (20%) | 8/50 (16%) | 10/50 (20%) |
+| sentence 15k | 25/50 (50%) | (running) | 26/50 (52%) |
+| kv_text 5k | 20/50 (40%) | 4/50 (8%) | 5/50 (10%) |
+| points_2d 5k | 28/50 (56%) | 6/50 (12%) | 1/50 (2%) |
+- 95% CIs at 5k on OpenDrawer: sentence 8 to 29%, kv_text 27 to 54%, points_2d 42 to 69%: the drawer intervals for kv_text and points_2d clear sentence's at 5k. One seed and an early checkpoint, so a hint, not a finding. On the microwave and pick-place, the 5k differences are inside the noise.
+- sentence improves fast between 10k and 15k (drawer 20% to 50%, microwave 20% to 52%); 20k scoring is running.
+- Seeds before belief: queued fs_mse_sentence_seed1 (same settings, seed 1) on the free GPU.
