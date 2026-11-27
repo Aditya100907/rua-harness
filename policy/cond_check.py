@@ -18,6 +18,7 @@ def main():
     ap.add_argument("--ckpt", required=True)
     ap.add_argument("--task", default="OpenDrawer")
     ap.add_argument("--n", type=int, default=32)
+    ap.add_argument("--nfe", type=int, default=1)
     a = ap.parse_args()
     from dem import preprocess_images
     from policy.data import RoboCasaDataset, load_norm_stats, task_quantiles
@@ -40,7 +41,7 @@ def main():
     def run(img, s, txt, z0):
         with torch.no_grad():
             vis = pol.encode_vision(img)
-            out = pol.act(None, s, texts=txt, vis_tokens=vis, z0=z0)
+            out = pol.act(None, s, texts=txt, vis_tokens=vis, z0=z0, nfe=a.nfe)
         return qa.unnormalize(out.float().numpy())
 
     def mae(p):

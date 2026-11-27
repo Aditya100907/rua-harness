@@ -60,6 +60,9 @@ def parse_args(argv=None):
     ap.add_argument("--video", action="store_true", help="decode mp4 directly (slow, no frame store needed)")
     ap.add_argument("--done-head", action="store_true", help="also train a progress / done output (DoneHead)")
     ap.add_argument("--dispersive-weight", type=float, default=0.25, help="DEM recipe: 0.25")
+    ap.add_argument("--objective", default="meanflow", choices=["meanflow", "fm", "mse"],
+                    help="meanflow (DEM recipe); fm = plain flow matching (r = t, sample with --nfe > 1); "
+                         "mse = deterministic regression (evaluate with --z0 zero)")
     ap.add_argument("--clip-norm", type=float, default=0.0, help="clip stage-1 normalized state/actions to +-this (0 = off)")
     a = ap.parse_args(argv)
     if a.all_tasks:
@@ -78,7 +81,8 @@ def build(args, ds_stats: dict, device: str):
     from policy.model import build_policy
     policy = build_policy(args.format, cams=len(args.cams), offline=args.offline,
                           freeze_vision=args.freeze_vision,
-                          dispersive_weight=getattr(args, "dispersive_weight", 0.25))
+                          dispersive_weight=getattr(args, "dispersive_weight", 0.25),
+                          ratio_r_eq_t=1.0 if getattr(args, "objective", "meanflow") == "fm" else 0.5)
     a_norm, p_norm = zscore_normalizers(ds_stats)
     policy.action_norm, policy.proprio_norm = a_norm, p_norm
     return policy.to(device)
@@ -180,7 +184,7 @@ def main(argv=None) -> None:
         t_d = time.time()
         for batch in dl:
             data_t += time.time() - t_d
-            loss, aux = forward_loss(policy, batch, dev, use_bf16, done_head=done_head)
+            loss, aux = forward_loss(policy, batch, dev, use_bf16, done_head=done_head, objective=args.objective)
             opt.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(trainable, 1.0)
