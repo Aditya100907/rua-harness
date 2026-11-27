@@ -54,3 +54,10 @@ One entry per result: what was tested, the number with its episode count and int
 | abl_fm (3 tasks, 5k) | plain flow matching, 10 steps | 0.145 (zero noise) | 0.155 | input spread 0.0125 vs noise 0.22 |
 - **Means:** the data, vision and head pipeline can fit (regression memorizes a demo). MeanFlow can fit one demo with the paper's cameras and learning rate, but overfit1_paper and overfit1_meanflow differ in two things (cameras, head lr), so this does not yet say which one mattered. On 3 tasks at 5k steps, both new objectives are only slightly better than the mean action; whether that is enough to act in the simulator is what the gate evals decide.
 - **mmBERT path:** the research-checkpoint converter and --init-from fine-tune run with mmBERT-small (384-d) tokens (job 34893756).
+
+## Nov 27, 16:52. THE GATE PASSES with regression (abl_mse, 5k steps)
+- **Tested:** abl_mse (objective mse = deterministic regression through the same DEM head; cameras left + right; recomputed quantiles; 3 smoke tasks; 5k steps; batch 64; seed 0), evaluated with zero noise, 50 episodes per task, seeds 1000 to 1049 (job 34893757).
+- **Numbers:** OpenDrawer **22/50 (44%, 95% CI 31 to 58%)**; PickPlaceCounterToCabinet 0/50; TurnOnMicrowave 0/50.
+- **Checked before believing it:** 50 rows, zero noise recorded, renders clean (img_rowdiff0 4.3 to 4.6), successes end at steps 210 to 290 (demo lengths 200 to 430), the success video shows the arm reaching the lower cabinet and the drawer pulled out.
+- **Means:** with the same data, vision, head and eval code, replacing MeanFlow by regression turns 0% into 44% on the drawer after only 5k steps, where MeanFlow had 0% at 20k (run1) and at 70k (run2). The pipeline was never the problem; MeanFlow's optimization in our setup is. The gate rule (beat 20% on OpenDrawer or TurnOnMicrowave) is met.
+- **Still to see:** abl_fm (plain flow matching, 10 steps) gate numbers; then choose the objective (fm if close, per Adi).
