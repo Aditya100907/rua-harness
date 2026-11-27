@@ -19,7 +19,7 @@
 #SBATCH --output=/nfs/roberts/project/pi_dr877/ak3288/apollo-lab/logs/rerender_%A_%a.out
 source /nfs/roberts/project/pi_dr877/ak3288/apollo-lab/rua-harness/policy/slurm/common.sh
 export LP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-4} OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
-export RUA_DEPTH=$SCR/depth
+export RUA_DEPTH=${RUA_DEPTH_OUT:-$SCR/depth}
 CHUNK=${CHUNK:-50}
 NCHUNK=${NCHUNK:-12}
 CAMS=${CAMS:-"left right"}

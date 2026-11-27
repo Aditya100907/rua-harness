@@ -63,6 +63,7 @@ def parse_args(argv=None):
     ap.add_argument("--objective", default="meanflow", choices=["meanflow", "fm", "mse"],
                     help="meanflow (DEM recipe); fm = plain flow matching (r = t, sample with --nfe > 1); "
                          "mse = deterministic regression (evaluate with --z0 zero)")
+    ap.add_argument("--depth-dir", default=None, help="re-rendered depth folder for point-map formats (sets RUA_DEPTH)")
     ap.add_argument("--init-from", default=None,
                     help="start from this checkpoint (e.g. a converted research checkpoint, policy/research_ckpt.py); "
                          "its folder's norm_stats.json is used, not recomputed")
@@ -123,6 +124,8 @@ def save_ckpt(policy, out: Path, step: int, fmt: str = "sentence") -> Path:
 
 def main(argv=None) -> None:
     args = parse_args(argv)
+    if args.depth_dir:
+        os.environ["RUA_DEPTH"] = args.depth_dir      # read by policy.rerender.PointMapStore (inherited by workers)
     out = Path(args.out).expanduser()
     out.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
