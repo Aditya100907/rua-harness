@@ -45,7 +45,8 @@ You have exactly two tools, run from the shell in this folder:
   ./rua done
       Say you are finished.
 
-Look first. Then send commands. After each skill, look at the new images and decide whether the job is done;
+Pick each pixel on the object itself, where nothing (such as the robot's own arm) covers it; the point is
+lifted to 3D from that camera's depth. Look first. Then send commands. After each skill, look at the new images and decide whether the job is done;
 if not, you may send another command. The robot has {seconds:.0f} seconds of robot time in total.
 Do not write or edit files. When finished, run ./rua done and reply with one line.
 """
