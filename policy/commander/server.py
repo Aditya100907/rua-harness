@@ -28,7 +28,11 @@ CAM_NAMES = {"left": "robot0_agentview_left", "right": "robot0_agentview_right",
 class Episode:
     def __init__(self, task, seed, ckpt, epdir: Path, size=256):
         from simlib.truth import target_part
+        from policy.run_skill import _runner, default_device
         self.task, self.seed, self.ckpt, self.dir = task, seed, ckpt, epdir
+        # load the policy BEFORE building the env: on the Mac, loading it after the env has been reset
+        # twice corrupts every later render (reproduced Nov 27; scripts/render_sanity.py)
+        _runner(ckpt, default_device())
         (epdir / "img").mkdir(parents=True, exist_ok=True)
         self.env = sim.make_env(paths.task_dir(task), cams=["left", "right", "wrist"], size=size, depth=True)
         self.env.rng = np.random.default_rng(seed)

@@ -19,3 +19,12 @@ The plan says left and right agent views; the DEM README example uses a scene ca
 
 ## 4. Which claim the paper makes
 Not chosen. Evidence will come from F4/F6 (formats with perfect commands) and Part V (agent-written commands). Keep all options open until those exist.
+
+## 5. Which planner LLM runs the RPent (Harness VLA) baseline (new, Nov 27 01:00)
+**Finding.** RPent is installed on Bouchet (`envs/rpent`), the RLDX-1 VLA weights are downloaded (public, not gated, RLWRLD non-commercial license), and its RoboCasa simulator checks pass on a gpu_devel GPU. SAM 3 is gated but RoboCasa does not use it. The only missing piece for a logged episode is a planner LLM, and every option either costs money or needs a terms check. Details: `docs/rpent_notes.md`.
+**Options.**
+- A. Codex with Adi's ChatGPT plan login (`codex login --device-auth` on Bouchet, `CODEX_HOME` in project space). Matches RPent's reference planner (Codex, GPT-5.5, xhigh). Adi must check that the plan terms and rate limits allow unattended harness runs (180 atomic runs, up to 100 tool calls each).
+- B. A paid API key (OpenAI, Anthropic or Gemini) in `.env` on the cluster. Clear terms, costs per token. Needs a budget: start with 1 episode, then the 3 smoke tasks.
+- C. Claude Code with Adi's claude.ai login. The Agent SDK docs say claude.ai login is not allowed for agents built on the SDK without approval. Not recommended.
+- D. A local open model behind vLLM (free). Needs a second GPU and environment, and the result does not match published numbers.
+**Recommendation: A if the plan terms allow it, else B with a small budget.** Run the no-LLM VLA check first (fix two stale lines in RPent's test, one gpu_devel job), then one OpenDrawer seed 1 episode.

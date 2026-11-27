@@ -14,12 +14,16 @@ base frame. The arm uses OSC_POSE with delta inputs in the base frame
 torso never move (as in the demos). Each task is a short list of phases (move to a pose,
 open or close the gripper, wait).
 
-    PickPlaceCounterToCabinet: open, go above the object, descend, close, lift to shelf
-        height, go in front of the lowest shelf, slide in, open, back out.
-    OpenDrawer: turn the gripper to point at the drawer face (fingers closing vertically, as
-        the demos do), go in front of the handle, close on it, pull along the slide joint.
+    PickPlaceCounterToCabinet: gripper toward the cabinet, tilted 45 degrees down; descend
+        onto the object, close, lift, back away, level the gripper while rising to the lowest
+        shelf, slide in, open, back out.
+    OpenDrawer: move sideways over the handle, turn the gripper to point at the drawer face
+        (fingers closing vertically, as the demos do), go in front of the handle bar, close,
+        pull along the slide joint.
     TurnOnMicrowave: close the gripper, point it at the start button, push 2 cm past the
-        button face, back off 20 cm (success needs the gripper 15 cm away).
+        button face, back off 22 cm (success needs the gripper 15 cm away).
+
+Results and the test sets: docs/testsets.md.
 
     python -m policy.scripted --tasks OpenDrawer --episodes 50 --seed0 1000 --note smoke
 """

@@ -6,6 +6,10 @@ Stops on the first of: the simulator's success check (see the note below),
 `max_seconds` of robot time (20 control steps per second), or `max_steps`.
 Returns a status dict and the final camera images (dataset orientation).
 
+Load order: call `_runner(checkpoint, device)` before building the env. On the Mac, loading the
+model after the env has been hard-reset twice corrupts every later render (Nov 27). The result
+carries `img_rowdiff` (mean change between neighbouring pixel rows: about 6 clean, 25+ corrupt).
+
 Note on stopping: the policy has no learned "done" output yet, so by default the
 skill stops when `env._check_success()` turns true. That is simulator ground
 truth: it is used here only to stop the skill, and the returned dict keeps it
@@ -84,6 +88,7 @@ def run_skill(env, instruction: str, max_seconds: float = 30.0, checkpoint: str 
         reason = "max_steps"
     imgs = {c: sim.images(obs, [c])[0] for c in ("left", "right", "wrist")
             if f"{sim.CAMERAS[c]}_image" in obs}
-    return {"status": "stopped", "reason": reason, "robot_seconds": steps / CONTROL_HZ, "steps": steps,
+    rowdiff = float(np.abs(np.diff(sim.images(obs, ["left"])[0].astype(np.int16), axis=0)).mean())
+    return {"status": "stopped", "reason": reason, "img_rowdiff": round(rowdiff, 1), "robot_seconds": steps / CONTROL_HZ, "steps": steps,
             "wall_seconds": round(time.time() - t0, 2), "model_seconds": round(model_s, 2),
             "images": imgs, "obs": obs, "grading_only": {"success": bool(success)}}

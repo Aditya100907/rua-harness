@@ -224,7 +224,7 @@ def main() -> None:
     new = not out.exists()
     f = open(out, "a", newline="")
     w = csv.DictWriter(f, fieldnames=COLS + ["model_seconds", "state_err0", "image_err0", "command_mode", "point_error_cm",
-                                       "min_dist_cmd_cm", "min_dist_true_cm", "demo_episode"], extrasaction="ignore")
+                                       "min_dist_cmd_cm", "min_dist_true_cm", "demo_episode", "img_rowdiff0"], extrasaction="ignore")
     if new:
         w.writeheader()
     cams = runner.cams if runner else ["left", "right"]
@@ -317,6 +317,11 @@ def main() -> None:
                                  point_error_cm=args.point_error_cm,
                                  min_dist_cmd_cm=round(100 * min(track["cmd"]), 1) if track["cmd"] else "",
                                  min_dist_true_cm=round(100 * min(track["true"]), 1) if track["true"] else "")
+            # render sanity at reset: mean change between neighbouring pixel rows (about 6 clean, 25+ corrupt)
+            extra_row["img_rowdiff0"] = round(float(np.abs(np.diff(sim.images(obs0, ["left"])[0].astype(np.int16),
+                                                                   axis=0)).mean()), 1)
+            if extra_row["img_rowdiff0"] > 20:
+                print(f"WARNING corrupt-looking render at reset: rowdiff {extra_row['img_rowdiff0']}", flush=True)
             n_ok += r["success"]
             row = dict(task=task, episode=i, seed=seed, success=r["success"], seconds=r["seconds"], llm_calls=0,
                        input_tokens=0, output_tokens=0, cost_usd=0, code_commit=commit, checkpoint_step=step,
