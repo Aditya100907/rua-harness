@@ -79,7 +79,8 @@ import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['step
     [ $(jobs_in_use) -ge $JOB_CAP ] && break
     conc=$(( free < ntasks ? free : ntasks ))
     if [ ! -f $d/scored/$step ]; then
-      j=$(CKPT=$ck TASKS="$tasks" EPISODES=$eps sbatch --parsable --job-name=eval_${run}_$step \
+      ea=""; [ "$ntasks" -le 3 ] && ea="--save-traj"    # trajectories for failure sorting (E5)
+      j=$(CKPT=$ck TASKS="$tasks" EPISODES=$eps EVAL_ARGS="$ea" sbatch --parsable --job-name=eval_${run}_$step \
           --array=0-$((ntasks-1))%$conc $REPO/policy/slurm/eval_array.sbatch) && touch $d/scored/$step \
           && n_eval=$((n_eval+1)) && msg="$msg eval:${run}@$step:$j"
     fi
