@@ -14,7 +14,7 @@
 source /nfs/roberts/project/pi_dr877/ak3288/apollo-lab/rua-harness/policy/slurm/common.sh
 GPU_CAP=${GPU_CAP:-8}
 JOB_CAP=${JOB_CAP:-12}
-EVAL_RESERVE=${EVAL_RESERVE:-2}   # GPUs the queue leaves free for scoring
+EVAL_RESERVE=${EVAL_RESERVE:-0}   # scoring runs on CPU nodes now (YCRC cancels GPU jobs with 0% use)
 CK=$PROJ/checkpoints
 Q=$ROOT/runs/queue.txt
 QDONE=$ROOT/runs/queue_done.txt
@@ -53,7 +53,11 @@ cycle() {
     [ -f $d/CRASHED ] && continue          # needs a person: see <run>/last_job.log
     grep -q '"untrained": true' $d/config.json && continue
     want=$(python -c "import json;print(json.load(open('$d/config.json'))['steps'])")
-    have=$(python -c "import torch;print(torch.load('$d/train_state.pt',weights_only=False)['step'])" 2>/dev/null || echo 0)
+    # progress = newest checkpoint's step (loading the 1.3 GB train_state.pt failed on the 8 GB agent node,
+    # which made the watcher resubmit finished runs every cycle on Nov 27, 05:00 to 06:30)
+    last=$(ls $d/ckpt_*.pt 2>/dev/null | grep -v '\.done\.pt' | sed 's/.*ckpt_0*\([0-9]*\)\.pt/\1/' | sort -n | tail -1)
+    have=${last:-0}
+    [ "$have" -ge "$want" ] && continue
     if [ "$have" -lt "$want" ] && ! job_exists $run; then
       args=$(cat $d/args.txt 2>/dev/null)
       if [ -n "$args" ] && [ $(gpus_in_use) -lt $GPU_CAP ]; then
@@ -74,10 +78,7 @@ import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['step
     if [ "$ntasks" -gt 3 ] && [ $final -eq 0 ] && [ $((step % 50000)) -ne 0 ]; then touch $d/scored/$step; continue; fi
     if [ "$ntasks" -le 3 ] && [ $final -eq 0 ] && [ $((step % 5000)) -ne 0 ]; then touch $d/scored/$step; continue; fi
     eps=50; [ $final -eq 1 ] && eps=100
-    free=$((GPU_CAP - $(gpus_in_use)))
-    [ $free -le 0 ] && break
-    [ $(jobs_in_use) -ge $JOB_CAP ] && break
-    conc=$(( free < ntasks ? free : ntasks ))
+    conc=$ntasks                          # CPU jobs: no GPU cap
     if [ ! -f $d/scored/$step ]; then
       ea=""; [ "$ntasks" -le 3 ] && ea="--save-traj"    # trajectories for failure sorting (E5)
       j=$(CKPT=$ck TASKS="$tasks" EPISODES=$eps EVAL_ARGS="$ea" sbatch --parsable --job-name=eval_${run}_$step \
@@ -103,7 +104,6 @@ import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['step
     want=$(python -c "import json;print(json.load(open('$d/config.json'))['steps'])")
     fck=$(printf "%s/ckpt_%07d.pt" $d $want)
     [ -f $fck ] && [ ! -f $d/scored/sweeps ] || continue
-    [ $((GPU_CAP - $(gpus_in_use))) -ge 1 ] || continue
     tasks=$(python -c "import json;print(' '.join(json.load(open('$d/config.json'))['tasks']))")
     j=$(TASKS="$tasks" bash $REPO/policy/slurm/sweeps.sh $fck 50) && touch $d/scored/sweeps && msg="$msg sweeps:$run:$j"
   done

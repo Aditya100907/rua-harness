@@ -3,17 +3,18 @@
 #   CKPT=/path/ckpt_0020000.pt TASKS="OpenDrawer TurnOnMicrowave" EPISODES=50 \
 #     sbatch --array=0-1 policy/slurm/eval_array.sbatch
 # Extra eval.py flags go in EVAL_ARGS (e.g. "--wiring" or "--save-traj").
-#SBATCH --partition=gpu
-#SBATCH --gpus=1
-#SBATCH --cpus-per-task=12
-#SBATCH --mem=96G
+#SBATCH --partition=day
+#SBATCH --cpus-per-task=24
+#SBATCH --mem=160G
 #SBATCH --time=06:00:00
 #SBATCH --job-name=eval
 #SBATCH --output=/nfs/roberts/project/pi_dr877/ak3288/apollo-lab/logs/eval_%A_%a.out
 source /nfs/roberts/project/pi_dr877/ak3288/apollo-lab/rua-harness/policy/slurm/common.sh
 T=($TASKS)
 TASK=${T[$SLURM_ARRAY_TASK_ID]}
-NPROC=${NPROC:-6}
+NPROC=${NPROC:-12}
+# CPU node: software EGL rendering and the policy on CPU, 2 threads per process
+export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 LP_NUM_THREADS=2
 EPISODES=${EPISODES:-50}
 if [ -n "${CKPT:-}" ]; then
   RUNID=$(basename $(dirname $CKPT)); STEP=$(basename $CKPT .pt | sed 's/ckpt_0*//'); STEP=${STEP:-0}
@@ -25,7 +26,7 @@ fi
 D=$REPO/results/parts/${NOTE}_${TASK}
 mkdir -p $D
 rm -f $D/shard*.csv          # a requeued or repeated job starts clean (no double-counted rows)
-echo "task $TASK note $NOTE ckpt ${CKPT:-none} nproc $NPROC on $(hostname) $(nvidia-smi --query-gpu=name --format=csv,noheader)"
+echo "task $TASK note $NOTE ckpt ${CKPT:-none} nproc $NPROC on $(hostname) (CPU)"
 for s in $(seq 0 $((NPROC-1))); do
   python -m policy.eval $CK --tasks $TASK --episodes $EPISODES --shard $s --nshards $NPROC \
     --video $([ $s -eq 0 ] && echo 2 || echo 0) --out $D/shard$s.csv --outdir $ROOT/runs/eval_media/${NOTE} ${EVAL_ARGS:-} \

@@ -2,10 +2,9 @@
 # Part N sweeps in ONE array (one element per task), each element running every mode in turn.
 #   CKPT=... TASKS="..." EPISODES=50 sbatch --array=0-2 policy/slurm/sweep_array.sbatch
 # Modes: N1 point error 0,1,2,5,10 cm; N2 distractor; N3 drop point / name / source; N4 rename.
-#SBATCH --partition=gpu
-#SBATCH --gpus=1
-#SBATCH --cpus-per-task=12
-#SBATCH --mem=96G
+#SBATCH --partition=day
+#SBATCH --cpus-per-task=24
+#SBATCH --mem=160G
 #SBATCH --time=12:00:00
 #SBATCH --job-name=sweep
 #SBATCH --output=/nfs/roberts/project/pi_dr877/ak3288/apollo-lab/logs/sweep_%A_%a.out
