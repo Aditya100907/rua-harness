@@ -42,7 +42,7 @@ Stock DEM trained with the MeanFlow recipe does not learn usable actions here: r
 - hx_check 34894785 (day): HexaShell target split vs our eval scenes, seeds 1000-1049.
 - fs_fm_sentence 34894171: flow matching at 20k with the same settings (does fm catch up with more steps).
 - MeanFlow batch-size test mf_ddp4_bs256 finished 5k steps; conditioning check and simulator eval (34894664) running.
-- HexaShell target split and SAM 3 service: helper working (pinned clone at 914d482).
+- HexaShell target split done (matches our eval on 15/15 scenes). SAM 3 service works (smoke test passed) but is stopped: YCRC cancels idle GPU jobs, so start it on demand with the HexaShell runs (`docs/sam3_service.md`).
 
 ## Next: policy track (new priorities from Adi, Nov 27 afternoon)
 1. **Gate: PASSED** (abl_mse 22/50 on OpenDrawer).

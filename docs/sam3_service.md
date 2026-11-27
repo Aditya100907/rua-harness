@@ -69,3 +69,11 @@ repo on Bouchet:
 Nov 27 ~16:55: the Hugging Face login on Bouchet (user `adikothar1`) got `403 GatedRepoError: awaiting a
 review`. Adi reported access granted shortly after; at 17:00 a test download of `config.json` worked.
 We did not request access or accept terms ourselves.
+
+## Run it on demand, not idle (Nov 27, 17:50)
+YCRC cancels GPU jobs that show 0% GPU use (on gpu_devel after about 1 hour), and warned on job 34895235 at 17:45 because nothing was calling the service yet. So the service was stopped at 17:50 and must not be left running idle (and must not be kept "busy" with fake requests; that works around the cluster's policy).
+
+How to use it: start the service in the same batch as the HexaShell runs that need it, and stop it when they finish.
+1. `sbatch -p gpu_devel --time=06:00:00 policy/slurm/sam3_service.sbatch` (or on `gpu` for a longer batch), from the repo on Bouchet, right before submitting the HexaShell episodes.
+2. Wait until `/nfs/roberts/project/pi_dr877/ak3288/apollo-lab/runs/sam3_service.txt` exists (about 1 minute; the model loads in about 32 s), then point HexaShell's `sam3_url` at the URL in it.
+3. Submit the HexaShell runs with `--dependency=after:<service job id>` so they start once the service is up, and `scancel` the service when the last one ends (or give the service job a `--time` that matches the batch).
