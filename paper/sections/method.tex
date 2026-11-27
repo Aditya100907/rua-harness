@@ -1,0 +1,22 @@
+\section{Method}
+\label{sec:method}
+
+\draftnote{DRAFT stub.}
+
+\paragraph{Policy.} \dem: two cameras at $256\times256$, DINOv3 image
+features, 32 language tokens from a frozen NeoBERT, a 16-number robot state,
+and a MeanFlow head that predicts 16 actions of 12 numbers each and executes 8.
+
+\paragraph{Command formats.} One command, five ways to show it to the policy:
+\begin{itemize}
+  \item \texttt{sentence}: an English instruction in RoboCasa's style.
+  \item \texttt{kv\_text}: fixed-order structured text, e.g.\ \texttt{skill pick place object apple from counter to cabinet}. No numbers.
+  \item \texttt{points\_2d}: object and target points drawn on the camera images.
+  \item \texttt{points\_3d}: object and target points in the robot base frame as extra tokens, with a point-map input.
+  \item \texttt{pose\_path}: a short path of gripper poses.
+\end{itemize}
+The policy is retrained from scratch for each format on the same demos.
+
+\paragraph{Agent.} The agent sees camera images, calls a \texttt{run\_skill}
+tool with a skill name and pixel points, and the harness lifts pixels to 3D.
+Simulator ground truth is used only for grading.

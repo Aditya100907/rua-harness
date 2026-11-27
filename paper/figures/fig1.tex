@@ -1,0 +1,36 @@
+% Figure 1 draft: request -> LLM agent -> command -> policy -> simulator.
+% Needs tikz with libraries positioning, arrows.meta (loaded in main.tex).
+% Example command follows ATOMIC_SEEN["PickPlaceCounterToCabinet"] in rua_harness/command.py.
+% Pixel values are illustrative, not from a real episode.
+\begin{tikzpicture}[
+    font=\sffamily\small,
+    node distance=5mm and 8mm,
+    box/.style={draw, rounded corners=2pt, thick, align=center, minimum height=14mm, inner sep=4pt},
+    agent/.style={box, fill=blue!8, draw=blue!60!black},
+    policy/.style={box, fill=orange!10, draw=orange!70!black},
+    io/.style={box, fill=gray!8, draw=gray!60!black},
+    cmd/.style={draw=gray!60!black, dashed, rounded corners=2pt, fill=white, align=left, inner sep=4pt, font=\ttfamily\scriptsize},
+    arr/.style={-{Stealth[length=2.2mm]}, thick},
+    lab/.style={font=\scriptsize, text=gray!40!black},
+  ]
+  \node[io] (req) {\textbf{Request}\\[2pt]\footnotesize ``Put the apple\\\footnotesize in the cabinet.''};
+  \node[agent, right=of req] (agent) {\textbf{LLM agent}\\[2pt]\footnotesize plans, looks at\\\footnotesize camera images};
+  \node[cmd, right=of agent] (cmd) {%
+    {\sffamily\bfseries command} {\sffamily(kv\_text + points)}\\[2pt]
+    skill  pick\_place\\
+    object apple   @ (212, 148)\\
+    from   counter\\
+    to     cabinet @ (96, 60)};
+  \node[policy, right=of cmd] (policy) {\textbf{Policy (DEM)}\\[2pt]\footnotesize DINOv3 + NeoBERT\\\footnotesize MeanFlow head\\\footnotesize 16 actions, run 8};
+  \node[io, right=14mm of policy] (sim) {\textbf{RoboCasa}\\[2pt]\footnotesize kitchen simulator\\\footnotesize success / fail};
+
+  \draw[arr] (req) -- (agent);
+  \draw[arr] (agent) -- (cmd);
+  \draw[arr] (cmd) -- (policy);
+  \draw[arr] (policy) -- node[lab, above]{actions} (sim);
+  % feedback: images and state to the policy every step, result to the agent at the end
+  \draw[arr, gray!60!black] (sim.north) -- ++(0,5mm) -| node[lab, pos=0.25, above]{camera images, robot state (every step)} (policy.north);
+  \draw[arr, gray!60!black] (sim.south) -- ++(0,-14mm) -| node[lab, pos=0.25, below]{images and skill result (when the skill ends)} (agent.south);
+
+  \node[lab, below=1.5mm of cmd, align=center] {formats compared: sentence, kv\_text,\\points\_2d, points\_3d, pose\_path};
+\end{tikzpicture}

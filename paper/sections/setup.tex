@@ -1,0 +1,19 @@
+\section{Experimental Setup}
+\label{sec:setup}
+
+\draftnote{DRAFT stub.}
+
+\paragraph{Simulator and tasks.} RoboCasa v1.0.1 \citep{nasiriany2024robocasa}, the 18 atomic-seen tasks,
+evaluated on the target split. Held-out objects test generalization.
+
+\paragraph{Data.} The target human split, 500 demos per task, LeRobot format.
+
+\paragraph{Conditions.} \texttt{policy\_only}, \texttt{agent\_only},
+\texttt{agent\_plus\_policy}.
+
+\paragraph{Metrics.} Success rate with a Wilson 95\% interval, seconds per
+episode, LLM calls and tokens per episode.
+
+\paragraph{Checks before any number counts.} The replay test (a demo's
+recorded actions succeed in the simulator) and the zero test (an untrained
+checkpoint scores about 0\%).

@@ -1,0 +1,22 @@
+\section{Introduction}
+\label{sec:intro}
+
+\draftnote{DRAFT stub.}
+
+\begin{figure*}[t]
+  \centering
+  \resizebox{\textwidth}{!}{\input{figures/fig1}}
+  \caption{\draftnote{Draft.} A request goes to the LLM agent. The agent
+  writes a short command, here in structured form with points. The policy
+  turns the command and camera images into actions in the simulator. We vary
+  the command format and retrain the policy for each.}
+  \label{fig:overview}
+\end{figure*}
+
+Points to make:
+\begin{itemize}
+  \item LLM agents plan well but act slowly and cost tokens when they drive a robot step by step.
+  \item Small policies act fast but need a command. The format of that command is a design choice nobody has measured with the policy retrained per format.
+  \item We measure it: five formats, same policy architecture, same data, RoboCasa atomic tasks.
+  \item Contributions: (1) a controlled comparison of command formats; (2) agent alone vs.\ agent plus policy on success, time and tokens; (3) open code and per-episode CSVs.
+\end{itemize}

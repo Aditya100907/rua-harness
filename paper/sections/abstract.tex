@@ -1,0 +1,17 @@
+% DRAFT abstract. Placeholder. No result in it is real yet.
+\begin{abstract}
+\draftnote{DRAFT: placeholder abstract, no numbers are real.}
+Large language model (LLM) agents can plan long household jobs, but they act
+slowly and spend many tokens when they control a robot step by step. A small
+learned policy acts fast, but it needs to be told what to do. We ask a simple
+question: in what form should the agent hand a job to the policy? We compare
+five command formats: a plain sentence, structured key-value text, 2D points
+drawn on the camera images, 3D points given as extra input tokens with a point
+map, and a short path of gripper poses. For each format we retrain the same
+policy, a DINOv3 and frozen NeoBERT model with a MeanFlow action head, on the
+RoboCasa kitchen simulator, and we test it on objects seen in training and on
+held-out objects. We then pair the best format with an LLM agent and compare
+it against the agent acting alone on success rate, wall-clock time and tokens
+used. \draftnote{Main finding goes here once Table 1 and Table 2 exist.}
+We release code, commands and per-episode results.
+\end{abstract}

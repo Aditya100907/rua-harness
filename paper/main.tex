@@ -1,0 +1,61 @@
+% rua-harness paper. Target: ICML 2027.
+% Style files are the ICML 2026 kit (2027 not published yet). See README.md.
+\documentclass{article}
+
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{adjustbox}  % generated tables shrink to fit
+\usepackage{hyperref}
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Blind review version. Use [preprint] or [accepted] later.
+\usepackage{icml2026}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,fit,backgrounds}
+\usepackage[capitalize,noabbrev]{cleveref}
+\usepackage[textsize=tiny]{todonotes}
+
+\newcommand{\dem}{DEM}
+\newcommand{\draftnote}[1]{\textcolor{red}{[#1]}}
+
+\icmltitlerunning{Command Formats for Agent to Policy Handoff}
+
+\begin{document}
+
+\twocolumn[
+  \icmltitle{What Should an Agent Tell a Robot Policy?\\
+    Command Formats for Handing Physical Jobs to a Small Fast Policy}
+
+  \icmlsetsymbol{equal}{*}
+  \begin{icmlauthorlist}
+    \icmlauthor{Adi Kothari}{yale}  % confirm full names before submission
+    \icmlauthor{William Gu}{yale}
+    \icmlauthor{Xiatao Sun}{yale}
+  \end{icmlauthorlist}
+  \icmlaffiliation{yale}{APOLLO Lab, Yale University, New Haven, CT, USA}
+  \icmlcorrespondingauthor{Adi Kothari}{TBD}
+  \icmlkeywords{Robot learning, LLM agents, imitation learning, RoboCasa}
+  \vskip 0.3in
+]
+
+\printAffiliationsAndNotice{}
+
+\input{sections/abstract}
+\input{sections/intro}
+\input{sections/related}
+\input{sections/method}
+\input{sections/setup}
+\input{sections/results}
+\input{sections/discussion}
+
+\bibliography{refs}
+\bibliographystyle{icml2026}
+
+\end{document}
