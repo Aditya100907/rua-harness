@@ -71,3 +71,9 @@ One entry per result: what was tested, the number with its episode count and int
 - **raw_mse over steps 4k to 5k:** run1 mean 1.148 / median 0.894; batch 256 mean 1.185 / median 0.804 (51 logs each). Barely different.
 - **Conditioning check (OpenDrawer, 32 frames):** MAE with zero noise 0.152 vs 0.155 for the mean action (run1 5k: 0.151). Input spread with fixed noise 0.094 (run1 5k: 0.060); noise spread 0.183 (run1 5k: 0.230). Zeroing the images raises MAE to 0.171 (images used a little more than before).
 - **Answer:** no. With a 4x larger batch, neither raw_mse nor the conditioning check beats the mean action at 5k steps. The output depends on the inputs somewhat more, but is still dominated by the sampling noise. For contrast, regression at 5k with batch 64 scores 22/50 on OpenDrawer. Simulator eval of this checkpoint (50 episodes per task) is running (34894664) for the record. Per Adi's rule, no other MeanFlow run is launched.
+
+## Nov 27, 17:26. Determinism fix does not change the gate score
+- **Tested:** abl_mse 5k on OpenDrawer, seeds 1000 to 1049, 50 episodes each: the original run (no fix), a second no-fix run, and a run with HexaShell's counter-region fix (policy/determinism.py).
+- **Numbers:** original 22/50 (44%); no-fix rerun 22/50 (44%); with fix 21/50 (42%, 95% CI 29 to 56%). Per-seed agreement with the original: no-fix rerun 48/50, with fix 47/50. Without the fix, 1 of 50 OpenDrawer scenes changed between runs (a different instruction).
+- **Scene test (separate processes, seeds 1000 to 1004):** without the fix, PickPlaceCounterToCabinet rebuilt differently for 3 of 5 seeds (seed 1003: different layout and target object), OpenDrawer for 1 of 5; with the fix, all identical.
+- **Means:** the fix matters for reproducibility (especially pick-place) but does not move the OpenDrawer number beyond noise; the gate still passes with it. Every eval after about 17:25 uses it (on by default); results before that ran without it.

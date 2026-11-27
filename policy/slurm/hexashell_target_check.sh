@@ -6,9 +6,9 @@
 set -uo pipefail
 HX=$PROJ/apollo-lab/HexaShell
 HPY=$PROJ/envs/hexashell-robocasa/bin/python
-OUT=$ROOT/runs/hexashell_target_check
+OUT=${OUT:-$ROOT/runs/hexashell_target_check}
 mkdir -p "$OUT"
-SEEDS=$(seq 1000 1049)
+SEEDS=${SEEDS:-$(seq 1000 1049)}
 C="python -m policy.hexashell_target_check"
 $C dump --side ours --seeds $SEEDS --out "$OUT/ours_a.json"
 $C dump --side ours --seeds $SEEDS --out "$OUT/ours_b.json"
