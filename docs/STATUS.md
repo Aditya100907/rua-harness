@@ -38,6 +38,8 @@ Stock DEM trained with the MeanFlow recipe does not learn usable actions here: r
 ## Running (Nov 27, 16:55; live view: `bash scripts/status.sh`)
 - **Gate passed (16:52):** abl_mse (regression, 5k steps) OpenDrawer 22/50 (44%), PickPlace 0/50, Microwave 0/50. abl_fm (flow matching) 0/50 on all three. Objective chosen: mse.
 - **Format study on mse** (3 smoke tasks, 20k steps, seed 0, held-out-50 split, left + wrist, shipped quantiles): fs_mse_sentence 34894170, fs_mse_kv_text 34894764, fs_mse_points_2d 34894765, fs_mse_points_3d_rgb 34894766, fs_mse_points_3d 34894767, fs_mse_pose_path 34894768; 18-task sentence fs_mse_sentence_all18 34894769 (300k). Watcher (34894756) scores every 5k steps on CPU nodes and holds the cap at 8 GPUs.
+- SAM 3 service 34895235 (gpu_devel, until 23:04): http://a1125u42n01:18300, address in `runs/sam3_service.txt`, smoke test passed (`docs/sam3_service.md`).
+- hx_check 34894785 (day): HexaShell target split vs our eval scenes, seeds 1000-1049.
 - fs_fm_sentence 34894171: flow matching at 20k with the same settings (does fm catch up with more steps).
 - MeanFlow batch-size test mf_ddp4_bs256 finished 5k steps; conditioning check and simulator eval (34894664) running.
 - HexaShell target split and SAM 3 service: helper working (pinned clone at 914d482).
@@ -57,7 +59,6 @@ See `docs/agent_port_spec.md`.
 - Part W (RPent baseline): needs a planner LLM with credentials, which costs money or needs a terms check (Adi: `docs/decisions_needed.md` item 5). RPent is installed and its simulator checks pass (`docs/rpent_notes.md`).
 - HexaShell already has a RoboCasa port; whether William still ports it is Adi's call (`docs/decisions_needed.md` item 1).
 - (Resolved Nov 26) No lab API key or budget. No private DEM data loader or evaluation script. See Decisions.
-- SAM 3 weights: the Hugging Face account on Bouchet (`adikothar1`) has requested `facebook/sam3`, but the request is "awaiting a review from the repo authors" (checked Nov 27 17:00, 403 on download). Only the authors can unblock it. Env, sbatch and smoke test are ready: `docs/sam3_service.md`.
 - Bouchet limits found tonight: gpu_devel allows 1 job submitted at a time and 12 CPUs; gpu_h200 allows at most 6 CPUs per GPU.
 
 ## Decisions

@@ -18,30 +18,54 @@ service. Without it, those two calls refuse and the rest of the robot API still 
   `psutil` and `setuptools<81` (sam3 imports `pkg_resources` and does not declare the others).
 - Weights: `sam3.pt` (3.45 GB) from the gated Hugging Face repo `facebook/sam3` (manual approval).
 
-## What we have ready
+## What runs now (Nov 27 2026, 17:05)
+
+**Service up.** Job **34895235** on `gpu_devel`, node **`a1125u42n01`** (NVIDIA A40), URL
+**`http://a1125u42n01:18300`**. Started 17:04:49, ends at its time limit **23:04:49** (6 h, the
+gpu_devel maximum). The current address is always in
+`/nfs/roberts/project/pi_dr877/ak3288/apollo-lab/runs/sam3_service.txt` (line 1 `host:port`, then
+`url`, `job`, `ends`); the job deletes the file when it stops, so a missing file means no service.
+
+**How it is reached.** HexaShell's server listens on `127.0.0.1:18299` only. The job runs
+`policy/tcp_forward.py` next to it on `0.0.0.0:18300`, which passes each connection through unchanged.
+Checked: `curl http://a1125u42n01:18300/health` answers from the login node and from another compute
+node (`c1102u05n01`, a `day` job); the inner port 18299 does not answer from outside. There is no
+authentication: anyone on the cluster network can send images. HexaShell runs point at it with
+`sam3_url: http://<host>:18300` (read the host from `runs/sam3_service.txt` at episode start).
+
+**Smoke test (passed, in the same job).** Frame 0 of the left camera, 256 x 256, from our frame store.
+Model load 32 s, GPU memory 2.9 GB, about 57 ms per text prompt.
+
+| task / prompt | masks | best score | best box [x0, y0, x1, y1] | best area |
+|---|---|---|---|---|
+| TurnOnMicrowave / `microwave` | 8 | 0.824 | [80, 0, 255, 84] | 19.7% |
+| TurnOnMicrowave / `robot gripper` | 8 | 0.004 | (nothing real; the gripper may be out of view) | |
+| PickPlaceCounterToCabinet / `cabinet` | 8 | 0.789 | [75, 186, 228, 255] | 7.0% |
+| PickPlaceCounterToCabinet / `counter` | 8 | 0.750 | [71, 112, 255, 207] | 11.4% |
+
+Mask PNGs for the microwave frame: `logs/sam3_smoke_34895235/`. Server log:
+`logs/sam3_server_34895235.log`; job log `logs/sam3_34895235.out`. I did not look at the mask images by eye.
+
+**Restart / longer runs.** Check `squeue -u ak3288` first (gpu_devel: 1 job per user), then from the
+repo on Bouchet:
+- 6 h on gpu_devel: `sbatch -p gpu_devel --time=06:00:00 policy/slurm/sam3_service.sbatch`
+- longer on `gpu` (default in the script, 6 h; up to 2 days): `sbatch --time=1-00:00:00 policy/slurm/sam3_service.sbatch`
+- smoke test only: `sbatch -p gpu_devel --time=01:00:00 --export=ALL,MODE=smoke policy/slurm/sam3_service.sbatch`
+- stop: `scancel <job>`. The node changes on each start; clients must reread `runs/sam3_service.txt`.
+
+## Pieces
 
 | piece | where |
 |---|---|
-| env (Python 3.11, torch 2.7.0 cu128, torchvision 0.22.0, timm, sam3 at `31cb7e6`, einops, pycocotools, psutil, setuptools<81, numpy<2) | `/nfs/roberts/project/pi_dr877/ak3288/envs/sam3`, built by `setup/setup_hexashell_bouchet.sh sam3` (CPU job) |
-| HexaShell checkout | `/nfs/roberts/project/pi_dr877/ak3288/apollo-lab/HexaShell` (`914d482`) |
-| service job | `policy/slurm/sam3_service.sbatch`: downloads `sam3.pt` to `$SCR/models/sam3/` once, starts the server, then runs the smoke test (`MODE=smoke`, default, gpu_devel) or keeps serving (`MODE=serve`, writes node and port to `logs/sam3_service.addr`) |
-| smoke test | `policy/sam3_smoke.py`: frame 0 of a task's left camera from our frame store (`$SCR/frames`), text prompts (`microwave`, `robot gripper`; `cabinet`, `counter`), prints mask count, scores, boxes, areas; saves PNGs under `logs/sam3_smoke_<job>/` |
+| env (Python 3.11, torch 2.7.0+cu128, torchvision 0.22.0, timm 1.0.31, sam3 at `31cb7e6`, einops, pycocotools, psutil, setuptools<81, numpy<2) | `/nfs/roberts/project/pi_dr877/ak3288/envs/sam3`, built by `setup/setup_hexashell_bouchet.sh sam3` (CPU job 34894784) |
+| weights | `sam3.pt` (3.45 GB) at `/nfs/roberts/scratch/pi_dr877/ak3288/models/sam3/` (scratch: purged after 30 days unused; copy to project space if we keep it) |
+| HexaShell checkout | `/nfs/roberts/project/pi_dr877/ak3288/apollo-lab/HexaShell` (`914d482`), server file `services/sam3_server.py` unchanged |
+| service job | `policy/slurm/sam3_service.sbatch` (downloads weights once, server, forwarder, smoke test, address file) |
+| forwarder | `policy/tcp_forward.py` (stdlib asyncio) |
+| smoke test | `policy/sam3_smoke.py` |
 
-## Status
+## Access history
 
-**Blocked on access.** On Nov 27 17:00 the Hugging Face login on Bouchet (`~/.cache/huggingface/token`,
-user `adikothar1`) could read the repo's metadata, but downloading any file gave `403 GatedRepoError:
-Your request to access model facebook/sam3 is awaiting a review from the repo authors.` Nothing to do
-on our side but wait. We did not request or accept anything.
-
-## Steps once access lands
-
-1. Check: `ssh bouchet "/nfs/roberts/project/pi_dr877/ak3288/envs/dem/bin/python -c \"from huggingface_hub import hf_hub_download as d; print(d('facebook/sam3','config.json'))\""` prints a path instead of a 403.
-2. Make sure gpu_devel is free: `ssh bouchet "squeue -u ak3288 -p gpu_devel"` (1 job per user).
-3. `ssh bouchet "cd /nfs/roberts/project/pi_dr877/ak3288/apollo-lab/rua-harness && sbatch policy/slurm/sam3_service.sbatch"`.
-   The first run downloads 3.45 GB to scratch, then loads the model and runs the smoke test.
-4. Read `logs/sam3_<job>.out`: expect `server up`, then for `microwave` at least one mask with a score
-   above about 0.5 and a box on the microwave. Masks in `logs/sam3_smoke_<job>/`.
-5. For episodes: run the service inside the same job as the HexaShell episodes (it listens on localhost
-   only), e.g. start it in the background at the top of the episode sbatch as `sam3_service.sbatch` does.
-   Scratch is purged after 30 days: copy `sam3.pt` to project space if we keep using it.
+Nov 27 ~16:55: the Hugging Face login on Bouchet (user `adikothar1`) got `403 GatedRepoError: awaiting a
+review`. Adi reported access granted shortly after; at 17:00 a test download of `config.json` worked.
+We did not request access or accept terms ourselves.
