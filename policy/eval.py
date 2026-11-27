@@ -182,6 +182,7 @@ def main() -> None:
     ap.add_argument("--distractor", action="store_true", help="N2/F6: grasp point on a distractor object")
     ap.add_argument("--drop", default="", choices=["", "point", "name", "source"], help="N3: drop a field")
     ap.add_argument("--rename", default="", help="N4: call the object by this name")
+    ap.add_argument("--demo-scenes", default="", help="JSON task -> demo episode ids: replay those initial scenes")
     args = ap.parse_args()
     import torch
     dev = args.device or ("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
@@ -201,7 +202,7 @@ def main() -> None:
     new = not out.exists()
     f = open(out, "a", newline="")
     w = csv.DictWriter(f, fieldnames=COLS + ["model_seconds", "state_err0", "image_err0", "command_mode", "point_error_cm",
-                                       "min_dist_cmd_cm", "min_dist_true_cm"], extrasaction="ignore")
+                                       "min_dist_cmd_cm", "min_dist_true_cm", "demo_episode"], extrasaction="ignore")
     if new:
         w.writeheader()
     cams = runner.cams if runner else ["left", "right"]
@@ -259,8 +260,15 @@ def main() -> None:
                                 reset_obs=obs0, record=args.save_traj)
                 extra_row.update(command_mode=f"demo_scene_{ep}" + ("_TRAINED" if ep in train_eps else ""))
             else:
-                env.rng = np.random.default_rng(seed)
-                obs0 = env.reset()
+                if args.demo_scenes:
+                    eps = json.loads(Path(args.demo_scenes).read_text())[task]
+                    if i >= len(eps):
+                        continue
+                    obs0 = sim.reset_to_episode(env, ds, eps[i])
+                    extra_row["demo_episode"] = eps[i]
+                else:
+                    env.rng = np.random.default_rng(seed)
+                    obs0 = env.reset()
                 instr = env.get_ep_meta().get("lang", "")
                 opts = dict(point_error_cm=args.point_error_cm, distractor=args.distractor, drop=args.drop,
                             rename=args.rename)

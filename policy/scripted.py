@@ -205,7 +205,7 @@ def plan_open_drawer(env, obs):
     grasp = hp + 0.01 * app
     cur = np.asarray(obs["robot0_base_to_eef_pos"])
     return [
-        Phase("orient", pos=np.r_[cur[:2] - 0.05 * app[:2], cur[2]], rot=R_h, tol=0.03, max_steps=80),
+        Phase("orient", pos=np.r_[cur[:2] - 0.05 * app[:2], cur[2]], rot=R_h, tol=0.03, rot_tol=0.25, max_steps=50),
         Phase("pre_grasp_high", pos=np.r_[pre[:2], max(pre[2] + 0.15, cur[2] - 0.2)], rot=R_h, tol=0.03),
         Phase("pre_grasp", pos=pre, rot=R_h, tol=0.01),
         Phase("approach", pos=grasp, rot=R_h, tol=0.01, speed=0.4),
@@ -230,7 +230,7 @@ def plan_microwave(env, obs):
     R_p = rot_from_axes(n, [0, 0, -1])
     mw = env.microwave
     return [
-        Phase("orient", pos=np.asarray(obs["robot0_base_to_eef_pos"]) - 0.05 * n, rot=R_p, grip=1, tol=0.03,
+        Phase("orient", pos=np.asarray(obs["robot0_base_to_eef_pos"]) - 0.05 * n, rot=R_p, grip=1, tol=0.03, rot_tol=0.25,
               max_steps=60),
         Phase("pre_press", pos=bp - 0.08 * n, rot=R_p, grip=1, tol=0.01),
         Phase("press", pos=bp + 0.02 * n, rot=R_p, grip=1, tol=0.005, speed=0.3, max_steps=60,

@@ -79,6 +79,15 @@ import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['step
     j=$(CKPT=$ck TASKS="$tasks" EPISODES=$eps sbatch --parsable --job-name=eval_${run}_$step \
         --array=0-$((ntasks-1))%$conc $REPO/policy/slurm/eval_array.sbatch) && touch $d/scored/$step
     n_eval=$((n_eval+1)); msg="$msg eval:${run}@$step:$j"
+    # object-split runs: also score the held-out objects (validation half; the test half stays locked)
+    if grep -q "objsplit_train" $d/config.json; then
+      vj=$SCR/splits/objsplit_val.json
+      vt=$(python -c "import json;print(' '.join(json.load(open('$vj'))))")
+      nv=$(echo $vt | wc -w)
+      j2=$(CKPT=$ck TASKS="$vt" EPISODES=$eps NOTE=${run}_${step}_heldoutval EVAL_ARGS="--demo-scenes $vj" \
+          sbatch --parsable --job-name=evalho_${run}_$step --array=0-$((nv-1)) $REPO/policy/slurm/eval_array.sbatch)
+      msg="$msg evalheldout:${run}@$step:$j2"
+    fi
   done
   # 3. queue
   while [ $(gpus_in_use) -lt $((GPU_CAP - EVAL_RESERVE)) ] && [ $(jobs_in_use) -lt $JOB_CAP ]; do
