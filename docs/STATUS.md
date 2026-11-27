@@ -1,7 +1,7 @@
 # Status
 
 Keep this current. A new session reads it first and continues from "Next".
-Last updated: Thu Nov 26, 2026, 23:50 ET (overnight agent).
+Last updated: Fri Nov 27, 2026, 00:20 ET (overnight agent).
 
 ## Goal for Sun Nov 29, night
 Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, agent plus policy. Success, seconds, LLM calls and tokens per episode.
@@ -24,12 +24,18 @@ Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, 
 - Data loader `policy/data.py` and frame store `policy/extract_frames.py`; `tests/test_data.py` passes (6 tests). Frames for all 18 tasks extracted to `$SCR/frames` (job 34840595).
 - Training script `policy/train.py`: 50 steps on the Mac (MPS) with falling loss (4.79 to 0.79), stop and resume continues the step count.
 - Eval wiring test (`policy/eval.py --wiring`) on the Mac: OpenDrawer 3/3, env state matches the recording to 1e-8, rendered image matches the video within 2 grey levels.
+- Nov 27 overnight: replay 10/10 on all 3 smoke tasks on Bouchet; wiring 30/30 and zero test 0/28 on Bouchet; speed test 3.27 steps/s on H100 (batch 64). Hindsight labels for all 18 tasks (`docs/labels_notes.md`). Five command formats (`policy/variants.py`), eval with ground-truth commands and error modes (`policy/commands_gt.py`), held-out object split (`policy/heldout.py`), `run_skill`, the commander (`policy/commander/`), simlib, depth re-render, paper scaffolding. Full list: `docs/MORNING_REPORT.md`.
 
 ## Never run
-- Any training on real data beyond the 50-step Mac test. Any evaluation of a trained policy.
+- Any evaluation of a trained policy (first checkpoints are training now).
+- The container build, the GitHub workflow, the depth re-render on Bouchet beyond the 3 smoke tasks (running).
 
-## Running
-- See `docs/MORNING_REPORT.md` section 4 for job IDs.
+## Running (Nov 27, 00:20; live view: `bash scripts/status.sh`)
+- run1_smoke 34842801, run3/run4 seeds 34842803/34842804, run5 left+wrist 34842805: 3 tasks, 20k steps, L40S/A40, end about 05:00.
+- run2_all18 34842802: 18 tasks, 300k steps, H100, about 25 h; resubmits itself.
+- f4_kv_text 34843699 (format study). Queued: f4_points_3d_rgb, f4_points_2d, f4_pose_path, f5_sentence_objsplit, f5_points_3d_rgb_objsplit.
+- watcher (agent partition, 7 days): scores checkpoints, resubmits dead runs, launches the queue (cap 8 GPUs, 2 kept for scoring).
+- F2 depth re-render for the 3 smoke tasks: 34844300 (day partition).
 
 ## Overnight Nov 26 to 27
 An agent works through `docs/OVERNIGHT.md` on branch `overnight-nov26`. It supersedes the short list below where they differ. Its log is `docs/overnight_log.md` and its summary is `docs/MORNING_REPORT.md`.
