@@ -144,14 +144,14 @@ def shelf_target(env, obs, fx, margin=0.10, depth_in=0.15):
     return fc + s * al + depth_in * inward, inward, p0[2]
 
 
-def plan_pick_place_cabinet(env, obs, pitch=np.deg2rad(45)):
+def plan_pick_place_cabinet(env, obs, pitch=np.deg2rad(45), obj_name="obj"):
     """Grasp with the gripper pointing toward the cabinet and tilted `pitch` below horizontal,
     fingers closing sideways, then level the gripper (pointing straight into the cabinet) while
     rising to shelf height and slide in. Fully horizontal cannot reach objects low and close to
     the robot, the tilted pose cannot reach the shelf, and pointing down hits the cabinet with
     the arm. Levelling tilts the object in the fingers by `pitch`; we accept that."""
-    obj = env.objects["obj"]
-    op = to_base(obs, truth.object_position(env, "obj"))
+    obj = env.objects[obj_name]
+    op = to_base(obs, truth.object_position(env, obj_name))
     h = float(np.asarray(obj.size)[2]) if hasattr(obj, "size") else 0.10
     tgt, inward, shelf_z = shelf_target(env, obs, env.cab)
     app = np.r_[inward[:2], 0.0]
@@ -244,23 +244,25 @@ PLANS = {"PickPlaceCounterToCabinet": plan_pick_place_cabinet, "OpenDrawer": pla
          "TurnOnMicrowave": plan_microwave}
 
 
-def make_act_fn(env, task):
-    """act_fn(obs, t) -> [1, 12] LeRobot-order action, planned from ground truth at t = 0."""
+def make_act_fn(env, task, obj_name="obj"):
+    """act_fn(obs, t) -> [1, 12] LeRobot-order action, planned from ground truth at t = 0.
+    `obj_name` picks which object a pick-and-place plan goes for (success is still about "obj")."""
     state = {}
 
     def act(obs, t):
         if "script" not in state:
-            state["script"] = Script(PLANS[task](env, obs))
+            kw = {"obj_name": obj_name} if task.startswith("PickPlace") else {}
+            state["script"] = Script(PLANS[task](env, obs, **kw))
         a = state["script"].act(env, obs)
         return None if a is None else env_to_lerobot_action(a)[None]
     return act, state
 
 
-def run_one(env, task, seed, horizon, video=None, obs0=None):
+def run_one(env, task, seed, horizon, video=None, obs0=None, obj_name="obj"):
     if obs0 is None:
         env.rng = np.random.default_rng(seed)
         obs0 = env.reset()
-    act, state = make_act_fn(env, task)
+    act, state = make_act_fn(env, task, obj_name)
     r = run_episode(env, task, seed, act, horizon, execute=1, video=video, reset_obs=obs0)
     r["phases"] = state["script"].log if "script" in state else []
     return r
@@ -275,16 +277,18 @@ def main() -> None:
     ap.add_argument("--note", default="smoke")
     ap.add_argument("--out", default=None)
     ap.add_argument("--testset", default=None, help="a policy/testsets.py set name (default: plain target split)")
+    ap.add_argument("--guess-lookalike", action="store_true",
+                    help="lookalike set: go for the target or its twin at random (what a category name alone allows)")
     args = ap.parse_args()
 
-    cond = "scripted" + (f"_{args.testset}" if args.testset else "")
+    cond = "scripted" + (f"_{args.testset}" if args.testset else "") + ("_guess" if args.guess_lookalike else "")
     out = Path(args.out) if args.out else paths.REPO / "results" / f"{dt.date.today()}_{cond}_{args.note}.csv"
     out.parent.mkdir(parents=True, exist_ok=True)
     viddir = out.with_suffix("")
     commit = paths.code_commit()
     new = not out.exists()
     f = open(out, "a", newline="")
-    w = csv.DictWriter(f, fieldnames=COLS + ["testset", "phases"], extrasaction="ignore")
+    w = csv.DictWriter(f, fieldnames=COLS + ["testset", "went_for", "phases"], extrasaction="ignore")
     if new:
         w.writeheader()
     for task in args.tasks:
@@ -302,13 +306,19 @@ def main() -> None:
             env.rng = np.random.default_rng(seed)
             obs0 = env.reset()
             instr = env.get_ep_meta().get("lang", "")
+            obj_name = "obj"
+            if args.testset:
+                from policy import testsets
+                instr = testsets.instruction(args.testset, task, env, seed)
+                if args.guess_lookalike and "lookalike" in env.objects:
+                    obj_name = str(np.random.default_rng(seed + 104729).choice(["obj", "lookalike"]))
             frames = [] if i < args.video else None
-            r = run_one(env, task, seed, H, video=frames, obs0=obs0)
+            r = run_one(env, task, seed, H, video=frames, obs0=obs0, obj_name=obj_name)
             n_ok += r["success"]
             row = dict(task=task, episode=i, seed=seed, success=r["success"], seconds=r["seconds"], llm_calls=0,
                        input_tokens=0, output_tokens=0, cost_usd=0, code_commit=commit, checkpoint_step="",
                        format="scripted", run_id=cond, steps=r["steps"], instruction=instr,
-                       testset=args.testset or "target",
+                       testset=args.testset or "target", went_for=obj_name,
                        phases=";".join(f"{p[0]}:{p[1]}:{p[2]}" for p in r["phases"]))
             w.writerow(row)
             f.flush()
