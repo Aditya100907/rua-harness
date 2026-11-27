@@ -35,15 +35,16 @@ Stock DEM trained with the MeanFlow recipe does not learn usable actions here: r
 - A policy that scores above 20% on any smoke task (the gate).
 - The container build and the GitHub workflow.
 
-## Running (Nov 27, 16:30; live view: `bash scripts/status.sh`)
-- Gate evals, 50 episodes per smoke task on CPU nodes: abl_mse 5k with zero noise (34893757); abl_fm 5k with 10 sampling steps (34893765, starts when abl_fm finishes).
-- mf_ddp4_bs256 (34893775): MeanFlow on 4 GPUs, global batch 256, 3 tasks, 5k steps; the batch-size test. Conditioning check chained (34893776). No other MeanFlow run until it answers.
-- Diagnostics: overfit1_paper (left + wrist, shipped quantiles, DEM recipe, 1 demo) and overfit1_meanflow, with open-loop checks chained; mmBERT converter test (34893756); depth spot check (34893778).
-- run2_all18 cancelled (STOP file set). Watcher off until the gate passes.
+## Running (Nov 27, 16:55; live view: `bash scripts/status.sh`)
+- **Gate passed (16:52):** abl_mse (regression, 5k steps) OpenDrawer 22/50 (44%), PickPlace 0/50, Microwave 0/50. abl_fm (flow matching) 0/50 on all three. Objective chosen: mse.
+- **Format study on mse** (3 smoke tasks, 20k steps, seed 0, held-out-50 split, left + wrist, shipped quantiles): fs_mse_sentence 34894170, fs_mse_kv_text 34894764, fs_mse_points_2d 34894765, fs_mse_points_3d_rgb 34894766, fs_mse_points_3d 34894767, fs_mse_pose_path 34894768; 18-task sentence fs_mse_sentence_all18 34894769 (300k). Watcher (34894756) scores every 5k steps on CPU nodes and holds the cap at 8 GPUs.
+- fs_fm_sentence 34894171: flow matching at 20k with the same settings (does fm catch up with more steps).
+- MeanFlow batch-size test mf_ddp4_bs256 finished 5k steps; conditioning check and simulator eval (34894664) running.
+- HexaShell target split and SAM 3 service: helper working (pinned clone at 914d482).
 
 ## Next: policy track (new priorities from Adi, Nov 27 afternoon)
-1. **Gate:** abl_mse or abl_fm beats 20% on OpenDrawer or TurnOnMicrowave (50 episodes each). No format result counts until it passes.
-2. **Format study** on the better of mse and fm (fm if close): `bash policy/slurm/format_study_queue.sh <obj>` writes the queue (sentence, kv_text, points_2d, points_3d_rgb, points_3d, pose_path; 3 smoke tasks, 20k steps, same seed and data, left + wrist, shipped quantiles; then 18-task sentence). Then restart the watcher with only these runs queued. One GPU per run.
+1. **Gate: PASSED** (abl_mse 22/50 on OpenDrawer).
+2. **Format study: LAUNCHED on mse** (16:54). Queue written by `bash policy/slurm/format_study_queue.sh <obj>` writes the queue (sentence, kv_text, points_2d, points_3d_rgb, points_3d, pose_path; 3 smoke tasks, 20k steps, same seed and data, left + wrist, shipped quantiles; then 18-task sentence). Then restart the watcher with only these runs queued. One GPU per run.
 3. **Batch-size test** (mf_ddp4_bs256): report whether raw_mse and the conditioning check beat the mean action.
 4. **Xiatao's weights:** when they arrive, `python -m policy.research_ckpt --head ... --vision ... --norm ... [--norm-stats ...] --lang neobert|mmbert --out DIR`, then `bash policy/slurm/score_research.sh DIR/ckpt_0000000.pt`; fine-tune any format with `policy.train --init-from DIR/ckpt_0000000.pt`. Tested on random-init stand-ins.
 5. Push after every commit.
