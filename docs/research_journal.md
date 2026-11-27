@@ -43,3 +43,14 @@ One entry per result: what was tested, the number with its episode count and int
 - **Numbers:** z0 = 0: PickPlace 0/30, Drawer 0/30, Microwave 0/30. nfe = 4: 0/30, 2/30 (7%), 2/30 (7%). run2 70k: 0/24, 0/24, 0/24.
 - **Means:** the failure is not the one-step sampler (4 steps helps at most a few points) and not only the 3-task budget (run 2 at 70k steps on 18 tasks also fails). The training signal itself is the suspect.
 - **raw_mse is spiky:** run 2's mean raw_mse over steps 50k to 55k is 35.8 (vs about 1 elsewhere). Rare samples with huge normalized targets, consistent with the near-constant dims whose q01..q99 range is tiny (PickPlace base action dim 2: range 0.02). These spikes may be what keeps the head from learning; the clip ablation tests part of this.
+
+## Nov 27, 16:40. Objective tests (open-loop and conditioning, OpenDrawer training frames; arm MAE on the 8 executed steps)
+| Checkpoint | What changed | Arm MAE | Mean-action MAE | Notes |
+|---|---|---|---|---|
+| overfit1_mse | regression, 1 demo, 2k steps, batch 64 | **0.009** | 0.157 | gripper 100%; memorized |
+| overfit1_paper | MeanFlow, 1 demo, 2k steps, batch 64, left + wrist, shipped quantiles, head lr 1e-4 | 0.095 (random noise), 0.124 (zero noise) | 0.157 | gripper 92%; first MeanFlow model to beat the mean action |
+| overfit1_meanflow | MeanFlow, 1 demo, 2k steps, batch 64, left + right, head lr 3e-4 | 0.210 | 0.157 | gripper 61% |
+| abl_mse (3 tasks, 5k) | regression | 0.128 (zero noise) | 0.155 | input spread n/a (deterministic) |
+| abl_fm (3 tasks, 5k) | plain flow matching, 10 steps | 0.145 (zero noise) | 0.155 | input spread 0.0125 vs noise 0.22 |
+- **Means:** the data, vision and head pipeline can fit (regression memorizes a demo). MeanFlow can fit one demo with the paper's cameras and learning rate, but overfit1_paper and overfit1_meanflow differ in two things (cameras, head lr), so this does not yet say which one mattered. On 3 tasks at 5k steps, both new objectives are only slightly better than the mean action; whether that is enough to act in the simulator is what the gate evals decide.
+- **mmBERT path:** the research-checkpoint converter and --init-from fine-tune run with mmBERT-small (384-d) tokens (job 34893756).

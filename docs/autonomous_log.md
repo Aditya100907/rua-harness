@@ -53,3 +53,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 16:28 Priority 4: launched mf_ddp4_bs256 (MeanFlow, 4 H100s, 64 per GPU = global 256, 3 smoke tasks, 5k steps; only change vs run1_smoke 5k is the global batch). cond_check chained.
 - 16:28 Moved mf_ddp4_bs256 to gpu_b200 or gpu_h100 (B200 starts about 16:28, H100 not until 20:17).
 - 16:29 STATUS.md rewritten for the new priorities. Depth re-render complete for all 9,126 demos; spot check submitted (34893778). Eval now follows each checkpoint's objective (mse: zero noise, fm: 10 steps). Format-study queue script ready (policy/slurm/format_study_queue.sh).
+- 16:39 Checks done (see journal 16:40): regression memorizes 1 demo (MAE 0.009); paper-matched MeanFlow 1-demo 0.095; MeanFlow left+right lr 3e-4 0.21; abl_mse 0.128 and abl_fm 0.145 vs mean 0.155. mmBERT converter test passed. Gate evals running (mse and fm, 50 eps x 3 tasks).
