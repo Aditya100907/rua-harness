@@ -9,7 +9,7 @@ Work this list top to bottom. Read `CLAUDE.md` and `docs/STATUS.md` first.
 - **Never wait idle.** While a download, job or training run is going, work on the next item that can proceed.
 - **Keep a log** in `docs/overnight_log.md`: time, what you ran, what happened, in one or two lines per step.
 - **Keep** `docs/MORNING_REPORT.md` (format at the bottom) current. Write a first version early and update it after every item, so it exists whenever the session stops.
-- **There is no finish line.** When Parts A to E are done, go on to F through K, then M through T. When those are done or blocked, follow the loop in Part L. Part M comes early: do it right after C3, because it keeps work going if the SSH connection drops. Do not stop, summarize and wait. Do not ask whether to continue.
+- **There is no finish line.** When Parts A to E are done, go on to F through K, then M through Z. When those are done or blocked, follow the loop in Part L. Part M comes early: do it right after C3, because it keeps work going if the SSH connection drops. Do not stop, summarize and wait. Do not ask whether to continue.
 - **Run things in parallel.** Use subagents or background jobs for independent items (for example E6 reading, E1 geometry, I paper scaffolding) while the main thread drives the critical path A, B, C, D.
 - **The gate.** Results from Parts F to H count only after B2 (replay test), D1 (wiring and zero tests) and D3 (stock DEM scores above zero on an easy task) have passed. You may write code and launch runs for F to H before the gate passes, but mark every number from them as provisional until it does.
 
@@ -224,7 +224,53 @@ In `simlib/`, not `agent/`: things William will also need, written once and test
 - `docs/experiment_registry.md`: every run launched tonight: ID, config, purpose, status, where its results are.
 - `docs/decisions_needed.md`: each decision only Adi can make, with the options and your recommendation.
 
-## Part L: the loop, once Parts A to K and M to T are done or blocked
+## Part U: the full experiment grid (added Nov 26, 11:45 pm)
+Put all of this in the cluster queue (`runs/queue.txt`, Part M3) in priority order, so it launches as GPUs free up over the coming days.
+1. Stock DEM on all 18 tasks to the paper's full 300k steps, to reproduce 55.6%. Resubmit across the 2-day limit.
+2. Every format from F3 on all 18 tasks, one seed.
+3. The best two formats and stock DEM with 3 seeds each.
+4. The Part L backlog ablations on the 3 smoke-test tasks.
+- For each queued run, the scoring job is chained to it. Scoring uses 100 episodes per task for anything that may go in the paper.
+- `scripts/make_tables.py` reports means with 95% confidence intervals over episodes and over seeds, and marks any comparison whose intervals overlap.
+
+## Part V: the agent writes each format (the study's second half)
+Extends Part O. Subscription runs only. Raise Part O's cap to 300 episodes for this part.
+- For each format (structured text, 2D points, 3D points, pose path): the commander sees the scene and writes the command in that format. Measure how far its points or poses are from ground truth, and the policy's success with the agent's command against the perfect command.
+- Start with the 3 smoke-test tasks, 10 episodes per format. Then extend to all 18 if time allows.
+- Test: a table with one row per format: agent error, success with perfect commands, success with agent commands, seconds and tokens per episode. This is the paper's central table.
+
+## Part W: a VLA-backed harness baseline
+- Install RPent (Harness VLA's public code, https://github.com/RLinf/RPent) in its own environment on the cluster with the `[robocasa]` extra. Read its RoboCasa guide. Find what it needs: the VLA checkpoint, SAM 3, the planner.
+- Get one RoboCasa365 episode running with a subscription-based planner if the terms of its tools allow, and record time and tokens. If a required checkpoint is gated, write the request steps in `docs/decisions_needed.md` and stop there.
+- Also record which RoboCasa commit RPent expects and whether it matches ours.
+- Test: either one logged episode, or a precise list of what blocks it.
+
+## Part X: reproducibility
+- A lock file with exact package versions for the Mac and for the cluster.
+- A container recipe (Apptainer) for the cluster environment, built and tested with the simulator test.
+- A clean-clone test: a fresh clone in a temporary folder, the setup script, the tests, and one tiny training and evaluation run, with no manual steps.
+- GitHub Actions that run the unit tests on every push.
+
+## Part Y: test sets the paper will need
+- **Look-alike distractors:** pick-and-place scenes with two objects of the same category, where only the point says which one. Build the evaluation config from RoboCasa's object sampling.
+- **Held-out kitchens** in addition to held-out objects.
+- **Unseen names:** the same objects called by names never used in training.
+- Test: each set runs with the scripted baseline and reports a number.
+
+## Part Z: integration and records
+- `run_skill` packaged in HexaShell's tool format (`tools/run_skill/tool.py` and `interface.md`), with a test that calls it the way William's harness will. Put it in `policy/hexashell_tool/`, not `agent/`.
+- When William pushes a branch, read it and write review notes in `docs/review_william_<date>.md`: what works, what is risky, questions. Do not edit his code.
+- A supplementary-video plan from saved evaluation videos: which clips show a success, a typical failure, and the policy following a moved point.
+- Verified BibTeX for every paper cited in `paper/`, each checked against its arXiv page.
+- At about 7 am, and again whenever a part completes: append dated entries to the log in `~/Desktop/APOLLO-Lab/PROJECT_CONTEXT.md` section 16 and update its sections 1 and 13.0, following that folder's `CLAUDE.md` (reread before editing, change only the lines you mean to).
+
+## What is deliberately not on this list
+- William's HexaShell port and the agent-alone baseline (his).
+- Anything on a physical robot.
+- Choosing the paper's claim. Record evidence for and against each option in `docs/decisions_needed.md`.
+- Messaging Xiatao or William.
+
+## Part L: the loop, once Parts A to K and M to Z are done or blocked
 Repeat until the session ends:
 1. Check every running job. Restart any that died, from its last checkpoint.
 2. Score every new checkpoint that has not been scored.
