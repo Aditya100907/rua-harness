@@ -57,7 +57,7 @@ See `docs/agent_port_spec.md`.
 - Part W (RPent baseline): needs a planner LLM with credentials, which costs money or needs a terms check (Adi: `docs/decisions_needed.md` item 5). RPent is installed and its simulator checks pass (`docs/rpent_notes.md`).
 - HexaShell already has a RoboCasa port; whether William still ports it is Adi's call (`docs/decisions_needed.md` item 1).
 - (Resolved Nov 26) No lab API key or budget. No private DEM data loader or evaluation script. See Decisions.
-- GPU access for SAM 3: not asked yet.
+- SAM 3 weights: the Hugging Face account on Bouchet (`adikothar1`) has requested `facebook/sam3`, but the request is "awaiting a review from the repo authors" (checked Nov 27 17:00, 403 on download). Only the authors can unblock it. Env, sbatch and smoke test are ready: `docs/sam3_service.md`.
 - Bouchet limits found tonight: gpu_devel allows 1 job submitted at a time and 12 CPUs; gpu_h200 allows at most 6 CPUs per GPU.
 
 ## Decisions

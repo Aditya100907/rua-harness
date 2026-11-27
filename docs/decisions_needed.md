@@ -28,3 +28,10 @@ Not chosen. Evidence will come from F4/F6 (formats with perfect commands) and Pa
 - C. Claude Code with Adi's claude.ai login. The Agent SDK docs say claude.ai login is not allowed for agents built on the SDK without approval. Not recommended.
 - D. A local open model behind vLLM (free). Needs a second GPU and environment, and the result does not match published numbers.
 **Recommendation: A if the plan terms allow it, else B with a small budget.** Run the no-LLM VLA check first (fix two stale lines in RPent's test, one gpu_devel job), then one OpenDrawer seed 1 episode.
+
+## 6. Our evaluation's scenes are not fully reproducible (new, Nov 27 17:10)
+**Finding.** Unpatched RoboCasa `425684d` (ours) can build a different kitchen for the same seed in two runs. In `robocasa/models/fixtures/counter.py` line 813, `list(set(valid_geoms))` orders XML elements by memory address, so a placement can fail in one process and succeed in another, and the retry draws a new kitchen. Seen on the Mac: seed 1003 gave layout 3 in some runs and layout 1 in others, for all 3 smoke tasks (OpenDrawer: 2 of 4 runs each way). With HexaShell's one-line fix (`dict.fromkeys`, their `[roboshell-determinism]` patch) monkeypatched in, 6 of 6 runs agree. Affects `policy/eval.py` numbers only through which scenes a seed set contains (success rates stay unbiased, but two runs of the "same" 50 seeds are not exactly the same episodes), and it decides whether HexaShell's target split can match our scenes. Details: `docs/hexashell_target_check.md`.
+**Options.**
+- A. Apply the same fix in our evaluation as a monkeypatch in `policy/sim.py` (no change to the pinned RoboCasa checkout). Scenes become reproducible and match HexaShell's target split. Numbers before and after differ on the affected seeds.
+- B. Leave it. Agent-alone (HexaShell) and agent-plus-policy runs then differ on a few seeds.
+**Recommendation: A**, at the start of the next evaluation round (not mid-way through the running gate evals), and note it in `results/README.md`.
