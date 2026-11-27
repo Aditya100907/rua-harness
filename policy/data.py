@@ -158,7 +158,8 @@ class RoboCasaDataset:
         return {"images": self._images(ti, ep, t, g),
                 "state": qs.normalize(tb["states"][g]).astype(np.float32),
                 "actions": qa.normalize(tb["actions"][rows]).astype(np.float32),
-                "mask": mask, "text": tb["instr"][ep], "task": ti, "episode": ep, "frame": t}
+                "mask": mask, "text": tb["instr"][ep], "task": ti, "episode": ep, "frame": t,
+                "progress": np.float32(t / max(1, n - 1))}
 
     # raw (un-normalized) access, used by tests and labeling
     def raw(self, i: int) -> dict:
@@ -173,6 +174,8 @@ def collate(batch: list[dict]) -> dict:
     import torch
     out = {k: torch.as_tensor(np.stack([b[k] for b in batch])) for k in ("images", "state", "actions", "mask")}
     out["task"] = torch.as_tensor([b["task"] for b in batch])
+    if "progress" in batch[0]:
+        out["progress"] = torch.as_tensor(np.stack([b["progress"] for b in batch]))
     out["text"] = [b["text"] for b in batch]
     return out
 

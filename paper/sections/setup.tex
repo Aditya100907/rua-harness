@@ -1,19 +1,126 @@
 \section{Experimental Setup}
 \label{sec:setup}
 
-\draftnote{DRAFT stub.}
+% DRAFT (Part T, 2026-11-27). Sources: docs/dataset_notes.md,
+% docs/labels_notes.md, docs/geometry_notes.md, docs/rerender_notes.md,
+% docs/MORNING_REPORT.md, docs/experiment_registry.md, policy/*.py.
 
-\paragraph{Simulator and tasks.} RoboCasa v1.0.1 \citep{nasiriany2024robocasa}, the 18 atomic-seen tasks,
-evaluated on the target split. Held-out objects test generalization.
+\draftnote{DRAFT. Protocol as built. No trained-policy success number exists
+yet; see ``What has not been run''.}
 
-\paragraph{Data.} The target human split, 500 demos per task, LeRobot format.
+\paragraph{Simulator and tasks.} We use RoboCasa v1.0.1
+\citep{nasiriany2024robocasa} at commit \texttt{425684d} with robosuite
+\texttt{5ce6643} and MuJoCo 3.3.1, on the target split of RoboCasa365
+\citep{nasiriany2026robocasa365}. The robot is a Panda arm on a mobile base
+(\texttt{PandaOmron}), controlled at 20\,Hz with delta end-effector commands
+in the base frame. We use the 18 atomic-seen tasks that \dem{} reports on
+\citep{sun2026dem}: five pick-and-place tasks, \texttt{CoffeeSetupMug},
+doors and lids, a drawer, a dishwasher rack, buttons, knobs, levers and
+\texttt{NavigateKitchen}. Three of them serve as fast screening tasks:
+\texttt{PickPlaceCounterToCabinet}, \texttt{OpenDrawer} and
+\texttt{TurnOnMicrowave} (one pick-and-place, one articulated fixture, one
+button). Kitchens come from the target layouts and styles 1 to 10, and
+objects from the target object split.
 
-\paragraph{Conditions.} \texttt{policy\_only}, \texttt{agent\_only},
-\texttt{agent\_plus\_policy}.
+\paragraph{Data.} We train on the human demonstrations of the target split
+in LeRobot format: 500 to 543 per task, 9,126 episodes and 2.23 million
+frames in total. Each episode has left, right and wrist videos at
+$256\times256$, the 16-number state, the 12-number action, the instruction,
+and saved simulator states. We use the left and right agent views.
+\draftnote{The DEM README's example uses a scene camera plus the wrist; a
+left-plus-wrist run is training to decide this.}
+Hindsight labels (\cref{sec:labels}) exist for every episode of all 18 tasks.
+Five pick-and-place tasks and \texttt{CoffeeSetupMug} are labeled from
+gripper close and open in every episode. Pushing and pressing tasks fall back
+in part or in full to the success frame (for example, all 502 episodes of
+\texttt{OpenStandMixerHead}, 51 of 543 of \texttt{TurnOnMicrowave}).
+Checked in the simulator on 20 demonstrations per task, the grasp point lies
+within the object's extent in all 120 pick-style demonstrations, with a
+median distance to the object's origin of 1.6 to 5.6\,cm by task.
 
-\paragraph{Metrics.} Success rate with a Wilson 95\% interval, seconds per
-episode, LLM calls and tokens per episode.
+\paragraph{Normalization.} We follow the \dem{} research code in two stages.
+Stage 1 maps each task's 1st to 99th percentile of each state and action
+dimension to $[-1,1]$ (constant dimensions map to $-1$ and are restored
+exactly). Stage 2 z-scores with statistics over all training tasks, inside
+the policy. Both are saved with each checkpoint.
 
-\paragraph{Checks before any number counts.} The replay test (a demo's
-recorded actions succeed in the simulator) and the zero test (an untrained
-checkpoint scores about 0\%).
+\paragraph{Training.} The recipe follows the \dem{} release: AdamW with
+learning rate $10^{-4}$ for the head and $5\times10^{-5}$ for the vision
+encoder, weight decay $10^{-4}$, $\beta=(0.9, 0.95)$, a cosine schedule,
+gradient clipping at 1.0, batch size 64, bf16 autocast for the vision encoder
+and fp32 for the head and loss. NeoBERT is frozen and its tokens are cached.
+Screening runs train for 20k steps on the three smoke tasks; the full run
+trains for 300k steps on all 18 tasks, as in \dem{}. Every format uses the
+same steps, batch, data order and seed (seed 0); two more seeds (1 and 2)
+measure run-to-run noise for stock \dem{}.
+
+\paragraph{Evaluation.} Each episode resets the environment with seed
+$1000+i$ for episode $i$, so all formats and conditions see the same kitchens
+and objects. The policy predicts 16 actions and executes 8, then predicts
+again. Success is checked after every step with the simulator's own check,
+and the episode stops at success or at the task's horizon from RoboCasa's
+registry (450 to 1,050 steps, 22.5 to 52.5\,s of robot time). Screening
+checkpoints are scored every 5k steps with 50 episodes per task; anything
+that may go in the paper is scored with 100 episodes per task. We report
+success rates with 95\% Wilson score intervals and mark comparisons whose
+intervals overlap. Every run writes one CSV row per episode, with the code
+commit.
+
+\paragraph{Checks before any number counts.} Recorded demonstration actions,
+replayed from the saved start state, succeed in 30 of 30 demonstrations on
+the three smoke tasks. The same actions run through our evaluation loop
+succeed in 30 of 30; the state at reset matches the recording to $10^{-8}$,
+and rendered images differ from the video frames by 1.7 to 2.5 grey levels
+(out of 255) on average. An untrained head scores 0 of 28 (95\% interval 0 to
+12\%).
+
+\paragraph{Perfect commands.} To score a format without an agent, we build
+the command from simulator ground truth at reset and treat it as an ideal
+agent's command. The text uses the same template and object names as the
+training labels. For pick-and-place tasks the grasp point is the object's
+body origin and the place point is the destination (cabinet interior centre,
+pan, plate, coffee receptacle); for fixture tasks it is the task's part
+(handle, knob, button, lever) nearest the gripper. These points do not match
+the training labels exactly: labels are where the gripper closed, perfect
+commands are body origins, a median gap of 1.6 to 5.6\,cm by task and up to
+about 10\,cm. \draftnote{Known mismatch. It biases perfect-command scores of
+point formats downward; not yet measured.} We also score controlled errors:
+points shifted by a fixed distance, the grasp point on a distractor object (to
+test whether the policy follows the point), dropped fields, and renamed
+objects.
+
+\paragraph{Held-out objects.} For pick-and-place we hold out object
+categories with a fixed seed. A demonstration is used for training only if no
+object in its scene, target or distractor, is held out. For
+\texttt{PickPlaceCounterToCabinet}, 16 of 106 categories are held out,
+leaving 328 training demonstrations, 35 validation and 36 locked test
+demonstrations (103 dropped because a held-out object appears as a
+distractor). Held-out evaluation replays those demonstrations' initial
+scenes. The locked test half is scored only for results going into the
+paper. \draftnote{Other pick-and-place tasks: split not yet built.}
+
+\paragraph{Agent.} The commander (\cref{sec:agent}) runs Claude Opus 5.5
+through a command-line coding agent on a subscription, and we log turns,
+input and output tokens, and wall-clock seconds per episode. Pixels are
+lifted with rendered depth; on a single scene a lifted mask-centre pixel lands
+3.2 and 3.5\,cm from the object origin in the left and right views.
+
+\paragraph{Hardware.} Training runs on single GPUs of a university cluster.
+On an H100 80\,GB at batch 64 with two cameras, training runs at 3.27 steps
+per second (83\% GPU busy, no data wait, 32\,GB peak), so 20k steps take
+about 1.7 hours and 300k steps about 25.5 hours. An L40S runs at 1.16 steps
+per second (20k steps in about 4.8 hours).
+
+\paragraph{What has not been run.} As of this draft: no trained checkpoint
+has been scored. Stock \dem{} is training on the three smoke tasks (three
+seeds and a left-plus-wrist camera variant) and on all 18 tasks toward 300k
+steps. Of the format runs, \texttt{kv\_text} is training on the smoke tasks;
+\texttt{points\_3d\_rgb}, \texttt{points\_2d} and \texttt{pose\_path} are
+queued. \texttt{points\_3d} with point-map input is not implemented in the
+training loader. Depth re-rendering has been checked on 10 demonstrations of
+one task. The commander has run one episode, with a 50-step checkpoint, as a
+smoke test. The agent-alone baseline has not been run.
+
+\paragraph{Conditions and metrics.} \texttt{policy\_only} (perfect or fixed
+commands), \texttt{agent\_only}, and \texttt{agent\_plus\_policy}. We report
+success rate, seconds per episode, LLM calls and tokens per episode.

@@ -46,13 +46,31 @@ def wrap_dataset(ds, args):
     return CommandDataset(ds, args.format, labels_dir=args.labels_dir, point_noise_cm=args.point_noise_cm)
 
 
-def forward_loss(policy, batch: dict, dev: str, use_bf16: bool):
+class DoneHead(torch.nn.Module):
+    """Learned "done" output (Part L backlog): predicts episode progress in [0, 1] from the mean vision
+    token and the stage-1 state. Kept outside the DEM module (saved as ckpt_*.done.pt) so DEM checkpoints
+    stay loadable by DEM.load. run_skill can stop when progress stays above a threshold."""
+
+    def __init__(self, vis_dim: int = 512, proprio_dim: int = 16, hidden: int = 256):
+        super().__init__()
+        self.net = torch.nn.Sequential(torch.nn.Linear(vis_dim + proprio_dim, hidden), torch.nn.GELU(),
+                                       torch.nn.Linear(hidden, hidden), torch.nn.GELU(), torch.nn.Linear(hidden, 1))
+
+    def forward(self, vis_tokens, proprio):
+        return torch.sigmoid(self.net(torch.cat([vis_tokens.float().mean(1), proprio.float()], -1))).squeeze(-1)
+
+
+def forward_loss(policy, batch: dict, dev: str, use_bf16: bool, done_head=None, done_weight: float = 0.1):
     from dem import preprocess_images
     images = preprocess_images(batch["images"].to(dev, non_blocking=True), size=256)
     with torch.autocast("cuda", dtype=torch.bfloat16, enabled=use_bf16):
         vis = policy.encode_vision(images)
     extra = {k: batch[k].to(dev) for k in ("points", "path") if k in batch}
-    if extra:
-        return policy.loss(None, batch["state"], batch["actions"], texts=batch["text"],
-                           vis_tokens=vis.float(), **extra)
-    return policy.loss(None, batch["state"], batch["actions"], texts=batch["text"], vis_tokens=vis.float())
+    loss, aux = policy.loss(None, batch["state"], batch["actions"], texts=batch["text"], vis_tokens=vis.float(),
+                            **extra)
+    if done_head is not None:
+        pred = done_head(vis, batch["state"].to(dev))
+        dl = torch.nn.functional.mse_loss(pred, batch["progress"].to(dev).float())
+        loss = loss + done_weight * dl
+        aux = dict(aux, done_mse=float(dl.detach()))
+    return loss, aux

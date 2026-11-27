@@ -9,7 +9,8 @@ Agent alone vs. agent plus policy. Success (%, Wilson 95% interval, episodes) an
 
 | Condition | Success | Seconds | LLM calls | In tokens | Out tokens | Cost (USD) |
 |---|---|---|---|---|---|---|
-| scripted | 76.8 [67.4, 84.2] (n=95) | 4.7 | 0.0 | 0 | 0 | 0.0000 |
+| agent_plus_policy | 0.0 [0.0, 79.3] (n=1) | 61.8 | 11.0 | 283,322 | 1,241 | 0.2922 |
+| scripted | 68.2 [61.0, 74.6] (n=176) | 5.8 | 0.0 | 0 | 0 | 0.0000 |
 
 ## format_success
 
@@ -17,7 +18,8 @@ Success rate (%) by command format, with Wilson 95% interval and episode count. 
 
 | Format | Success |
 |---|---|
-| scripted | 76.8 [67.4, 84.2] (n=95) |
+| points_3d_rgb | 0.0 [0.0, 79.3] (n=1) |
+| scripted | 68.2 [61.0, 74.6] (n=176) |
 
 ## checkpoint_success
 
@@ -25,25 +27,27 @@ Success rate (%) by training step.
 
 | Format | Step | Success |
 |---|---|---|
-| _No results yet (no checkpoint_step column in any result)_ |  |  |
+| points_3d_rgb | 50 | 0.0 [0.0, 79.3] (n=1) |
 
 ## per_task
 
 Success rate (%) per task and condition, with Wilson 95% interval and episode count.
 
-| Task | scripted |
-|---|---|
-| OpenDrawer | 71.4 [45.4, 88.3] (n=14) |
-| PickPlaceCounterToCabinet | 41.9 [26.4, 59.2] (n=31) |
-| TurnOnMicrowave | 100.0 [92.9, 100.0] (n=50) |
-| All tasks | 76.8 [67.4, 84.2] (n=95) |
+| Task | agent_plus_policy | scripted |
+|---|---|---|
+| OpenDrawer | 0.0 [0.0, 79.3] (n=1) | 59.2 [45.2, 71.8] (n=49) |
+| PickPlaceCounterToCabinet | - | 36.8 [25.5, 49.8] (n=57) |
+| TurnOnMicrowave | - | 100.0 [94.8, 100.0] (n=70) |
+| All tasks | 0.0 [0.0, 79.3] (n=1) | 68.2 [61.0, 74.6] (n=176) |
 
 ## Sources
 
 | File | Condition | Rows | Commits | Missing columns |
 |---|---|---|---|---|
-| 2026-11-27_agent_plus_policy_runner_smoke_test.csv | agent_plus_policy | 0 | - | task, episode, seed, success, seconds, llm_calls, input_tokens, output_tokens, cost_usd, code_commit |
-| 2026-11-27_scripted_kitchens_recombined_n10.csv | scripted | 12 | f0b568e-dirty | - |
-| 2026-11-27_scripted_lookalike_n20.csv | scripted | 11 | f0b568e-dirty | - |
-| 2026-11-27_scripted_smoke50.csv | scripted | 60 | f3370c5-dirty | - |
-| 2026-11-27_scripted_unseen_names_n10.csv | scripted | 12 | f0b568e-dirty | - |
+| 2026-11-27_agent_plus_policy_runner_smoke_test.csv | agent_plus_policy | 1 | 6d6f184-dirty | - |
+| 2026-11-27_scripted_kitchens_pretrain_n10.csv | scripted | 8 | d710c82 | - |
+| 2026-11-27_scripted_kitchens_recombined_n10.csv | scripted | 30 | f0b568e-dirty | - |
+| 2026-11-27_scripted_lookalike_guess_n20.csv | scripted | 9 | 4c2e347-dirty | - |
+| 2026-11-27_scripted_lookalike_n20.csv | scripted | 20 | f0b568e-dirty | - |
+| 2026-11-27_scripted_smoke50.csv | scripted | 79 | f3370c5-dirty | - |
+| 2026-11-27_scripted_unseen_names_n10.csv | scripted | 30 | f0b568e-dirty | - |

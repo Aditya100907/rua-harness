@@ -1,22 +1,161 @@
 \section{Method}
 \label{sec:method}
 
-\draftnote{DRAFT stub.}
+% DRAFT (Part T, 2026-11-27). Written from the code on branch overnight-nov26:
+% rua_harness/command.py, policy/{model,variants,data,label_commands,
+% commands_gt,run_skill,train}.py, policy/commander/. Every design choice that
+% has no result yet is marked with \draftnote{no result yet}.
 
-\paragraph{Policy.} \dem: two cameras at $256\times256$, DINOv3 image
-features, 32 language tokens from a frozen NeoBERT, a 16-number robot state,
-and a MeanFlow head that predicts 16 actions of 12 numbers each and executes 8.
+\draftnote{DRAFT. Describes what is built. No trained-policy result exists yet.}
 
-\paragraph{Command formats.} One command, five ways to show it to the policy:
-\begin{itemize}
-  \item \texttt{sentence}: an English instruction in RoboCasa's style.
-  \item \texttt{kv\_text}: fixed-order structured text, e.g.\ \texttt{skill pick place object apple from counter to cabinet}. No numbers.
-  \item \texttt{points\_2d}: object and target points drawn on the camera images.
-  \item \texttt{points\_3d}: object and target points in the robot base frame as extra tokens, with a point-map input.
-  \item \texttt{pose\_path}: a short path of gripper poses.
-\end{itemize}
-The policy is retrained from scratch for each format on the same demos.
+An LLM agent decides what to do. A small learned policy decides how to move.
+Between them sits one \emph{command}: the message the agent sends each time it
+hands the policy a job. We fix the command's content and vary only its
+\emph{format}, the way that content is shown to the policy. For each format we
+retrain the same policy on the same demonstrations.
 
-\paragraph{Agent.} The agent sees camera images, calls a \texttt{run\_skill}
-tool with a skill name and pixel points, and the harness lifts pixels to 3D.
-Simulator ground truth is used only for grading.
+\subsection{The command}
+\label{sec:command}
+
+A command names a skill and the things it acts on. The skills are
+\texttt{pick\_place}, \texttt{open}, \texttt{close}, \texttt{slide},
+\texttt{press}, \texttt{turn}, \texttt{insert} and \texttt{navigate}. Each
+skill has required fields (for example, \texttt{pick\_place} needs an
+\texttt{object} and a \texttt{target}) and optional ones (a \texttt{source}
+name, or a \texttt{direction} such as \texttt{on} or \texttt{out}). The
+\texttt{object} and \texttt{target} are references: a short name and,
+optionally, a 3D point in the robot base frame where the gripper should act.
+
+The command carries two kinds of content, and we keep them apart on purpose.
+The \emph{semantic channel} is the names: skill, object, source, target,
+direction. It is text and goes to the policy's frozen language encoder. The
+\emph{geometric channel} is the points (or, in one format, a pose path). It
+goes to a small learned encoder, or is drawn on the images. Numbers never pass
+through the language encoder, and names never pass through the point encoder.
+
+\subsection{Five command formats}
+\label{sec:formats}
+
+All formats share the same demonstrations, cameras (left and right agent
+views), state, action chunk and training budget. They differ only in how the
+command enters the policy.
+
+\paragraph{\texttt{sentence}.} The original RoboCasa instruction, for example
+``Open the left drawer.'' This is stock \dem{} and the control for every
+other format.
+
+\paragraph{\texttt{kv\_text}.} Structured text with a fixed field order, no
+punctuation and no numbers, for example
+\texttt{skill pick place object apple from counter to cabinet}. It carries the
+same names as the sentence in a regular form that an agent can fill in
+without writing prose. The formats below all keep this text and add geometry
+to it, so each is compared against \texttt{kv\_text} as well as against
+\texttt{sentence}.
+
+\paragraph{\texttt{points\_2d}.} The grasp point and the place point are
+projected into each agent-view camera and drawn on its image as filled
+circles (radius 4 pixels at $256\times256$, green for grasp, red for place,
+each with a dark outline). Points behind the camera or outside the image are
+not drawn. The policy architecture is unchanged; it reads the points from the
+pixels.
+
+\paragraph{\texttt{points\_3d} and \texttt{points\_3d\_rgb}.} The two 3D
+points, in the robot base frame of the current frame, become two extra tokens.
+Each point goes through random Fourier features (16 frequencies, scale 10,
+concatenated with the raw coordinates) and a three-layer MLP (hidden width
+256, GELU) to one token of the language width, plus a learned embedding for
+its slot (grasp or place). The two tokens are appended to the 32 language
+tokens, with a mask entry set to false when a point is absent. The \dem{}
+head is unchanged and sees $32+2$ tokens in its language stream. The plan
+gives \texttt{points\_3d} a point-map image input (per-pixel 3D coordinates
+from rendered depth) in place of color, and \texttt{points\_3d\_rgb} keeps
+color, so the effect of the point tokens and of the image input can be
+separated. \draftnote{In the current code both use color images. The point-map
+input is not yet wired into the training loader; only
+\texttt{points\_3d\_rgb} is queued. No result yet.}
+
+\paragraph{\texttt{pose\_path}.} Eight future gripper poses, one every 8
+frames (0.4\,s at 20\,Hz), each a position and a quaternion expressed in the
+current base frame. The same kind of encoder (input size 7, eight slots)
+turns them into eight tokens appended to the language stream. Near the end of
+a demonstration the last pose repeats. This format tells the policy how to
+move, not only where, and it is the hardest for an agent to write. At test
+time a perfect path is available only from a demonstration's own future, so
+this format is scored on demonstration scenes only. \draftnote{Planned with a
+point-map input; the current code uses color. No result yet.}
+
+\subsection{Hindsight command labels}
+\label{sec:labels}
+
+The demonstrations come with an instruction but no points. We label each
+demonstration with the command it should have received, in hindsight, from
+its own recorded actions. The gripper action is $-1$ (open) or $+1$
+(closed). The first frame where the gripper closes gives the grasp, and the
+next frame where it opens gives the place. The gripper position at those
+frames, computed from the state vector (base pose plus end effector relative
+to the base), becomes the object point and the target point. Names come from
+the task and the episode metadata (object category, fixture names).
+
+Some demonstrations never close the gripper (buttons, knobs, levers, and
+pushed doors). For these we use the gripper position at the frame the
+demonstration first succeeds. Demonstrations end 17 frames after first
+success, so that frame is the length minus 17. \texttt{NavigateKitchen}
+uses the final base position as the target. Each label records which method
+produced it; the counts per task are in \cref{sec:setup}.
+
+Labels are stored in the world frame. At training frame $t$ they are moved
+into the robot base frame of frame $t$, using the base pose in the state
+vector, so the command is always relative to where the robot is now.
+\draftnote{The success-frame labels are not yet checked against the true
+fixture part.}
+
+\subsection{Noise on the command during training}
+\label{sec:noise}
+
+An agent's points will be off by a few centimeters. We add Gaussian noise
+during training: each coordinate of each point gets noise with a standard
+deviation of 2\,cm, and in \texttt{pose\_path} each pose also gets a random
+rotation with a standard deviation of $3^\circ$ per axis. A fresh random
+generator is drawn per sample, so data-loader workers do not share noise.
+\draftnote{The noise scale is a design choice with no result yet. A sweep (0,
+1, 3, 5\,cm) is in the backlog.}
+
+\subsection{The policy}
+\label{sec:policy}
+
+The policy is \dem{} \citep{sun2026dem}. It encodes two camera images at
+$256\times256$ with a fine-tuned DINOv3 ConvNeXt-B \citep{simeoni2025dinov3},
+encodes up to 32 language tokens with a frozen NeoBERT
+\citep{lebreton2025neobert}, and reads a 16-number robot state (base position
+and orientation, end-effector position and orientation relative to the base,
+two gripper joints). A MeanFlow action head \citep{geng2025meanflow}
+predicts a chunk of 16 actions of 12 numbers each (base motion and torso,
+control mode, end-effector position and rotation deltas, gripper) in one
+step, and the robot executes the first 8 before predicting again. We do not
+change the backbone or the head. The only additions are the geometric
+encoder of \cref{sec:formats} and, for \texttt{points\_2d}, the drawn
+markers.
+
+\subsection{The agent side}
+\label{sec:agent}
+
+The agent is a coding-agent LLM that we call the \emph{commander}. It
+controls one episode through two tools. \texttt{look} returns the current
+left, right and wrist camera images. \texttt{run\_skill} takes a command in
+the form of \cref{sec:command}, except that each reference gives a camera
+and a pixel $(u,v)$ instead of a 3D point. The harness lifts the pixel to 3D
+using that camera's rendered depth, intrinsics and pose, moves the point into
+the robot base frame, and runs the policy until the skill stops or its time
+runs out. It then returns a status and new images, never simulator ground
+truth. A third call, \texttt{done}, ends the episode. Robot time across all
+skills is capped at the task's horizon.
+
+The policy has no learned ``done'' output, so a skill stops when the
+simulator's success check turns true, when its time limit runs out, or at a
+step limit. The success flag is used only to stop the skill and is not shown
+to the agent. \draftnote{This leaks a little ground truth (a skill ends early
+when it succeeds). A learned done output is planned.}
+
+Simulator ground truth is used for grading only. The one exception is the
+``perfect command'' used to score formats without an agent
+(\cref{sec:setup}), which plays the role of an ideal agent.

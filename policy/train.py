@@ -58,6 +58,7 @@ def parse_args(argv=None):
     ap.add_argument("--point-noise-cm", type=float, default=2.0, help="training noise on command points")
     ap.add_argument("--labels-dir", default=None, help="hindsight command labels (policy/label_commands.py)")
     ap.add_argument("--video", action="store_true", help="decode mp4 directly (slow, no frame store needed)")
+    ap.add_argument("--done-head", action="store_true", help="also train a progress / done output (DoneHead)")
     a = ap.parse_args(argv)
     if a.all_tasks:
         a.tasks = list(paths.ATOMIC_SEEN)
@@ -132,8 +133,15 @@ def main(argv=None) -> None:
         with torch.no_grad():
             policy.encode_language(ds.instructions())
 
-    opt = torch.optim.AdamW(policy.parameter_groups(args.lr_head, args.lr_vision),
-                            weight_decay=args.weight_decay, betas=(0.9, 0.95))
+    done_head = None
+    groups = policy.parameter_groups(args.lr_head, args.lr_vision)
+    if getattr(args, "done_head", False):
+        from policy.model import DoneHead
+        done_head = DoneHead(policy.vision.embed_dim, 16).to(dev)
+        if resuming and Path(str(st["ckpt"]).replace(".pt", ".done.pt")).exists():
+            done_head.load_state_dict(torch.load(str(st["ckpt"]).replace(".pt", ".done.pt"), map_location=dev))
+        groups.append({"params": list(done_head.parameters()), "lr": args.lr_head})
+    opt = torch.optim.AdamW(groups, weight_decay=args.weight_decay, betas=(0.9, 0.95))
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: lr_lambda(s, args.steps, args.warmup))
     if resuming:
         opt.load_state_dict(st["opt"])
@@ -162,7 +170,7 @@ def main(argv=None) -> None:
         t_d = time.time()
         for batch in dl:
             data_t += time.time() - t_d
-            loss, aux = forward_loss(policy, batch, dev, use_bf16)
+            loss, aux = forward_loss(policy, batch, dev, use_bf16, done_head=done_head)
             opt.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(trainable, 1.0)
@@ -185,6 +193,8 @@ def main(argv=None) -> None:
             out_of_time = args.max_hours and (time.time() - t_start) > args.max_hours * 3600
             if step % args.save_every == 0 or step >= args.steps or out_of_time:
                 ck = save_ckpt(policy, out, step)
+                if done_head is not None:
+                    torch.save(done_head.state_dict(), str(ck).replace(".pt", ".done.pt"))
                 torch.save({"step": step, "opt": opt.state_dict(), "sched": sched.state_dict(),
                             "torch_rng": torch.get_rng_state(), "ckpt": str(ck)}, state_path.with_suffix(".tmp"))
                 os.replace(state_path.with_suffix(".tmp"), state_path)

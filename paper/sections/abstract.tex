@@ -1,17 +1,19 @@
-% DRAFT abstract. Placeholder. No result in it is real yet.
+% DRAFT abstract for the Jan 14 deadline (Part T, 2026-11-27). About 150
+% words. Every bold bracket is a placeholder; no number in it is real yet.
 \begin{abstract}
-\draftnote{DRAFT: placeholder abstract, no numbers are real.}
-Large language model (LLM) agents can plan long household jobs, but they act
-slowly and spend many tokens when they control a robot step by step. A small
-learned policy acts fast, but it needs to be told what to do. We ask a simple
-question: in what form should the agent hand a job to the policy? We compare
-five command formats: a plain sentence, structured key-value text, 2D points
-drawn on the camera images, 3D points given as extra input tokens with a point
-map, and a short path of gripper poses. For each format we retrain the same
-policy, a DINOv3 and frozen NeoBERT model with a MeanFlow action head, on the
-RoboCasa kitchen simulator, and we test it on objects seen in training and on
-held-out objects. We then pair the best format with an LLM agent and compare
-it against the agent acting alone on success rate, wall-clock time and tokens
-used. \draftnote{Main finding goes here once Table 1 and Table 2 exist.}
-We release code, commands and per-episode results.
+\draftnote{DRAFT: placeholders in brackets; no result is real yet.}
+LLM agents can plan household jobs, but driving a robot step by step makes
+them slow and costly in tokens. A small learned policy acts fast, but must be
+told what to do. We ask what form that command should take. We compare five
+formats: a sentence, structured text, 2D points drawn on the camera images,
+3D points given as extra input tokens, and a path of future gripper poses.
+For each format we retrain the same policy, DEM, on the same RoboCasa
+demonstrations, labeling points in hindsight from where the gripper closed
+and opened. On 18 kitchen tasks, \textbf{[best format]} reaches
+\textbf{[X\%]} success with perfect commands against \textbf{[Y\%]} for a
+sentence, and \textbf{[Z\%]} on held-out objects. With commands written by
+an LLM agent, it reaches \textbf{[A\%]}. Paired with the agent, the policy
+matches the agent alone within \textbf{[B]} points while using
+\textbf{[C$\times$]} fewer tokens and \textbf{[D$\times$]} less time. We
+release code, labels and per-episode results.
 \end{abstract}
