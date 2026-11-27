@@ -33,3 +33,4 @@ elif [ "$STEP" -lt "$WANT" ] && [ -z "${NO_RESUBMIT:-}" ] && [ ! -f $OUT/STOP ];
     sbatch --job-name=$SLURM_JOB_NAME --partition=${PARTS:-$SLURM_JOB_PARTITION} ${CONSTRAINT:+--constraint=$CONSTRAINT} \
     --time=$(squeue -j $SLURM_JOB_ID -h -o %l) $REPO/policy/slurm/train.sbatch
 fi
+exit 0   # a finished run is a success (the tests above end in 1 when nothing needs resubmitting)
