@@ -63,6 +63,9 @@ def parse_args(argv=None):
     ap.add_argument("--objective", default="meanflow", choices=["meanflow", "fm", "mse"],
                     help="meanflow (DEM recipe); fm = plain flow matching (r = t, sample with --nfe > 1); "
                          "mse = deterministic regression (evaluate with --z0 zero)")
+    ap.add_argument("--init-from", default=None,
+                    help="start from this checkpoint (e.g. a converted research checkpoint, policy/research_ckpt.py); "
+                         "its folder's norm_stats.json is used, not recomputed")
     ap.add_argument("--quantiles", default="recompute", choices=["recompute", "dataset"],
                     help="stage-1 q01/q99: recompute over training frames, or the dataset's shipped meta/stats.json")
     ap.add_argument("--clip-norm", type=float, default=0.0, help="clip stage-1 normalized state/actions to +-this (0 = off)")
@@ -88,6 +91,23 @@ def build(args, ds_stats: dict, device: str):
     a_norm, p_norm = zscore_normalizers(ds_stats)
     policy.action_norm, policy.proprio_norm = a_norm, p_norm
     return policy.to(device)
+
+
+def init_from(args, dev: str):
+    """Start from a checkpoint (DEM file). Sentence-style formats load it as is; point formats copy its
+    weights into a PointDEM and start the point encoder fresh. Normalizers come from the checkpoint."""
+    from policy.model import load_policy
+    base = load_policy(args.init_from)
+    if args.format in ("sentence", "kv_text", "points_2d"):
+        return base.to(dev)
+    from policy.variants import PointDEM
+    pol = PointDEM(base.config, args.format)
+    missing, unexpected = pol.load_state_dict(base.state_dict(), strict=False)
+    bad = [k for k in missing if not k.startswith("geo.")]
+    if bad or unexpected:
+        raise RuntimeError(f"init-from mismatch: missing {bad[:5]}, unexpected {unexpected[:5]}")
+    pol.action_norm, pol.proprio_norm = base.action_norm, base.proprio_norm
+    return pol.to(dev)
 
 
 def save_ckpt(policy, out: Path, step: int, fmt: str = "sentence") -> Path:
@@ -125,6 +145,11 @@ def main(argv=None) -> None:
     state_path = out / "train_state.pt"
     resuming = args.resume and state_path.exists()
     stats = load_norm_stats(out / "norm_stats.json") if resuming else None
+    if args.init_from and not resuming:
+        stats = load_norm_stats(Path(args.init_from).parent / "norm_stats.json")
+        missing = [t for t in args.tasks if t not in stats["per_task"]]
+        if missing:
+            raise ValueError(f"--init-from stats lack tasks {missing}")
     episodes = json.loads(Path(args.episodes_json).read_text()) if args.episodes_json else None
     from policy.model import wrap_dataset
     ds = RoboCasaDataset(args.tasks, cams=tuple(args.cams), norm_stats=stats, episodes=episodes,
@@ -145,7 +170,10 @@ def main(argv=None) -> None:
         policy = load_policy(st["ckpt"], offline=args.offline).to(dev)
         step = int(st["step"])
     else:
-        policy = build(args, stats, dev)     # same seed on every rank, so the weights start identical
+        if args.init_from:
+            policy = init_from(args, dev)
+        else:
+            policy = build(args, stats, dev)     # same seed on every rank, so the weights start identical
         step = 0
     policy.train()
     if world > 1:
