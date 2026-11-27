@@ -1,9 +1,9 @@
 # Morning report, Fri Nov 27
 
-Updated through the night. Last update: Nov 27, 00:50 ET.
+Updated through the night. Last update: Nov 27, 07:00 ET.
 
 ## 1. Bottom line
-Every test before the gate passes: replay (30/30 on Bouchet), wiring (30/30) and zero test (0/28). Stock DEM is training on the 3 smoke tasks (run 1) and on all 18 tasks toward 300k steps (run 2), with two more seeds, a camera comparison and the first format-study runs alongside. The cluster now scores checkpoints and launches queued runs by itself. No trained-policy success numbers exist yet; the first (run 1 at 5k steps) should appear around 01:30.
+Everything around the policy works and is tested (data, replay 30/30, eval wiring 30/30, zero test 0/28, labels, five command formats, held-out split, a self-driving cluster queue), but stock DEM as trained here does not work yet: run 1 scores 0% on drawer and pick-place and 0% on the microwave at 20k steps, and the kv_text run gets 7% on the microwave. A diagnosis shows the model's actions are dominated by sampling noise and it barely uses the images, so this is a training-recipe problem, not an evaluation bug; four one-change ablations and two sampling tests are running. The gate (D3) has not passed, so no format-study result counts yet.
 
 ## 2. Numbers
 - **Replay test (B2):** Bouchet: PickPlaceCounterToCabinet 10/10, OpenDrawer 10/10, TurnOnMicrowave 10/10 (job 34841442). Mac: OpenDrawer 10/10, TurnOnMicrowave 10/10.
@@ -16,7 +16,8 @@ Every test before the gate passes: replay (30/30 on Bouchet), wiring (30/30) and
 - **Test sets (Y), scripted baseline, small samples:** look-alike distractors 6/20 when it goes for the target, 3/20 when it picks one of the two at random; recombined kitchens 4/10, 8/10, 10/10; RoboCasa's pretrain kitchens 7/10, 5/10, 10/10.
 - **Commander (Part O) smoke test, 1 episode, 50-step checkpoint:** 62 s, 11 turns, 283k input tokens (90% cache reads), 1.2k output, $0.29 at list price. Pointing error 81.5 cm with the arm in the way, 3.1 cm from the clear camera.
 - **Policy timing on the Mac (M-series, MPS):** 47 ms per act call, 118 ms per robot second. GPU numbers pending (job 34847608).
-- Learned-policy success rates: none yet. First at 5k steps around 01:10.
+- **Learned policy (stock DEM, run1_smoke, left + right):** 5k: 0/50, 0/50, 0/50 (pick-place, drawer, microwave); 10k: 0/50 on all three. **f4_kv_text:** 20k: 0/100, 0/100, 7/100. Run 2 (18 tasks) at 70k: scoring now. Paper category numbers for comparison: drawers 79.5%, buttons 81.5%, pick-place 33.2%.
+- **Why (Part K, `docs/research_journal.md`):** on its own training frames the 20k model's action error is 0.19 versus 0.16 for always predicting the mean action; with the noise fixed, predictions vary 0.09 across frames but 0.18 across noise draws on one frame; blanking the images barely changes the error. The flow-matching error (raw_mse) stays near 1 for the whole run; the falling total loss is the dispersive term.
 
 ## 3. Done
 - A1 downloads verified (18 tasks, 500 to 543 each). A2 simtest OK after re-downloading assets. A3 dataset notes. A4 3 tasks on the Mac.
@@ -39,6 +40,10 @@ Every test before the gate passes: replay (30/30 on Bouchet), wiring (30/30) and
 Queued in `runs/queue.txt`: f4_points_3d_rgb, f4_points_2d, f4_pose_path (launch as GPUs free; 2 GPUs are kept free for scoring).
 
 ## 5. Blocked or failed
+- **D3 (first real numbers) failed:** see section 2. Ablations abl_nodisp, abl_bs128, abl_clip3, abl_lrhead3e4 (5k steps each, jobs 34864024 to 34864027) and eval tests of run1 20k with zero noise and with 4 sampling steps (34864030, 34864031) are running. A one-demo overfitting test is running on the Mac.
+- **Watcher bug, 05:00 to 06:30:** it read each run's step from the 1.3 GB train_state.pt, which failed on the 8 GB agent node, so it resubmitted all five finished 20k runs every 10 minutes. Each resubmission trained one more step and triggered another 100-episode eval, filling the GPU cap. Fixed (progress from checkpoint names); the extra checkpoints (ckpt_0020001, ckpt_0020002) and their result CSVs are not deleted; ignore them.
+- **YCRC cancelled one eval job (34848256_0) for 0% GPU use;** another was warned. Evaluation is simulator-bound, so all scoring now runs on CPU nodes.
+- **I lost about 5 hours (01:10 to 06:30):** my session waited on a helper with nothing to wake it, so the near-zero numbers went unnoticed while the cluster kept scoring and the watcher misbehaved.
 - Part W (RPent baseline): installed on Bouchet, simulator checks pass; blocked on a planner LLM choice (decision 5).
 - Kitchen assets on Bouchet were incomplete (login-node download killed at 82%); fixed by job 34840169.
 - ICML 2027 style files are not published; the paper uses the 2026 kit for now.
