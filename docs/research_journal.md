@@ -18,3 +18,16 @@ One entry per result: what was tested, the number with its episode count and int
 - **Numbers:** 62 s wall, 11 turns, 283k input tokens (256k of them cache reads), 1.2k output tokens, $0.29 at list price. Two run_skill calls.
 - **What it shows:** the agent first pointed at the drawer handle in the left camera; the lifted point was 81.5 cm from the handle, because the arm hides the handle in that view and the pixel's depth lands on the arm. Its second command used the right camera: 3.1 cm. The same occlusion shows in the depth re-render check (left camera fails the grasp-pixel test in 8 of 10 demos for the same reason).
 - **Means:** pointing error depends heavily on the camera the agent picks. Worth telling the agent which camera sees the target better, or lifting from both cameras and taking the nearer consistent point. This goes into Part V's design.
+
+## Nov 27, 06:30. First trained-policy numbers are near zero
+- **Tested:** watcher evals (50 episodes per task, 100 at 20k) of run1_smoke (stock DEM, left+right) at 5k and 10k, run3 at 5k, f4_kv_text at 5k to 20k.
+- **Numbers:** run1 5k: 0/50, 0/50, 0/50; run1 10k: 0/50 on all three. f4_kv_text 20k: PickPlace 0/100, OpenDrawer 0/100, TurnOnMicrowave 7/100 (7%, 95% CI 3 to 14%). Paper category numbers (18 tasks, 300k steps): drawers 79.5%, buttons 81.5%, pick-place 33.2%. Scripted oracle on the same seeds: 46%, 82%, 100%.
+- **Renders checked clean** (img_rowdiff0 4 to 6). Video of an OpenDrawer failure: the arm moves down and right but never reaches the handle (min distance 41 to 79 cm).
+
+## Nov 27, 06:45. Part K investigation: the model has not learned the actions
+- **Open-loop on its own training frames (run1 20k, 150 frames per task):** MAE on the 8 executed arm actions: OpenDrawer 0.191, Microwave 0.191, PickPlace 0.233, versus 0.159 to 0.160 for always predicting the mean action and 0.05 to 0.06 for repeating the current action. Gripper sign agreement: 83%, 91%, 53% (chance on pick-place).
+- **Conditioning check (OpenDrawer, 32 frames):** with fixed noise, predictions vary 0.088 across frames; on a fixed frame they vary 0.183 across noise draws. The noise dominates the output. With z0 = 0 the MAE is 0.129 (vs 0.155 for the mean action). Zeroing the images: 0.135 (images barely used). Zeroing the state: 0.245 (state used). Run2 at 70k (18 tasks): the same picture (0.093 vs 0.182).
+- **Training log:** total loss falls from 0.74 to -0.6, but raw_mse (the flow-matching error) stays around 1 (0.6 to 2.0) for the whole run; the fall is the dispersive term (weight 0.25), which can be negative.
+- **Normalization:** heavy tails in near-constant dims (PickPlace base action dim 2 has a q01..q99 range of 0.02, so rare base moves map to z-scores of 10+; base height in the state has ranges of 0.0001 to 0.007).
+- **Rules out:** eval-time input mismatch (the model fails on training frames too); render corruption.
+- **Live hypotheses, tested now:** (a) undertraining of the flow model, (b) dispersive term dominating, (c) batch 64 too small, (d) outliers from the quantile normalization, (e) head learning rate. Ablations abl_nodisp, abl_bs128, abl_clip3, abl_lrhead3e4 (5k steps, 3 tasks) against run1 5k; eval-only tests of run1 20k with z0 = 0 and with 4 sampling steps; a one-demo overfitting test on the Mac.
