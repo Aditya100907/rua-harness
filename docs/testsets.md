@@ -35,7 +35,41 @@ Output: `results/<date>_scripted[_<testset>]_<note>.csv`, the `policy/eval.py` c
 `testset`, `went_for` (which object the plan went for) and `phases` (each phase, its step
 count, and `ok` or `timeout`).
 
-RESULTS_PLACEHOLDER
+### Results, Nov 27, 2026 (Mac, seeds 1000 onward, no cameras)
+
+| set | PickPlaceCounterToCabinet | OpenDrawer | TurnOnMicrowave | CSV |
+|---|---|---|---|---|
+| target split (plain) | 23/50 (46%) | 41/50 (82%) | 50/50 (100%) | `2026-11-27_scripted_smoke50.csv` |
+| lookalike, goes for the target | 6/20 (30%) | n/a | n/a | `2026-11-27_scripted_lookalike_n20.csv` |
+| lookalike, random of the two (`--guess-lookalike`) | 3/20 (15%): 3/10 when it picked the target, 0/10 when it picked the twin | n/a | n/a | `2026-11-27_scripted_lookalike_guess_n20.csv` |
+| kitchens_recombined | 4/10 | 8/10 | 10/10 | `2026-11-27_scripted_kitchens_recombined_n10.csv` |
+| kitchens_pretrain | 7/10 | 5/10 | 10/10 | `2026-11-27_scripted_kitchens_pretrain_n10.csv` |
+| unseen_names | 5/10 | 10/10 | 10/10 | `2026-11-27_scripted_unseen_names_n10.csv` |
+
+Median seconds per episode: 2.0 (microwave), 3.4 (drawer), 6.9 (pick and place). Successful
+episodes take about 125, 200 and 365 control steps; the horizons are 450, 750 and 750.
+
+The test-set rows use 10 or 20 episodes, so a gap of 2 or 3 successes is noise. The lookalike
+scene draws different objects from the plain split (the category is drawn first), so its
+30% is not directly comparable to the plain 46%.
+
+Why it fails:
+- PickPlaceCounterToCabinet: most failures are at the grasp. The hand cannot get down to the
+  object (out of reach without moving the base, or too low and close to the robot), or the
+  object does not fit the 8 cm gripper opening (wide bottles, long baguettes lying flat). A few
+  drop the object while rising. The grasp yaw is never turned to the object's narrow side.
+- OpenDrawer: the handle is far to the side or far forward, and the hand cannot reach the
+  pointing-forward pose in front of it. No base motion.
+- TurnOnMicrowave: no failures in 50.
+
+Development history (so no one mistakes the superseded files for results): the first OpenDrawer
+version scored 23/50. It turned the hand before swinging to a drawer on the robot's left
+(the last wrist joint ran out of range) and aimed 1 cm past the handle region's centre (it
+missed thin bars that sit at the front of that region). Fixed: move sideways first, roll the
+hand the way the demos do for left drawers, aim 1.2 cm behind the region's front face. Those
+v1 rows are kept in the `*_drawer_v1_superseded.csv` files. The PickPlaceCounterToCabinet
+plan went through a straight-down grasp (the arm then hits the cabinet when lifting) and a
+horizontal grasp (cannot reach low objects near the robot) before the 45 degree version.
 
 ## The test sets (`policy/testsets.py`)
 
