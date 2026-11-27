@@ -11,7 +11,8 @@ LLM agent plus a small fast robot policy, on RoboCasa. APOLLO Lab, Yale. Adi Kot
 | `agent/` | HexaShell's tools on RoboCasa, LLM loop, episode runner | William |
 | `policy/` | Demo data loader, DEM training, evaluation | Adi |
 | `rua_harness/` | The command format between agent and policy, geometry helpers | Both |
-| `docs/` | Specs. Start with `agent_port_spec.md` | |
+| `CLAUDE.md` | Instructions for AI agents working in this repo | |
+| `docs/` | `STATUS.md` (what is done, next, blocked) and `agent_port_spec.md` | |
 | `results/` | One CSV per run | Both |
 | `setup/` | `setup_dem.sh`, one-command install | |
 | `tests/`, `scripts/` | Tests and utilities for `rua_harness/` | |
