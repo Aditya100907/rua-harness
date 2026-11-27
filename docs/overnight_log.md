@@ -23,3 +23,7 @@ Times are ET.
 - 23:48 E2: hindsight labels for the 3 smoke tasks. PickPlaceCounterToCabinet, 20 demos checked in the simulator: eef from the state vector equals the simulator's eef (0.0 cm). Grasp point to object origin: median 2.1 cm, p95 8.3 cm, max 8.6 cm, 14/20 within 5 cm. All 20 lie inside the object's bounding sphere; the 6 over 5 cm are larger objects grasped away from their origin. OpenDrawer: all 514 by gripper close. TurnOnMicrowave: 492 by gripper close, 51 by success frame (no close).
 - 23:49 C3: run 1 (3 tasks, 20k steps) and run 2 (18 tasks, 300k steps) submitted to gpu_b200 (H100 2-day jobs would not start until 06:13). Jobs 34842499, 34842500.
 - 00:15 (cluster clock) M test started: no SSH from the Mac for 30 minutes. Deviation: the SSH master connection is not killed, because reconnecting needs a Duo approval nobody can give overnight; not using it tests the same thing (the watcher has to work alone).
+- 00:20 F5 held-out object split (PickPlaceCounterToCabinet): 16 of 106 categories held out; 328 training demos, 35 val, 36 locked test, 103 dropped (held-out object as distractor). F5 runs queued.
+- 00:25 E4 run_skill done (test on a live OpenDrawer env passes). F2 depth re-render array for the 3 smoke tasks submitted (34844300, day partition).
+- 00:30 Watcher bugs fixed: CPU jobs counted toward the 12-job cap; GPU count matched partition names by accident. Now both count jobs in gpu* partitions.
+- 00:35 Part O commander built and tested: 1 real agent episode (budget used: 1 of 60).
