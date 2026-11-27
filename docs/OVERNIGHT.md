@@ -270,22 +270,37 @@ Extends Part O. Subscription runs only. Raise Part O's cap to 300 episodes for t
 - Choosing the paper's claim. Record evidence for and against each option in `docs/decisions_needed.md`.
 - Messaging Xiatao or William.
 
-## Part L: the loop, once Parts A to K and M to Z are done or blocked
-Repeat until the session ends:
-1. Check every running job. Restart any that died, from its last checkpoint.
-2. Score every new checkpoint that has not been scored.
-3. Rebuild the tables, plots and morning report.
-4. Retry one blocked item with a different approach.
-5. Take the next idea from this backlog and do it:
-   - Extend F4 and F6 from 3 tasks to all 18.
-   - Ablate the point noise scale (0, 1, 3, 5 cm).
-   - Ablate 2 extra tokens against a distance-to-point image channel.
-   - A depth-only image input against a point map.
-   - Depth noise (GAE's 1 cm and 10 cm settings) at evaluation time, to see how each variant degrades.
-   - A learned "done" output so the skill can report it finished.
-   - Evaluate composite tasks by chaining atomic commands from ground truth, as a preview of what the agent will do.
-   - Quantize or compile the policy and measure the speed and success trade-off.
-6. If the backlog is empty, reread `docs/MORNING_REPORT.md`, pick the weakest number or the least-tested claim in it, and test it harder.
+## Part L: the research loop (runs forever, day and night)
+Start this loop as soon as stock DEM has a trusted number (the gate has passed). It runs alongside the remaining parts, not after them. It does not end.
+
+### Each cycle
+1. **Collect.** Check every job. Restart dead ones from their last checkpoint. Score every unscored checkpoint. Rebuild tables and plots.
+2. **Analyze.** For each new result, write an entry in `docs/research_journal.md`: what was tested, the number with its episode count and interval, what it means, and what it rules out. Watch failure videos for anything that scored unexpectedly low and say why it failed, not just that it did.
+3. **Update beliefs.** Keep `docs/findings.md` as the current best understanding: each claim, the evidence for it, the evidence against it, and how confident you are. Revise it when results disagree with it. Say so plainly when a result kills an idea.
+4. **Propose.** List the next experiments that would most change `docs/findings.md`. For each: the question, the prediction, what each outcome would mean, the GPU-hours, and how long until an answer. Rank by information gained per GPU-hour.
+5. **Launch.** Add the top ones to the cluster queue until the GPU cap is full. Never leave GPUs idle under the cap while the queue has ideas.
+6. **Report.** Update `docs/MORNING_REPORT.md` and `docs/STATUS.md`. Then start the next cycle at once. While runs train, do the cheap work: analysis, failure sorting, code for the next experiment, writing.
+
+### Rules that keep the results honest
+- **One question per experiment.** Change one thing against a control trained in the same batch with the same seed and budget.
+- **Fast proxies first.** Screen ideas on the 3 smoke-test tasks with short runs. Only what survives goes to all 18 tasks and full length.
+- **Seeds before belief.** A difference counts as real only when it holds across 3 seeds or its interval clears zero. One run is a hint.
+- **A locked test set.** Set aside the held-out objects and kitchens from Part Y as the final test. Tune and choose on a separate validation split. Score the final test set only for results going into the paper, and log every time you do.
+- **Log everything, including failures.** Every experiment gets a row in `docs/experiment_registry.md` before it runs, with its prediction. Negative results stay in.
+- **No quiet goalpost moves.** If you change a metric, a split or a protocol, write the reason and rerun the controls.
+- **Check surprises twice.** A jump of more than 15 points from a small change means look for a bug first.
+- **Spend by priority.** About 60% of GPU time on the main study (formats, with perfect and with agent-written commands), 25% on baselines and repeats, 15% on new ideas.
+
+### Where the ideas come from, in order
+1. Questions the latest results raise.
+2. The weakest or least-tested claim in `docs/findings.md`.
+3. Failure analysis: whatever failure type is most common, design an input or training change aimed at it.
+4. This backlog: extend the format study from 3 tasks to all 18. Point-noise scale in training (0, 1, 3, 5 cm). Two extra tokens against a distance-to-point image channel. Depth only against a point map. Color plus point map against point map alone. Depth noise at test time. A learned "done" output. Chaining commands for composite tasks. More demos against fewer (100, 250, 500 per task). Model size (a smaller and a larger head). Chunk length. A grasp approach direction added to the command. Quantizing or compiling the policy.
+5. Ideas from `docs/related_notes.md` that the other papers did not test.
+
+### What stays with Adi
+- Which claim the paper makes. Keep `docs/decisions_needed.md` current with the evidence for each option, and keep working on all live options until he chooses.
+- Anything that needs a person: Duo, access requests, messages.
 
 ---
 
