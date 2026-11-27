@@ -73,3 +73,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 17:46 YCRC warned that the idle SAM 3 service (34895235) used 0% GPU for 40 min. Cancelled it; documented on-demand use (start with the HexaShell runs, stop after) in docs/sam3_service.md. Did not add fake traffic.
 - 17:59 Scores: sentence 15k drawer 25/50, microwave 26/50; kv_text 5k 20/4/5; points_2d 5k 28/6/1. Queued fs_mse_sentence_seed1 (seed repeat). Depth3 re-render 393/1559 demos.
 - 18:14 sentence 15k PickPlace 14/50 (28%). seed1 at 1k steps; depth3 851/1559; kv_text and points_2d at about 10.4k.
+- 18:34 sentence 20k final: 46/100, 26/100, 43/100. kv_text 10k: drawer 33/50, microwave 18/50. points_2d 10k: 25/50, 15/50. depth3 1155/1559.

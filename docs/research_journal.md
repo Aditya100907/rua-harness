@@ -95,3 +95,13 @@ One entry per result: what was tested, the number with its episode count and int
 - 95% CIs at 5k on OpenDrawer: sentence 8 to 29%, kv_text 27 to 54%, points_2d 42 to 69%: the drawer intervals for kv_text and points_2d clear sentence's at 5k. One seed and an early checkpoint, so a hint, not a finding. On the microwave and pick-place, the 5k differences are inside the noise.
 - sentence improves fast between 10k and 15k (drawer 20% to 50%, microwave 20% to 52%); 20k scoring is running.
 - Seeds before belief: queued fs_mse_sentence_seed1 (same settings, seed 1) on the free GPU.
+
+## Nov 27, 18:35. Sentence arm final (20k, 100 episodes per task) and 10k scores for kv_text and points_2d
+| Format, step | OpenDrawer | PickPlace | Microwave |
+|---|---|---|---|
+| sentence 20k (final) | 46/100 (46%, 36 to 56%) | 26/100 (26%, 18 to 35%) | 43/100 (43%, 34 to 53%) |
+| kv_text 10k | 33/50 (66%, 52 to 78%) | running | 18/50 (36%, 24 to 50%) |
+| points_2d 10k | 25/50 (50%, 37 to 63%) | running | 15/50 (30%, 19 to 44%) |
+- Stock-sentence regression policy, one seed, 3 tasks, 20k steps, left + wrist: 46%, 26%, 43%. DEM paper category numbers (18 tasks, 300k steps, MeanFlow): drawers 79.5%, pick-place 33.2%, buttons 81.5%. Scripted oracle on the same seeds: 46%, 82%, 100% (pick, drawer, microwave). The learned policy now beats the scripted oracle on nothing except tying pick-place; it is still below it on drawer and microwave.
+- sentence 20k vs 15k: drawer 46% vs 50%, microwave 43% vs 52%, inside the noise (100 vs 50 episodes).
+- kv_text at 10k already scores 66% on the drawer (vs sentence 46% at 20k; intervals 52 to 78% vs 36 to 56% just overlap). Hint only: one seed, different step counts.
