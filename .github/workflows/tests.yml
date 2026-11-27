@@ -1,0 +1,26 @@
+# Unit tests that need no simulator, no datasets and no GPU, on every push and pull request.
+# Simulator tests are marked `sim` and deselected. Dataset tests skip because RUA_DATA points
+# at an empty folder. The simlib test that reads RoboCasa's registry skips (importorskip).
+# tests/test_variants.py imports policy.variants, which imports torch at module level, so it is
+# ignored here; it runs locally and on Bouchet with the full dem env.
+name: tests
+on:
+  push:
+  pull_request:
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: .
+      RUA_DATA: /tmp/no-datasets
+      RUA_FRAMES: /tmp/no-frames
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install light dependencies
+        run: python -m pip install "numpy==2.2.5" "scipy==1.15.3" pytest
+      - name: Unit tests (not sim)
+        run: python -m pytest -q -m "not sim" -rs tests --ignore=tests/test_variants.py

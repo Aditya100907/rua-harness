@@ -1,0 +1,85 @@
+# pip lock for the 'dem' env on Adi's Mac (macOS arm64, Python 3.11.18, conda-forge python).
+# Made 2026-11-26 with: ~/miniconda3/envs/dem/bin/python -m pip freeze
+# Editable clones are replaced by their pinned git commits. Install those three by hand as in
+# setup/setup_dem.sh (robocasa with --no-deps), not from this file, so the clones stay editable.
+# The conda layer (python itself) is in setup/lock_mac_conda.txt (conda list --explicit).
+# Rebuild an env exactly: pip install --no-deps -r setup/lock_mac.txt
+absl-py==2.5.1
+annotated-doc==0.0.6
+annotated-types==0.8.0
+anyio==4.16.0
+av==18.1.1
+click==8.5.1
+cloudpickle==3.1.2
+dem @ git+https://github.com/Apollo-Lab-Yale/decoupled-embodiment-model.git@e5c8f6a81dca59bdfea2d1de067a7ec6f8a3e0ea
+etils==1.15.0
+Farama-Notifications==0.0.6
+filelock==4.2.10
+fsspec==2026.9.0
+glfw==2.11.0
+gymnasium==1.4.0
+h11==0.16.0
+h5py==3.16.0
+hf-xet==1.8.0
+httpcore2==2.16.0
+httpx2==2.16.0
+huggingface_hub==2.4.0
+idna==3.20
+ImageIO==2.38.1
+imageio-ffmpeg==0.8.1
+iniconfig==2.3.1
+Jinja2==3.1.6
+llvmlite==0.44.0
+lxml==6.1.3
+markdown-it-py==4.3.0
+MarkupSafe==3.0.4
+mdurl==0.1.2
+mpmath==1.3.0
+mujoco==3.3.1
+networkx==3.6.1
+numba==0.61.2
+numpy==2.2.5
+opencv-python==5.0.0.93
+packaging==26.3
+pandas==3.1.1
+pillow==13.0.0
+pluggy==1.7.0
+pyarrow==26.0.1
+pydantic==2.14.3
+pydantic_core==2.50.4
+pygame==2.6.1
+Pygments==2.21.0
+pynput==1.8.2
+pyobjc-core==13.0
+pyobjc-framework-ApplicationServices==13.0
+pyobjc-framework-Cocoa==13.0
+pyobjc-framework-CoreText==13.0
+pyobjc-framework-Quartz==13.0
+PyOpenGL==3.1.10
+pytest==9.2.0
+python-dateutil==4.0.0
+PyYAML==6.0.3
+qpsolvers==4.13.0
+quadprog==0.1.14
+regex==2026.11.9
+rich==15.0.0
+robocasa @ git+https://github.com/robocasa/robocasa.git@425684d332f135f5b30a40b321f52d15a0fe9250
+robosuite @ git+https://github.com/ARISE-Initiative/robosuite.git@5ce6643f3092639d08f7b0f90ed1c6a84f50552c
+safetensors==0.8.0
+scipy==1.15.3
+shellingham==1.5.4
+six==1.17.0
+sympy==1.14.0
+termcolor==3.3.0
+timm==1.0.31
+tokenizers==0.23.3
+torch==2.15.0
+torchvision==0.29.2
+tqdm==4.70.1
+transformers==5.23.0
+truststore==0.10.5
+typer==0.29.1
+typing-inspection==0.4.5
+typing_extensions==4.16.0
+tzdata==2026.6
+zipp==4.1.2

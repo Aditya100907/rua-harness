@@ -28,6 +28,7 @@ import numpy as np
 import torch
 
 from policy import paths
+from policy.variants import collate_variant
 from policy.data import RoboCasaDataset, collate, load_norm_stats, save_norm_stats, zscore_normalizers
 
 
@@ -144,7 +145,7 @@ def main(argv=None) -> None:
     gen = torch.Generator().manual_seed(args.seed + step)
     dl = torch.utils.data.DataLoader(
         ds, batch_size=args.batch, shuffle=True, drop_last=True, num_workers=args.workers,
-        collate_fn=collate, generator=gen, persistent_workers=args.workers > 0,
+        collate_fn=collate if args.format == "sentence" else collate_variant, generator=gen, persistent_workers=args.workers > 0,
         pin_memory=dev.startswith("cuda"), prefetch_factor=4 if args.workers > 0 else None)
     use_bf16 = dev.startswith("cuda")
     from policy.model import forward_loss

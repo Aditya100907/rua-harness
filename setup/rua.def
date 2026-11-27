@@ -1,0 +1,67 @@
+Bootstrap: docker
+From: nvidia/cuda:13.0.0-base-ubuntu24.04
+
+# Apptainer recipe for the rua-harness cluster environment (the 'dem' env on Bouchet).
+#
+# What is inside: Python 3.11.18 (conda-forge), every pip package from setup/lock_bouchet.txt at
+# its exact version (torch 2.15.0 with its own CUDA 13.2 libraries, numpy 2.2.5, MuJoCo 3.3.1),
+# and the system libraries MuJoCo needs to render headless with EGL.
+# What is NOT inside: the three pinned clones (DEM e5c8f6a, robosuite 5ce6643, robocasa 425684d),
+# the 10 GB of kitchen assets and the datasets. They stay on the cluster disk and come in through
+# a bind mount and PYTHONPATH (see %environment), so the image stays small and the assets are
+# not copied.
+#
+# Build and test: sbatch setup/build_container.sbatch   (see docs/reproduce.md)
+# Run:  apptainer exec --nv -B /nfs/roberts rua.sif python -m policy.train ...
+#
+# The base image only supplies Ubuntu; the GPU driver comes from the host through --nv and the
+# CUDA runtime comes from the torch wheels, so the base CUDA version does not need to match.
+
+%files
+    setup/lock_bouchet.txt /opt/rua/lock_bouchet.txt
+
+%environment
+    export PATH=/opt/conda/bin:$PATH
+    export MUJOCO_GL=egl
+    export PYOPENGL_PLATFORM=egl
+    export PYTHONNOUSERSITE=1
+    # the pinned clones and this repo, from the bind-mounted project folder
+    ROOT=${ROOT:-/nfs/roberts/project/pi_dr877/ak3288/apollo-lab}
+    export PYTHONPATH=$ROOT/rua-harness:$ROOT/decoupled-embodiment-model:$ROOT/robosuite:$ROOT/robocasa${PYTHONPATH:+:$PYTHONPATH}
+
+%post
+    set -e
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    # EGL and GL through glvnd (--nv adds the NVIDIA vendor library and its egl_vendor.d json),
+    # plus build tools for the few packages that build from source (evdev).
+    apt-get install -y --no-install-recommends \
+        ca-certificates curl git bzip2 build-essential \
+        libglvnd0 libegl1 libgl1 libgles2 libopengl0 libglx0 libglu1-mesa \
+        libegl-mesa0 libgl1-mesa-dri libosmesa6 \
+        libglib2.0-0 libsm6 libxext6 libxrender1 libx11-6 \
+        ffmpeg
+    mkdir -p /usr/share/glvnd/egl_vendor.d
+    rm -rf /var/lib/apt/lists/*
+
+    # Python 3.11.18 from conda-forge, the same build the cluster env uses
+    curl -fsSL -o /tmp/miniforge.sh \
+        https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+    bash /tmp/miniforge.sh -b -p /opt/miniforge
+    /opt/miniforge/bin/conda create -y -p /opt/conda -c conda-forge --override-channels python=3.11.18
+    rm -rf /tmp/miniforge.sh /opt/miniforge/pkgs
+
+    # Exact pip set from the cluster env. --no-deps so pip installs exactly the lock and never
+    # re-resolves (robocasa's own pins would downgrade torch). The three clones are skipped here.
+    grep -vE '^(#|dem @|robosuite @|robocasa @)' /opt/rua/lock_bouchet.txt > /opt/rua/lock_noclones.txt
+    /opt/conda/bin/python -m pip install --no-cache-dir --upgrade pip
+    /opt/conda/bin/python -m pip install --no-cache-dir --no-deps -r /opt/rua/lock_noclones.txt
+    /opt/conda/bin/python -m pip check || true
+
+%test
+    /opt/conda/bin/python -c "import numpy, torch, mujoco, scipy; assert numpy.__version__ == '2.2.5', numpy.__version__; assert mujoco.__version__ == '3.3.1', mujoco.__version__; print('numpy', numpy.__version__, 'torch', torch.__version__, 'mujoco', mujoco.__version__)"
+
+%labels
+    Project rua-harness
+    Python 3.11.18
+    Pins robocasa=425684d robosuite=5ce6643 mujoco=3.3.1 numpy=2.2.5
