@@ -25,6 +25,7 @@ def main():
     ap.add_argument("--n", type=int, default=200)
     ap.add_argument("--device", default="cpu")
     ap.add_argument("--nfe", type=int, default=1)
+    ap.add_argument("--episodes", default=None, help="JSON task -> episode ids to sample frames from")
     a = ap.parse_args()
     from dem import preprocess_images
     from policy.data import RoboCasaDataset, load_norm_stats, task_quantiles
@@ -33,10 +34,11 @@ def main():
     stats = load_norm_stats(ck.parent / "norm_stats.json")
     cfg = json.loads((ck.parent / "config.json").read_text())
     pol = load_policy(a.ckpt).to(a.device).eval()
-    ds = RoboCasaDataset([a.task], cams=tuple(cfg.get("cams", ["left", "right"])), norm_stats=stats)
+    eps = json.loads(Path(a.episodes).read_text()) if a.episodes else None
+    ds = RoboCasaDataset([a.task], cams=tuple(cfg.get("cams", ["left", "right"])), norm_stats=stats, episodes=eps)
     qs, qa = task_quantiles(stats, a.task)
     rng = np.random.default_rng(0)
-    idx = rng.choice(len(ds), a.n, replace=False)
+    idx = rng.choice(len(ds), min(a.n, len(ds)), replace=False)
     all_raw = ds.tables[0]["actions"]
     mean_a = all_raw.mean(0)
     err_m, err_mean, err_rep, err_m1 = [], [], [], []
