@@ -1,7 +1,7 @@
 # Status
 
 Keep this current. A new session reads it first and continues from "Next".
-Last updated: Thu Nov 26, 2026, about 7:45 pm ET.
+Last updated: Thu Nov 26, 2026, 23:50 ET (overnight agent).
 
 ## Goal for Sun Nov 29, night
 Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, agent plus policy. Success, seconds, LLM calls and tokens per episode.
@@ -19,12 +19,17 @@ Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, 
 - Bouchet environment built with `setup/setup_bouchet.sh env` (Nov 26, about 9:55 pm): numpy 2.2.5, torch 2.15.0 with CUDA, MuJoCo 3.3.1, DEM tests pass. Hugging Face login done on the cluster.
 - Kitchen assets and the 18-task demo download started on Bouchet at about 10:05 pm (one copy each). **Not yet verified:** that both finished, that each task has 500 episodes, and `setup_bouchet.sh simtest`.
 
+- Nov 26 overnight (branch `overnight-nov26`): downloads verified (18 tasks, 500 to 543 episodes, `docs/dataset_notes.md`). Kitchen assets were incomplete on Bouchet (login-node download killed); re-downloaded by job 34840169. `SIMTEST OK` (job 34841443, gpu_devel, EGL works; 35.6 s for env creation plus 20 steps).
+- Replay test (`policy/replay_test.py`) on the Mac: OpenDrawer 10/10, TurnOnMicrowave 10/10.
+- Data loader `policy/data.py` and frame store `policy/extract_frames.py`; `tests/test_data.py` passes (6 tests). Frames for all 18 tasks extracted to `$SCR/frames` (job 34840595).
+- Training script `policy/train.py`: 50 steps on the Mac (MPS) with falling loss (4.79 to 0.79), stop and resume continues the step count.
+- Eval wiring test (`policy/eval.py --wiring`) on the Mac: OpenDrawer 3/3, env state matches the recording to 1e-8, rendered image matches the video within 2 grey levels.
+
 ## Never run
-- `scripts/render_geometry.py` (depth, mask and point map for one scene, with a self-check).
-- Any training on real data. Any evaluation of a trained policy.
+- Any training on real data beyond the 50-step Mac test. Any evaluation of a trained policy.
 
 ## Running
-- Nothing.
+- See `docs/MORNING_REPORT.md` section 4 for job IDs.
 
 ## Overnight Nov 26 to 27
 An agent works through `docs/OVERNIGHT.md` on branch `overnight-nov26`. It supersedes the short list below where they differ. Its log is `docs/overnight_log.md` and its summary is `docs/MORNING_REPORT.md`.
@@ -47,7 +52,8 @@ See `docs/agent_port_spec.md`.
 
 ## Blocked
 - (Resolved Nov 26) No lab API key or budget. No private DEM data loader or evaluation script. See Decisions.
-- Bouchet account or partition for our jobs, and GPU access for SAM 3: not asked yet.
+- GPU access for SAM 3: not asked yet.
+- Bouchet limits found tonight: gpu_devel allows 1 job submitted at a time and 12 CPUs; gpu_h200 allows at most 6 CPUs per GPU.
 
 ## Decisions
 - Nov 26: all 18 tasks, not 3. The 3 are the smoke test.
