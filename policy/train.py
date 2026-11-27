@@ -108,6 +108,19 @@ def main(argv=None) -> None:
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     dev = args.device
+    # Multi-GPU (torchrun): each rank computes gradients on its own batch; gradients are averaged with
+    # all_reduce before every step (what DDP does). Done by hand because MeanFlow's loss differentiates
+    # the head with torch.func.jvp, which does not go through a DDP wrapper's forward.
+    world = int(os.environ.get("WORLD_SIZE", "1"))
+    rank = 0
+    if world > 1:
+        import torch.distributed as dist
+        dist.init_process_group("nccl")
+        rank = dist.get_rank()
+        local = int(os.environ.get("LOCAL_RANK", "0"))
+        torch.cuda.set_device(local)
+        dev = f"cuda:{local}"
+    is_main = rank == 0
 
     state_path = out / "train_state.pt"
     resuming = args.resume and state_path.exists()
@@ -118,11 +131,13 @@ def main(argv=None) -> None:
                          use_video=args.video, clip=args.clip_norm, quantiles=args.quantiles)
     ds = wrap_dataset(ds, args)
     stats = ds.norm_stats
-    if not resuming:
+    if not resuming and is_main:
         save_norm_stats(stats, out / "norm_stats.json")
-    cfg = dict(vars(args), code_commit=paths.code_commit(), n_samples=len(ds),
+    cfg = dict(vars(args), code_commit=paths.code_commit(), n_samples=len(ds), world_size=world,
+               global_batch=args.batch * world,
                n_episodes=int(sum(len(t["lens"]) for t in ds.tables)), instructions=len(ds.instructions()))
-    (out / ("config_resume.json" if resuming else "config.json")).write_text(json.dumps(cfg, indent=1))
+    if is_main:
+        (out / ("config_resume.json" if resuming else "config.json")).write_text(json.dumps(cfg, indent=1))
 
     if resuming:
         st = torch.load(state_path, map_location="cpu", weights_only=False)
@@ -130,9 +145,11 @@ def main(argv=None) -> None:
         policy = load_policy(st["ckpt"], offline=args.offline).to(dev)
         step = int(st["step"])
     else:
-        policy = build(args, stats, dev)
+        policy = build(args, stats, dev)     # same seed on every rank, so the weights start identical
         step = 0
     policy.train()
+    if world > 1:
+        torch.manual_seed(args.seed * 1000 + rank)   # different MeanFlow noise per rank
 
     # Language tokens once per distinct instruction (frozen NeoBERT caches them inside DEM).
     if policy.language.tokenizer is None:               # offline test mode: fixed random ids per string
@@ -167,14 +184,19 @@ def main(argv=None) -> None:
     trainable = [p for g_ in opt.param_groups for p in g_["params"]]
 
     gen = torch.Generator().manual_seed(args.seed + step)
+    sampler = None
+    if world > 1:
+        sampler = torch.utils.data.distributed.DistributedSampler(ds, num_replicas=world, rank=rank, shuffle=True,
+                                                                  seed=args.seed + step, drop_last=True)
     dl = torch.utils.data.DataLoader(
-        ds, batch_size=args.batch, shuffle=True, drop_last=True, num_workers=args.workers,
+        ds, batch_size=args.batch, shuffle=sampler is None, sampler=sampler, drop_last=True,
+        num_workers=args.workers,
         collate_fn=collate if args.format == "sentence" else collate_variant, generator=gen, persistent_workers=args.workers > 0,
         pin_memory=dev.startswith("cuda"), prefetch_factor=4 if args.workers > 0 else None)
     use_bf16 = dev.startswith("cuda")
     from policy.model import forward_loss
 
-    log_f = open(out / "train_log.csv", "a", newline="")
+    log_f = open(out / ("train_log.csv" if is_main else f"train_log_rank{rank}.csv"), "a", newline="")
     log = csv.writer(log_f)
     if log_f.tell() == 0:
         log.writerow(["step", "loss", "raw_mse", "lr_head", "steps_per_sec", "data_frac", "gpu_mem_gb", "wall"])
@@ -182,13 +204,23 @@ def main(argv=None) -> None:
     t_win, data_t, n_win = time.time(), 0.0, 0
     losses, mses = [], []
     done = False
+    epoch = 0
     while not done:
+        if sampler is not None:
+            sampler.set_epoch(epoch)
+        epoch += 1
         t_d = time.time()
         for batch in dl:
             data_t += time.time() - t_d
             loss, aux = forward_loss(policy, batch, dev, use_bf16, done_head=done_head, objective=args.objective)
             opt.zero_grad(set_to_none=True)
             loss.backward()
+            if world > 1:
+                for p_ in trainable:
+                    if p_.grad is None:
+                        p_.grad = torch.zeros_like(p_)
+                    dist.all_reduce(p_.grad, op=dist.ReduceOp.SUM)
+                    p_.grad.div_(world)
             torch.nn.utils.clip_grad_norm_(trainable, 1.0)
             opt.step()
             sched.step()
@@ -206,8 +238,12 @@ def main(argv=None) -> None:
                 print(f"step {step} loss {row[1]:.4f} mse {row[2]:.4f} lr {row[3]:.2e} "
                       f"{row[4]:.2f} it/s data {row[5]:.0%} mem {mem:.1f}G", flush=True)
                 t_win, data_t, n_win, losses, mses = time.time(), 0.0, 0, [], []
-            out_of_time = args.max_hours and (time.time() - t_start) > args.max_hours * 3600
-            if step % args.save_every == 0 or step >= args.steps or out_of_time:
+            out_of_time = bool(args.max_hours and (time.time() - t_start) > args.max_hours * 3600)
+            if world > 1:          # every rank stops at the same step
+                flag = torch.tensor([float(out_of_time)], device=dev)
+                dist.all_reduce(flag, op=dist.ReduceOp.MAX)
+                out_of_time = bool(flag.item())
+            if (step % args.save_every == 0 or step >= args.steps or out_of_time) and is_main:
                 ck = save_ckpt(policy, out, step, args.format)
                 if done_head is not None:
                     torch.save(done_head.state_dict(), str(ck).replace(".pt", ".done.pt"))
@@ -222,7 +258,11 @@ def main(argv=None) -> None:
                 break
             t_d = time.time()
     log_f.close()
-    print("TRAIN DONE" if step >= args.steps else f"TRAIN STOPPED at {step} (time limit)", flush=True)
+    if world > 1:
+        dist.barrier()
+        dist.destroy_process_group()
+    if is_main:
+        print("TRAIN DONE" if step >= args.steps else f"TRAIN STOPPED at {step} (time limit)", flush=True)
 
 
 if __name__ == "__main__":
