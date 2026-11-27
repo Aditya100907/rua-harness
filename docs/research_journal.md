@@ -37,3 +37,9 @@ One entry per result: what was tested, the number with its episode count and int
 - **Numbers:** raw_mse 1.20 to 0.69. Open-loop arm MAE 0.182 vs 0.157 for the mean action and 0.062 for repeating the current action. Gripper sign 66%.
 - **Means:** the model cannot memorize one demo in 400 steps. Not decisive on its own: DEM's own toy test needs 1,200 steps at lr 3e-4 and batch 256 to contract onto a single 2-D point, so MeanFlow converges slowly. The DEM paper trained on 8 H100s for 300k steps, so its effective batch was likely 8x ours or more.
 - **Next:** the same test with lr 3e-4 and no dispersive term (Mac, running); a 3,000-step, batch-64 version on Bouchet once SSH is back.
+
+## Nov 27, 16:00. Sampling changes do not rescue the policy; more training alone does not either
+- **Tested:** run1 20k evaluated with zero noise (deterministic) and with 4 MeanFlow steps; run2 (18 tasks) at 70k.
+- **Numbers:** z0 = 0: PickPlace 0/30, Drawer 0/30, Microwave 0/30. nfe = 4: 0/30, 2/30 (7%), 2/30 (7%). run2 70k: 0/24, 0/24, 0/24.
+- **Means:** the failure is not the one-step sampler (4 steps helps at most a few points) and not only the 3-task budget (run 2 at 70k steps on 18 tasks also fails). The training signal itself is the suspect.
+- **raw_mse is spiky:** run 2's mean raw_mse over steps 50k to 55k is 35.8 (vs about 1 elsewhere). Rare samples with huge normalized targets, consistent with the near-constant dims whose q01..q99 range is tiny (PickPlace base action dim 2: range 0.02). These spikes may be what keeps the head from learning; the clip ablation tests part of this.
