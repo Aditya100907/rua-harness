@@ -38,3 +38,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 16:05 Reconnected. Collected: run2 70k 0/24 each; run1 20k with zero noise 0/30 each, with 4 sampling steps 0, 2, 2 of 30. Ablation raw_mse means are spike-dominated, so conditioning checks submitted on all ablation checkpoints and run2 180k. Watcher kept off (its queue would launch more runs on the failing recipe).
 - 16:10 Measured outliers in normalized targets: under 2.5% of frames per dim exceed 5 sigma (max 29), mostly pick-place base and mode dims. Probably not the main cause.
 - 16:12 Started this log at Adi's request; added the rule to `CLAUDE.md`.
+- 16:15 Started `caffeinate -i -t 43200` so the Mac stays awake for 12 h. Waiting on 6 conditioning checks (CPU jobs 34891984 to 34891989).
