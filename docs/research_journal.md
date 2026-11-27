@@ -89,7 +89,7 @@ One entry per result: what was tested, the number with its episode count and int
 |---|---|---|---|
 | sentence 5k | 8/50 (16%) | 5/50 (10%) | 4/50 (8%) |
 | sentence 10k | 10/50 (20%) | 8/50 (16%) | 10/50 (20%) |
-| sentence 15k | 25/50 (50%) | (running) | 26/50 (52%) |
+| sentence 15k | 25/50 (50%) | 14/50 (28%) | 26/50 (52%) |
 | kv_text 5k | 20/50 (40%) | 4/50 (8%) | 5/50 (10%) |
 | points_2d 5k | 28/50 (56%) | 6/50 (12%) | 1/50 (2%) |
 - 95% CIs at 5k on OpenDrawer: sentence 8 to 29%, kv_text 27 to 54%, points_2d 42 to 69%: the drawer intervals for kv_text and points_2d clear sentence's at 5k. One seed and an early checkpoint, so a hint, not a finding. On the microwave and pick-place, the 5k differences are inside the noise.
