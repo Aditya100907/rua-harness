@@ -105,3 +105,13 @@ One entry per result: what was tested, the number with its episode count and int
 - Stock-sentence regression policy, one seed, 3 tasks, 20k steps, left + wrist: 46%, 26%, 43%. DEM paper category numbers (18 tasks, 300k steps, MeanFlow): drawers 79.5%, pick-place 33.2%, buttons 81.5%. Scripted oracle on the same seeds: 46%, 82%, 100% (pick, drawer, microwave). The learned policy now beats the scripted oracle on nothing except tying pick-place; it is still below it on drawer and microwave.
 - sentence 20k vs 15k: drawer 46% vs 50%, microwave 43% vs 52%, inside the noise (100 vs 50 episodes).
 - kv_text at 10k already scores 66% on the drawer (vs sentence 46% at 20k; intervals 52 to 78% vs 36 to 56% just overlap). Hint only: one seed, different step counts.
+
+## Nov 27, 18:55. More early scores
+| Format, step | OpenDrawer | PickPlace | Microwave |
+|---|---|---|---|
+| kv_text 10k | 33/50 | 9/50 | 18/50 |
+| points_2d 10k | 25/50 | 6/50 | 15/50 |
+| points_3d_rgb 5k | 10/50 | 0/50 | 0/50 |
+| pose_path 5k (held-out demo scenes, demo's own future path) | 5/50 | 1/50 | 4/50 |
+- The two formats that add learned point or path tokens start slower than the text and drawn-point formats (5k, one seed). Their new MLP starts from scratch while everything else is shared, so check again at 20k before reading anything into it.
+- pose_path is scored on a different protocol (held-out demo scenes with the demo's future path), so its numbers are not directly comparable with the others' fresh-seed scenes.
