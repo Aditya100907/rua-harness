@@ -1,7 +1,7 @@
 # Status
 
 Keep this current. A new session reads it first and continues from "Next".
-Last updated: Fri Nov 27, 2026, 00:20 ET (overnight agent).
+Last updated: Fri Nov 27, 2026, about 16:40 ET.
 
 ## Goal for Sun Nov 29, night
 Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, agent plus policy. Success, seconds, LLM calls and tokens per episode.
@@ -28,32 +28,25 @@ Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, 
 
 - Nov 27 (Part S): LIBERO set up on Bouchet as a second benchmark, in its own env `envs/libero` (robosuite 1.4.1, MuJoCo 2.3.7, plus DEM). Demos for libero_spatial and libero_object on scratch. Random episode, replay test, eval wiring and a CPU training smoke test pass. No LIBERO training launched. Details, numbers and the launch command: `docs/libero.md`.
 
+## Key finding (Nov 27)
+Stock DEM trained with the MeanFlow recipe does not learn usable actions here: run1 (3 tasks, 20k) 0% on drawer and pick-place; run2 (18 tasks) 0% at 70k; on training frames its actions are worse than the mean action and dominated by sampling noise. Plain regression through the same pipeline memorizes one demo (normalized MSE 0.0019) and learns on 3 tasks, so the data, vision and head pipeline is sound; MeanFlow's optimization is the suspect. Shipped and recomputed quantiles are identical (`docs/quantile_comparison.txt`). Details: `docs/research_journal.md`, `docs/autonomous_log.md`.
+
 ## Never run
-- Any evaluation of a trained policy (first checkpoints are training now).
-- The container build, the GitHub workflow, the depth re-render on Bouchet beyond the 3 smoke tasks (running).
+- A policy that scores above 20% on any smoke task (the gate).
+- The container build and the GitHub workflow.
 
-## Running (Nov 27, 00:20; live view: `bash scripts/status.sh`)
-- run1_smoke 34842801, run3/run4 seeds 34842803/34842804, run5 left+wrist 34842805: 3 tasks, 20k steps, L40S/A40, end about 05:00.
-- run2_all18 34842802: 18 tasks, 300k steps, H100, about 25 h; resubmits itself.
-- f4_kv_text 34843699 (format study). Queued: f4_points_3d_rgb, f4_points_2d, f4_pose_path, f5_sentence_objsplit, f5_points_3d_rgb_objsplit.
-- watcher (agent partition, 7 days): scores checkpoints, resubmits dead runs, launches the queue (cap 8 GPUs, 2 kept for scoring).
-- F2 depth re-render for the 3 smoke tasks: 34844300 (day partition).
+## Running (Nov 27, about 16:40; live view: `bash scripts/status.sh`)
+- Gate evals, 50 episodes per smoke task on CPU nodes: abl_mse 5k with zero noise (34893757); abl_fm 5k with 10 sampling steps (34893765, starts when abl_fm finishes).
+- mf_ddp4_bs256 (34893775): MeanFlow on 4 GPUs, global batch 256, 3 tasks, 5k steps; the batch-size test. Conditioning check chained (34893776). No other MeanFlow run until it answers.
+- Diagnostics: overfit1_paper (left + wrist, shipped quantiles, DEM recipe, 1 demo) and overfit1_meanflow, with open-loop checks chained; mmBERT converter test (34893756); depth spot check (34893778).
+- run2_all18 cancelled (STOP file set). Watcher off until the gate passes.
 
-## Overnight Nov 26 to 27
-An agent works through `docs/OVERNIGHT.md` on branch `overnight-nov26`. It supersedes the short list below where they differ. Its log is `docs/overnight_log.md` and its summary is `docs/MORNING_REPORT.md`.
-
-## Next: policy track (Adi)
-Each item is done only when its test passes.
-1. **Verify the Bouchet downloads and run the simulator test.** Check no download is still running. Count episodes per task under `$SCR/datasets/v1.0/target/atomic/` (expect 18 tasks with 500 each) and confirm each has saved simulator states. Then run `bash setup/setup_bouchet.sh simtest` and confirm the log ends with `SIMTEST OK`. Record sizes and results here.
-2. **Look at one dataset before writing code.** Print the folder tree of one task, `meta/info.json`, `meta/modality.json`, one parquet file's columns and shapes, and the video list. Write what you find to `docs/dataset_notes.md`. Download the 3 smoke-test tasks on the Mac for local debugging.
-3. **Data loader** in `policy/data.py`. Reads LeRobot files and yields what `DEM.loss` expects: two camera images, robot state, instruction, a 16-step action chunk. Test: one batch has the right shapes and value ranges, and the two cameras are the left and right agent views in that order.
-4. **Replay test** in `policy/replay_test.py`. Reset the simulator to a demo's saved state, play its recorded actions, check `env._check_success()`. Test: succeeds on at least 9 of 10 demos for each smoke-test task.
-5. **Training script** in `policy/train.py`, built from the DEM repo's `examples/train_minimal.py`. Real loader, action and state normalization saved with the checkpoint, checkpoints every N steps, loss logging. Test: 50 steps on the Mac with falling loss, then a job on Bouchet.
-6. **Launch training** on all 18 tasks by Friday evening.
-7. **Evaluation script** in `policy/eval.py`. Load a checkpoint, run episodes in the target split, predict 16 actions and execute 8, stop on success or the task's horizon, write a results CSV. Test: the zero test, then the replay test's actions through the same environment wrapper.
-8. **Score** the latest checkpoint: 3 smoke-test tasks first, then all 18 at 50 episodes each as parallel jobs.
-9. **`run_skill` tool** in `agent/tools/run_skill/`, in HexaShell's tool format. Runs the trained DEM on the live environment until success, timeout or the step limit.
-10. **Combined run** with William: all 18 tasks, same seeds as his agent-alone run.
+## Next: policy track (new priorities from Adi, Nov 27 afternoon)
+1. **Gate:** abl_mse or abl_fm beats 20% on OpenDrawer or TurnOnMicrowave (50 episodes each). No format result counts until it passes.
+2. **Format study** on the better of mse and fm (fm if close): `bash policy/slurm/format_study_queue.sh <obj>` writes the queue (sentence, kv_text, points_2d, points_3d_rgb, points_3d, pose_path; 3 smoke tasks, 20k steps, same seed and data, left + wrist, shipped quantiles; then 18-task sentence). Then restart the watcher with only these runs queued. One GPU per run.
+3. **Batch-size test** (mf_ddp4_bs256): report whether raw_mse and the conditioning check beat the mean action.
+4. **Xiatao's weights:** when they arrive, `python -m policy.research_ckpt --head ... --vision ... --norm ... [--norm-stats ...] --lang neobert|mmbert --out DIR`, then `bash policy/slurm/score_research.sh DIR/ckpt_0000000.pt`; fine-tune any format with `policy.train --init-from DIR/ckpt_0000000.pt`. Tested on random-init stand-ins.
+5. Push after every commit.
 
 ## Next: agent track (William)
 See `docs/agent_port_spec.md`.
