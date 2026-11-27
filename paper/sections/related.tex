@@ -1,15 +1,93 @@
 \section{Related Work}
 \label{sec:related}
 
-\draftnote{DRAFT stub. Fill citations in refs.bib.}
+% DRAFT (task I5, 2026-11-27). Sources: docs/related_notes.md plus arXiv
+% abstracts re-checked on 2026-11-27. Each claim carries its arXiv ID and a
+% "read:" tag saying how much of the source was read:
+%   full        = main text read (by us, see docs/related_notes.md)
+%   partial     = some sections read (listed)
+%   abstract    = abstract only
+%   unverified  = not checked; marked with \todo
 
-\paragraph{LLM agents for robots.} Agents that call skills or write code
-(SayCan, Code as Policies, HexaShell). \draftnote{cite}
+\paragraph{Agents that call robot skills.}
+An LLM can pick among pretrained language-named skills, grounded by their
+value functions \citep{ahn2022saycan}, % arXiv:2204.01691, read: abstract
+or write policy code that calls perception and control APIs
+\citep{liang2022cap}. % arXiv:2209.07753, read: abstract
+Later systems have the model output geometry instead of skill names: 3D value
+maps that a planner turns into 6-DoF end-effector waypoints
+\citep{huang2023voxposer}, % arXiv:2307.05973, read: abstract
+points marked on the image \citep{liu2024moka}, % arXiv:2403.03174, read: abstract
+or keypoint constraints solved by an optimizer \citep{huang2024rekep}.
+% arXiv:2409.01652, read: abstract
+HexaShell gives a coding agent 14 general tools for motion, perception and
+state, with no trained policy, and reports 85.6\% on RoboCasa365 with
+per-task skills \citep{gao2026hexashell,hexashellrepo,robocasa365leaderboard}.
+% arXiv:2610.23479, read: abstract (number from abstract; leaderboard
+% position from the repo README, 2026-11-27)
+Our agent is a port of HexaShell's tools to RoboCasa. In all of these the
+command goes to a planner or motion primitives. In ours it goes to a learned
+policy, so the format must also be something the policy can be trained on.
 
-\paragraph{Language-conditioned policies.} Vision-language-action models and
-small policies conditioned on text. \draftnote{cite}
+\paragraph{Agents and hierarchies over a learned policy.}
+Hierarchical VLAs (vision-language-action models) split a high-level step
+predictor from a low-level controller, and most use language between them:
+language motions in RT-H \citep{belkhale2024rth}, % arXiv:2403.01823, read: abstract
+next-step instructions in Hi Robot \citep{shi2025hirobot}, % arXiv:2502.19417, read: abstract
+and semantic subtask prediction in $\pi_{0.5}$ \citep{black2025pi05}.
+% arXiv:2504.16054, read: abstract
+X-Harness studies the harness between a VLM agent and a VLA over 470,000
+rollouts and reports that VLMs predict 3D gripper poses poorly
+\citep{lai2026xharness}. % arXiv:2611.34778, read: full (main text; appendices skimmed)
+In its comparison of VLM outputs on RoboMME, language sub-goals score 34.0\%
+and sub-goals with a 2D target point 51.9\%, against 13.1\% for raw poses.
+% arXiv:2611.34778 Table 6a, read: full. Gemini Flash.
+No model is trained in that study. The two sub-goal formats run on two
+public checkpoints from another group, so matched data and compute are not
+established.
+% \todo: find the RoboMME / MME-VLA paper and check how those two
+% checkpoints were trained (read: unverified).
 
-\paragraph{Points, traces and poses as commands.} Policies conditioned on 2D
-points, sketched traces or goal poses. \draftnote{cite}
+\paragraph{Points, traces and poses as the command.}
+A policy can be conditioned on a rough 2D trajectory sketch drawn on the image
+\citep{gu2023rttrajectory}, % arXiv:2311.01977, read: abstract
+or on a coarse 2D end-effector path from a fine-tuned VLM that guides a
+3D-aware low-level policy \citep{li2025hamster}. % arXiv:2502.05485, read: abstract
+MolmoAct predicts an editable 2D trace inside a single model
+\citep{lee2025molmoact}. % arXiv:2508.07917, read: abstract
+Each of these fixes one format. The closest work to ours is the GR00T~2
+white paper \citep{nvidia2026gr00t2}, % no arXiv ID; read: partial (Sec. 2, 3.4, App. G)
+which asks what an agent should send to the policy and retrains for each
+answer. It trains a language-only and a point-conditioned checkpoint on the
+same data, cameras, schedule and compute. With grasp and release points drawn
+on one camera image, short-horizon success on a real two-arm robot rises from
+55.6\% with the agent's language alone to 83.3\%.
+% GR00T 2 white paper Table 22 (YAM, pass@1), read: partial (Sec. 3.4).
+It compares two formats, language and 2D points, plus a 2D path variant in
+simulation. We compare five (a sentence, structured text, 2D points, 3D points
+and a 3D pose path), each with the policy retrained under matched data and
+compute, on one benchmark, and we also count the time and tokens the agent
+spends.
+% \todo: GAE (pose-path conditioning, cited in docs/OVERNIGHT.md) not
+% identified. Need title or arXiv ID from Adi (read: unverified).
 
-\paragraph{Benchmarks.} RoboCasa and its target split. \draftnote{cite}
+\paragraph{Policies and benchmarks.}
+Large VLAs such as OpenVLA \citep{kim2024openvla}, % arXiv:2406.09246, read: abstract
+Octo \citep{octo2024}, % arXiv:2405.12213, read: abstract
+$\pi_{0.5}$ and GR00T~N1 \citep{bjorck2025gr00tn1} % arXiv:2503.14734, read: abstract
+run a large backbone at every step. DEM instead joins a fine-tuned DINOv3
+vision encoder \citep{simeoni2025dinov3}, % arXiv:2508.10104, read: abstract
+a frozen NeoBERT text encoder \citep{lebreton2025neobert} % arXiv:2502.19587, read: abstract
+and a one-step MeanFlow action head \citep{geng2025meanflow}. % arXiv:2505.13447, read: abstract
+It reaches 55.6\% mean success on 18 RoboCasa tasks at 6.1\,ms per forward
+pass \citep{sun2026dem}, % arXiv:2609.18374, read: abstract
+which makes retraining it once per format affordable. Diffusion Policy
+\citep{chi2023diffusion} % arXiv:2303.04137, read: abstract
+generates action chunks by iterative denoising; a MeanFlow head needs one
+step. We evaluate in RoboCasa \citep{nasiriany2024robocasa}, % arXiv:2406.02523, read: abstract
+on 18 atomic tasks of the target split of RoboCasa365, which extends RoboCasa
+to 365 tasks and 2,500 kitchens \citep{nasiriany2026robocasa365}.
+% arXiv:2603.04356, read: abstract. \todo: confirm the target split and
+% the 18 atomic-seen tasks are defined in the RoboCasa365 paper (read: unverified).
+LIBERO \citep{liu2023libero} % arXiv:2306.03310, read: abstract
+is another widely used simulated suite.

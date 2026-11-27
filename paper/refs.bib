@@ -1,8 +1,312 @@
-% Add references here. Check every entry against the published version.
+% References for the paper.
+% Every arXiv entry below was checked on 2026-11-27 against the arXiv API
+% record (export.arxiv.org/api/query?id_list=<id>, same data as
+% arxiv.org/abs/<id>): title, authors, year of first version, ID.
+% Long author lists are cut to the first ten names plus "others".
+% Year is the year of arXiv v1. Swap in venue versions (booktitle) by hand
+% once checked against the published paper.
 
-@inproceedings{nasiriany2024robocasa,
-  title     = {RoboCasa: Large-Scale Simulation of Everyday Tasks for Generalist Robots},
-  author    = {Nasiriany, Soroush and Maddukuri, Abhiram and Zhang, Lance and Parikh, Adeet and Lo, Aaron and Joshi, Abhishek and Mandlekar, Ajay and Zhu, Yuke},
-  booktitle = {Robotics: Science and Systems},
-  year      = {2024}
+% ---------------------------------------------------------------------
+% Non-arXiv items
+% ---------------------------------------------------------------------
+
+% verified 2026-11-27: PDF and project page return HTTP 200; title taken
+% from the project page <title>. No arXiv ID found.
+@misc{nvidia2026gr00t2,
+  title        = {{GR00T} 2: Scaling Robot Foundation Models for Generalization, Dexterity, and Adaptation},
+  author       = {{NVIDIA}},
+  year         = {2026},
+  howpublished = {White paper, \url{https://research.nvidia.com/labs/gear/gr00t-2/assets/gr00t2_whitepaper.pdf}},
+  url          = {https://research.nvidia.com/labs/gear/gr00t-2},
+  urldate      = {2026-11-27}
 }
+
+% verified 2026-11-27: repository page returns HTTP 200. The paper itself
+% is gao2026hexashell (arXiv 2610.23479).
+@misc{hexashellrepo,
+  title        = {{HexaShell}: A Universal Harness for Robot Coding Agents in Simulation and the Real World (code)},
+  author       = {{HexaFuture}},
+  year         = {2026},
+  howpublished = {\url{https://github.com/HexaFuture/HexaShell}},
+  url          = {https://github.com/HexaFuture/HexaShell},
+  urldate      = {2026-11-27}
+}
+
+% verified 2026-11-27: page returns HTTP 200, title "RoboCasa Leaderboard".
+@misc{robocasa365leaderboard,
+  title        = {{RoboCasa} Leaderboard},
+  author       = {{RoboCasa}},
+  year         = {2026},
+  howpublished = {\url{https://robocasa.ai/leaderboard.html}},
+  url          = {https://robocasa.ai/leaderboard.html},
+  urldate      = {2026-11-27}
+}
+
+% ---------------------------------------------------------------------
+% arXiv items (alphabetical by key)
+% ---------------------------------------------------------------------
+
+% verified 2026-11-27 against arxiv.org/abs/2204.01691
+@article{ahn2022saycan,
+  title         = {{Do As I Can, Not As I Say: Grounding Language in Robotic Affordances}},
+  author        = {Ahn, Michael and Brohan, Anthony and Brown, Noah and Chebotar, Yevgen and Cortes, Omar and David, Byron and Finn, Chelsea and Fu, Chuyuan and Gopalakrishnan, Keerthana and Hausman, Karol and others},
+  journal       = {arXiv preprint arXiv:2204.01691},
+  year          = {2022},
+  eprint        = {2204.01691},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2403.01823
+@article{belkhale2024rth,
+  title         = {{RT-H: Action Hierarchies Using Language}},
+  author        = {Belkhale, Suneel and Ding, Tianli and Xiao, Ted and Sermanet, Pierre and Vuong, Quon and Tompson, Jonathan and Chebotar, Yevgen and Dwibedi, Debidatta and Sadigh, Dorsa},
+  journal       = {arXiv preprint arXiv:2403.01823},
+  year          = {2024},
+  eprint        = {2403.01823},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2503.14734
+@article{bjorck2025gr00tn1,
+  title         = {{GR00T N1: An Open Foundation Model for Generalist Humanoid Robots}},
+  author        = {{NVIDIA} and Bjorck, Johan and Castañeda, Fernando and Cherniadev, Nikita and Da, Xingye and Ding, Runyu and Fan, Linxi and Fang, Yu and Fox, Dieter and Hu, Fengyuan and others},
+  journal       = {arXiv preprint arXiv:2503.14734},
+  year          = {2025},
+  eprint        = {2503.14734},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2504.16054
+@article{black2025pi05,
+  title         = {{$\pi_{0.5}$: a Vision-Language-Action Model with Open-World Generalization}},
+  author        = {{Physical Intelligence} and Black, Kevin and Brown, Noah and Darpinian, James and Dhabalia, Karan and Driess, Danny and Esmail, Adnan and Equi, Michael and Finn, Chelsea and Fusai, Niccolo and others},
+  journal       = {arXiv preprint arXiv:2504.16054},
+  year          = {2025},
+  eprint        = {2504.16054},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2303.04137
+@article{chi2023diffusion,
+  title         = {{Diffusion Policy: Visuomotor Policy Learning via Action Diffusion}},
+  author        = {Chi, Cheng and Xu, Zhenjia and Feng, Siyuan and Cousineau, Eric and Du, Yilun and Burchfiel, Benjamin and Tedrake, Russ and Song, Shuran},
+  journal       = {arXiv preprint arXiv:2303.04137},
+  year          = {2023},
+  eprint        = {2303.04137},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2610.23479
+@article{gao2026hexashell,
+  title         = {{HexaShell: A Universal Harness for Robot Coding Agents in Simulation and the Real World}},
+  author        = {Gao, Hongcheng and Zeng, Jianshu and Zhou, Alex and Ge, Shijia and Shangguan, Xuan and Wang, Yazhe and Wan, Yexing and Zheng, Zelin and Zhu, Jay and Li, Xiping and others},
+  journal       = {arXiv preprint arXiv:2610.23479},
+  year          = {2026},
+  eprint        = {2610.23479},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2505.13447
+@article{geng2025meanflow,
+  title         = {{Mean Flows for One-step Generative Modeling}},
+  author        = {Geng, Zhengyang and Deng, Mingyang and Bai, Xingjian and Kolter, J. Zico and He, Kaiming},
+  journal       = {arXiv preprint arXiv:2505.13447},
+  year          = {2025},
+  eprint        = {2505.13447},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2311.01977
+@article{gu2023rttrajectory,
+  title         = {{RT-Trajectory: Robotic Task Generalization via Hindsight Trajectory Sketches}},
+  author        = {Gu, Jiayuan and Kirmani, Sean and Wohlhart, Paul and Lu, Yao and Gonzalez Arenas, Montserrat and Rao, Kanishka and Yu, Wenhao and Fu, Chuyuan and Gopalakrishnan, Keerthana and Xu, Zhuo and others},
+  journal       = {arXiv preprint arXiv:2311.01977},
+  year          = {2023},
+  eprint        = {2311.01977},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2307.05973
+@article{huang2023voxposer,
+  title         = {{VoxPoser: Composable 3D Value Maps for Robotic Manipulation with Language Models}},
+  author        = {Huang, Wenlong and Wang, Chen and Zhang, Ruohan and Li, Yunzhu and Wu, Jiajun and Fei-Fei, Li},
+  journal       = {arXiv preprint arXiv:2307.05973},
+  year          = {2023},
+  eprint        = {2307.05973},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2409.01652
+@article{huang2024rekep,
+  title         = {{ReKep: Spatio-Temporal Reasoning of Relational Keypoint Constraints for Robotic Manipulation}},
+  author        = {Huang, Wenlong and Wang, Chen and Li, Yunzhu and Zhang, Ruohan and Fei-Fei, Li},
+  journal       = {arXiv preprint arXiv:2409.01652},
+  year          = {2024},
+  eprint        = {2409.01652},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2406.09246
+@article{kim2024openvla,
+  title         = {{OpenVLA: An Open-Source Vision-Language-Action Model}},
+  author        = {Kim, Moo Jin and Pertsch, Karl and Karamcheti, Siddharth and Xiao, Ted and Balakrishna, Ashwin and Nair, Suraj and Rafailov, Rafael and Foster, Ethan and Lam, Grace and Sanketi, Pannag and others},
+  journal       = {arXiv preprint arXiv:2406.09246},
+  year          = {2024},
+  eprint        = {2406.09246},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2611.34778
+@article{lai2026xharness,
+  title         = {{Toward Agentic Robotics: A Large-Scale Study of Harness Design for Robot-Use Agents}},
+  author        = {Lai, Yuxiang and Zhong, Jike and Li, Yu-Jhe and Wang, Lan and Liu, Chengzhi and Tang, Youbao and Li, Ming and Xiao, Xi and Yang, Xiaofeng and Zhao, Liang and Mai, Zheda and Fan, Ruixi},
+  journal       = {arXiv preprint arXiv:2611.34778},
+  year          = {2026},
+  eprint        = {2611.34778},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2502.19587
+@article{lebreton2025neobert,
+  title         = {{NeoBERT: A Next-Generation BERT}},
+  author        = {Le Breton, Lola and Fournier, Quentin and El Mezouar, Mariam and Morris, John X. and Chandar, Sarath},
+  journal       = {arXiv preprint arXiv:2502.19587},
+  year          = {2025},
+  eprint        = {2502.19587},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CL}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2508.07917
+@article{lee2025molmoact,
+  title         = {{MolmoAct: Action Reasoning Models that can Reason in Space}},
+  author        = {Lee, Jason and Duan, Jiafei and Fang, Haoquan and Deng, Yuquan and Liu, Shuo and Li, Boyang and Fang, Bohan and Zhang, Jieyu and Wang, Yi Ru and Lee, Sangho and others},
+  journal       = {arXiv preprint arXiv:2508.07917},
+  year          = {2025},
+  eprint        = {2508.07917},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2502.05485
+@article{li2025hamster,
+  title         = {{HAMSTER: Hierarchical Action Models For Open-World Robot Manipulation}},
+  author        = {Li, Yi and Deng, Yuquan and Zhang, Jesse and Jang, Joel and Memmel, Marius and Yu, Raymond and Garrett, Caelan Reed and Ramos, Fabio and Fox, Dieter and Li, Anqi and Gupta, Abhishek and Goyal, Ankit},
+  journal       = {arXiv preprint arXiv:2502.05485},
+  year          = {2025},
+  eprint        = {2502.05485},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2209.07753
+@article{liang2022cap,
+  title         = {{Code as Policies: Language Model Programs for Embodied Control}},
+  author        = {Liang, Jacky and Huang, Wenlong and Xia, Fei and Xu, Peng and Hausman, Karol and Ichter, Brian and Florence, Pete and Zeng, Andy},
+  journal       = {arXiv preprint arXiv:2209.07753},
+  year          = {2022},
+  eprint        = {2209.07753},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2306.03310
+@article{liu2023libero,
+  title         = {{LIBERO: Benchmarking Knowledge Transfer for Lifelong Robot Learning}},
+  author        = {Liu, Bo and Zhu, Yifeng and Gao, Chongkai and Feng, Yihao and Liu, Qiang and Zhu, Yuke and Stone, Peter},
+  journal       = {arXiv preprint arXiv:2306.03310},
+  year          = {2023},
+  eprint        = {2306.03310},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.AI}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2403.03174
+@article{liu2024moka,
+  title         = {{MOKA: Open-World Robotic Manipulation through Mark-Based Visual Prompting}},
+  author        = {Liu, Fangchen and Fang, Kuan and Abbeel, Pieter and Levine, Sergey},
+  journal       = {arXiv preprint arXiv:2403.03174},
+  year          = {2024},
+  eprint        = {2403.03174},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2406.02523
+@article{nasiriany2024robocasa,
+  title         = {{RoboCasa: Large-Scale Simulation of Everyday Tasks for Generalist Robots}},
+  author        = {Nasiriany, Soroush and Maddukuri, Abhiram and Zhang, Lance and Parikh, Adeet and Lo, Aaron and Joshi, Abhishek and Mandlekar, Ajay and Zhu, Yuke},
+  journal       = {arXiv preprint arXiv:2406.02523},
+  year          = {2024},
+  eprint        = {2406.02523},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2603.04356
+@article{nasiriany2026robocasa365,
+  title         = {{RoboCasa365: A Large-Scale Simulation Framework for Training and Benchmarking Generalist Robots}},
+  author        = {Nasiriany, Soroush and Nasiriany, Sepehr and Maddukuri, Abhiram and Zhu, Yuke},
+  journal       = {arXiv preprint arXiv:2603.04356},
+  year          = {2026},
+  eprint        = {2603.04356},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2405.12213
+@article{octo2024,
+  title         = {{Octo: An Open-Source Generalist Robot Policy}},
+  author        = {{Octo Model Team} and Ghosh, Dibya and Walke, Homer and Pertsch, Karl and Black, Kevin and Mees, Oier and Dasari, Sudeep and Hejna, Joey and Kreiman, Tobias and Xu, Charles and others},
+  journal       = {arXiv preprint arXiv:2405.12213},
+  year          = {2024},
+  eprint        = {2405.12213},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2502.19417
+@article{shi2025hirobot,
+  title         = {{Hi Robot: Open-Ended Instruction Following with Hierarchical Vision-Language-Action Models}},
+  author        = {Shi, Lucy Xiaoyang and Ichter, Brian and Equi, Michael and Ke, Liyiming and Pertsch, Karl and Vuong, Quan and Tanner, James and Walling, Anna and Wang, Haohuan and Fusai, Niccolo and others},
+  journal       = {arXiv preprint arXiv:2502.19417},
+  year          = {2025},
+  eprint        = {2502.19417},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2508.10104
+@article{simeoni2025dinov3,
+  title         = {{DINOv3}},
+  author        = {Siméoni, Oriane and Vo, Huy V. and Seitzer, Maximilian and Baldassarre, Federico and Oquab, Maxime and Jose, Cijo and Khalidov, Vasil and Szafraniec, Marc and Yi, Seungeun and Ramamonjisoa, Michaël and others},
+  journal       = {arXiv preprint arXiv:2508.10104},
+  year          = {2025},
+  eprint        = {2508.10104},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV}
+}
+
+% verified 2026-11-27 against arxiv.org/abs/2609.18374
+@article{sun2026dem,
+  title         = {{Decoupling Vision, Language, and Action for Efficient Multi-Task Robot Policies}},
+  author        = {Sun, Xiatao and Liang, Chen and Zeng, Ziyao and Wang, Qian and Zhang, Haoyang and Sun, Yue and Li, Qiucheng and Rakita, Daniel},
+  journal       = {arXiv preprint arXiv:2609.18374},
+  year          = {2026},
+  eprint        = {2609.18374},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.RO}
+}
+
