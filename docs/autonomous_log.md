@@ -39,3 +39,5 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 16:10 Measured outliers in normalized targets: under 2.5% of frames per dim exceed 5 sigma (max 29), mostly pick-place base and mode dims. Probably not the main cause.
 - 16:12 Started this log at Adi's request; added the rule to `CLAUDE.md`.
 - 16:15 Started `caffeinate -i -t 43200` so the Mac stays awake for 12 h. Waiting on 6 conditioning checks (CPU jobs 34891984 to 34891989).
+- 16:20 Conditioning checks: all four ablations at 5k are still at mean-action level (input spread 0.01 to 0.06 vs true 0.23); run2 180k only slightly better (0.117, MAE 0.137 vs 0.155). No single tweak helps. Next: test whether plain regression (mse) or standard flow matching (fm) learns quickly; if yes, MeanFlow optimization is the bottleneck.
+- 16:30 Added --objective mse|fm; launched abl_mse and abl_fm (5k steps, 3 tasks).
