@@ -33,3 +33,4 @@ Times are ET.
 - 00:45 M test: during 30 min without SSH from the Mac, the watcher cycled every 10 min (00:25, 00:35) and all six training runs kept going. Nothing came due for scoring in that window (first 5k checkpoints about 01:05); the scoring half of the test is confirmed when those are scored with no SSH involvement.
 - 00:50 F2: depth re-render for the 3 smoke tasks running (about 65 s per demo on CPU, llvmpipe EGL); remaining 15 tasks submitted (180 chunks, 60 at a time). H1 timing job 34847608 (gpu_devel RTX 5000 Ada). Composite target datasets download 34847609 (Part Q). Part S LIBERO handed to a helper.
 - 00:58 M test complete: the watcher scored f4_kv_text's 5k checkpoint on its own (eval 34848256), with no SSH from the Mac involved. Pass.
+- 07:10 SSH master connection expired; Duo needed. Asked Adi. Mac-only work until reconnected; one retry every 30 min.
