@@ -93,6 +93,19 @@ import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['step
           && touch $d/scored/${step}_ho && msg="$msg evalheldout:${run}@$step:$j2"
     fi
   done
+  # 2b. Part N sweeps on the final checkpoint of every point-format run (once)
+  for d in $CK/*/; do
+    run=$(basename $d)
+    [ -f $d/config.json ] || continue
+    fmt=$(python -c "import json;print(json.load(open('$d/config.json')).get('format','sentence'))")
+    case $fmt in points_2d|points_3d|points_3d_rgb) ;; *) continue ;; esac
+    want=$(python -c "import json;print(json.load(open('$d/config.json'))['steps'])")
+    fck=$(printf "%s/ckpt_%07d.pt" $d $want)
+    [ -f $fck ] && [ ! -f $d/scored/sweeps ] || continue
+    [ $((GPU_CAP - $(gpus_in_use))) -ge 1 ] || continue
+    tasks=$(python -c "import json;print(' '.join(json.load(open('$d/config.json'))['tasks']))")
+    j=$(TASKS="$tasks" bash $REPO/policy/slurm/sweeps.sh $fck 50) && touch $d/scored/sweeps && msg="$msg sweeps:$run:$j"
+  done
   # 3. queue
   while [ $(gpus_in_use) -lt $((GPU_CAP - EVAL_RESERVE)) ] && [ $(jobs_in_use) -lt $JOB_CAP ]; do
     line=$(grep -v '^\s*#' $Q | grep -v '^\s*$' | head -1)
