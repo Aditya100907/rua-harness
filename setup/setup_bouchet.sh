@@ -17,14 +17,17 @@ SCR="${SCR:-/nfs/roberts/scratch/pi_dr877/$USER}"
 ROOT="$PROJ/apollo-lab"
 ENVDIR="$PROJ/envs/dem"
 LOGDIR="$ROOT/logs"
-mkdir -p "$ROOT" "$LOGDIR" "$SCR/datasets" "$SCR/cache/pip" "$SCR/cache/hf" "$PROJ/conda_pkgs"
+mkdir -p "$ROOT" "$ROOT/runs" "$LOGDIR" "$SCR/datasets" "$SCR/cache/pip" "$SCR/cache/hf" "$PROJ/conda_pkgs"
 
 # keep caches out of home (home has a 500,000-file limit)
 export PIP_CACHE_DIR="$SCR/cache/pip"
-export HF_HOME="$SCR/cache/hf"
+# model files go to scratch; the login token stays in ~/.cache/huggingface
+export HF_HUB_CACHE="$SCR/cache/hf"
 export CONDA_PKGS_DIRS="$PROJ/conda_pkgs"
 
 activate() {
+  # already in the right environment (for example after a manual conda activate): nothing to do
+  [ "${CONDA_PREFIX:-}" = "$ENVDIR" ] && return 0
   module load miniconda
   # shellcheck disable=SC1091
   source "$(conda info --base)/etc/profile.d/conda.sh"
@@ -82,11 +85,13 @@ print('numpy', numpy.__version__, '| torch', torch.__version__, '| cuda build', 
   echo "  3. bash setup/setup_bouchet.sh data"
   ;;
 assets)
+  [ -f "$ROOT/robocasa/robocasa/macros_private.py" ] || { echo "Run: bash setup/setup_bouchet.sh env  first, and wait for DONE."; exit 1; }
   activate; cd "$ROOT/runs"
   nohup bash -c "yes y | python -m robocasa.scripts.download_kitchen_assets" > "$LOGDIR/assets_download.log" 2>&1 &
   echo "started in background, pid $!. Watch: tail -f $LOGDIR/assets_download.log"
   ;;
 data)
+  grep -q "^DATASET_BASE_PATH = \"$SCR/datasets\"" "$ROOT/robocasa/robocasa/macros_private.py" 2>/dev/null || { echo "Run: bash setup/setup_bouchet.sh env  first, and wait for DONE."; exit 1; }
   activate; cd "$ROOT/runs"
   TASKS="CloseBlenderLid CloseFridge CloseToasterOvenDoor CoffeeSetupMug NavigateKitchen OpenCabinet OpenDrawer OpenStandMixerHead PickPlaceCounterToCabinet PickPlaceCounterToStove PickPlaceDrawerToCounter PickPlaceSinkToCounter PickPlaceToasterToCounter SlideDishwasherRack TurnOffStove TurnOnElectricKettle TurnOnMicrowave TurnOnSinkFaucet"
   nohup bash -c "yes y | python -m robocasa.scripts.download_datasets --split target --source human --tasks $TASKS" > "$LOGDIR/data_download.log" 2>&1 &
@@ -105,7 +110,7 @@ simtest)
 module load miniconda
 source "\$(conda info --base)/etc/profile.d/conda.sh"
 conda activate "$ENVDIR"
-export MUJOCO_GL=egl HF_HOME="$SCR/cache/hf"
+export MUJOCO_GL=egl HF_HUB_CACHE="$SCR/cache/hf"
 cd "$ROOT/runs"
 nvidia-smi --query-gpu=name,memory.total --format=csv
 python - <<'PY'
