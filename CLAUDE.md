@@ -4,6 +4,7 @@
 An LLM agent hands physical jobs to a small fast robot policy (DEM), in the RoboCasa kitchen simulator. The research question: what should the agent tell the policy (a sentence, structured text, 2D points, 3D points, a pose path), measured with the policy retrained for each format. The paper needs two tables: which command format works best, and agent alone against agent plus policy on success, time and tokens.
 
 ## Start here
+0. **Read `docs/STANDING_ORDERS.md` first.** It sets what you decide alone and what needs Adi.
 1. `docs/STATUS.md`: what is done, running, next and blocked. Work from the top of "Next". Update it as you go.
 2. `README.md`: layout and versions.
 3. `docs/agent_port_spec.md`: the agent side (William).
