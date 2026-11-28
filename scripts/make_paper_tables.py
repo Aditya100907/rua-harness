@@ -22,7 +22,7 @@ TASKS = ["OpenDrawer", "PickPlaceCounterToCabinet", "TurnOnMicrowave"]
 SHORT = {"OpenDrawer": "Drawer", "PickPlaceCounterToCabinet": "Pick-place", "TurnOnMicrowave": "Microwave"}
 FORMATS = ["sentence", "kv_text", "points_2d", "points_3d_rgb", "points_3d", "pose_path"]
 MODES = ["err0cm", "err1cm", "err2cm", "err5cm", "err10cm", "err20cm", "err40cm", "distractor", "distractor10pct", "distractor30pct", "drop_point", "drop_name",
-         "drop_source", "rename_thing", "no_command", "blank_images"]
+         "drop_source", "rename_thing", "no_command", "blank_images", "name_swap"]
 
 
 def wilson(k, n, z=1.96):

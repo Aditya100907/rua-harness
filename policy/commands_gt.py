@@ -32,7 +32,8 @@ def _is_pick(task: str) -> bool:
 
 
 def perfect_command(env, task: str, rng: np.random.Generator | None = None, point_error_cm: float = 0.0,
-                    distractor: bool = False, drop: str = "", rename: str = "", twin: bool = False) -> dict:
+                    distractor: bool = False, drop: str = "", rename: str = "", twin: bool = False,
+                    name_swap: bool = False) -> dict:
     from policy.paths import source_task
     from simlib.truth import object_names, object_position, target_part
     task = source_task(task)
@@ -72,6 +73,13 @@ def perfect_command(env, task: str, rng: np.random.Generator | None = None, poin
     obj = tmpl.get("object")
     if rename and obj:
         obj = rename
+    if name_swap and obj and _is_pick(task):
+        # referent test (PROPOSALS P0b): name another object in the scene, keep the point on the true target
+        others = [c.replace("_", " ") for n, c in names["objects"].items()
+                  if n != "obj" and c and c.replace("_", " ") != obj]
+        if others:
+            obj = others[0]
+            info["swapped_name"] = obj
     if drop in ("name", "all") and obj:
         obj = "object"
     src = None if drop in ("source", "all") else tmpl.get("source")

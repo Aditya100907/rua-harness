@@ -235,6 +235,8 @@ def main() -> None:
                     help="N3: drop a field; 'all' = no command (control)")
     ap.add_argument("--blank-images", action="store_true", help="control: the policy's camera images are zeroed")
     ap.add_argument("--rename", default="", help="N4: call the object by this name")
+    ap.add_argument("--name-swap", action="store_true",
+                    help="referent test: name another object in the scene, keep the point on the true target")
     ap.add_argument("--no-determinism-fix", action="store_true",
                     help="run without HexaShell's counter-region determinism fix (policy/determinism.py)")
     ap.add_argument("--z0", default="random", choices=["random", "zero"], help="sampling noise")
@@ -356,7 +358,7 @@ def main() -> None:
                 wrong = args.distractor or (args.distractor_rate > 0 and
                                             np.random.default_rng(seed + 991).random() < args.distractor_rate)
                 opts = dict(point_error_cm=args.point_error_cm, distractor=wrong, drop=args.drop,
-                            rename=args.rename)
+                            rename=args.rename, name_swap=args.name_swap)
                 if args.twin_point:
                     opts["twin"] = True
                 cmd = runner.set_task(task, instr, env=env, cmd_opts=opts, rng=np.random.default_rng(seed + 7))
@@ -379,7 +381,7 @@ def main() -> None:
                         track["true"].append(np.linalg.norm(e - g_true))
                 r = run_episode(env, task, seed, lambda o, t: runner.act(o), H, execute=args.execute,
                                 video=frames, reset_obs=obs0, record=args.save_traj, on_step=on_step)
-                mode = "blank_images" if args.blank_images else ("distractor" if wrong else "perfect") + (f"_rate{args.distractor_rate:g}" if args.distractor_rate else "") \
+                mode = "name_swap" if args.name_swap else "blank_images" if args.blank_images else ("distractor" if wrong else "perfect") + (f"_rate{args.distractor_rate:g}" if args.distractor_rate else "") \
                     if (args.distractor or args.distractor_rate) else (f"drop_{args.drop}" if args.drop else
                                                              (f"rename" if args.rename else "perfect"))
                 extra_row.update(command_mode=mode if runner.format != "sentence" else "sentence",
