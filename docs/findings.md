@@ -17,3 +17,11 @@ Each claim, evidence for, evidence against, confidence. Revised as results arriv
 | Nov 28 | not measurable yet: no L3 (twin) scenes or twin-trained checkpoints; at L0 the F2/F3/F4 spread on 3 tasks is points_2d 65 / kv_text 55 / points_3d 41 on the drawer (old labels, points_3d one seed) | no-command control running (first results due today) | twin data being built; relabelled runs next |
 
 | 6 | Under a real agent, a coordinate format loses its perfect-command lead | pilot (Qwen3-VL-8B, 10 episodes per task, old labels): points_2d 17/30 perfect vs 6/30 agent; sentence 10/30 vs 5/30; agent pointing error 10 to 16 cm, at or beyond the policy's capture radius | one seed, small n, old labels | low (pilot) |
+
+## Track B results and what each changes in the Track A system (one line each; newest last)
+- Regression head instead of MeanFlow (gate): the system's policy is a DEM backbone with a regression head; it trains in hours and reaches 51.2% over 18 tasks, so Track A can use it now.
+- Drawn points beat the plain sentence on drawer and microwave with perfect commands (65 vs 53%, 56 vs 44%, 3 seeds, old labels): if the agent can point well, the system should send drawn points, not only a sentence.
+- The policy follows the name, not the point (distractor test): in ordinary scenes the agent's object name decides what gets grasped, so naming errors, not pointing errors, are the main risk to system success today.
+- Tolerance is flat to about 10 cm and falls by 20 to 40 cm on some checkpoints: the agent's pointing must stay within roughly 10 cm; beyond that the system should snap the point to an object or fall back to text.
+- Open-model commander pilot (Qwen3-VL-8B, 10 cm to 16 cm pointing error): with an open agent writing commands, points lose their lead (6/30 vs 5/30), so the system's default command should stay sentence-first until pointing is fixed (snap control running).
+- Label/test mismatch (microwave points 20 cm off): the system must define the command point the same way in training and at run time; run_skill and the commander use the test-time definition.

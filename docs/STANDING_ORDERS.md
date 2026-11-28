@@ -74,6 +74,17 @@ is next, what needs me. Append a dated entry to the log in
 ~/Desktop/APOLLO-Lab/PROJECT_CONTEXT.md once a day. Reread that file before
 editing it and change only your own lines, since other sessions edit it too.
 
+## Two tracks (Adi, Sat Nov 28, about 15:10). Read with the priorities below.
+**Track A, the system** (Xiatao's original question): a general agent with a small fast policy inside it that
+is cheap, general and fast. Evidence: agent alone, policy alone, agent plus policy, on the 18 single-step tasks
+and on RoboCasa's composite multi-step tasks, with success, seconds, LLM calls and tokens. Plus Diffusion
+Policy, LIBERO, and the real xArm 7 with a 3D input.
+**Track B, the interaction layer:** what the agent should tell the policy and how to train the policy to listen.
+Formats, point following, tolerance, agent pointing error.
+**B serves A.** For every Track B result, write one line in docs/findings.md on what it changes in the Track A
+system. **Split GPUs evenly between the tracks** (watcher pools: Track B = pool A, 4 GPUs; Track A = pools B
+and C, 3 + 1 GPUs; borrowing only when a track's queue is empty). **Report both tracks separately in DAILY.md.**
+
 ## Current priorities (Adi, Sat Nov 28, about 15:00). These are decisions. They replace the two
 ## additions that were here (the research-synthesis priority set and reading PROPOSALS.md each cycle).
 1. System benchmark. William runs HexaShell alone and is on schedule; do not run HexaShell alone yourself.
