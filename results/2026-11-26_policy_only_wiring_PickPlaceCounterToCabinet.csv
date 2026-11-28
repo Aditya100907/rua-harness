@@ -1,0 +1,11 @@
+task,episode,seed,success,seconds,llm_calls,input_tokens,output_tokens,cost_usd,code_commit,checkpoint_step,format,run_id,steps,instruction,model_seconds,state_err0,image_err0
+PickPlaceCounterToCabinet,0,1000,1,9.73,0,0,0,0,b180b55-dirty,,sentence,wiring,230,Pick the honey bottle from the counter and place it in the cabinet.,0.0,0.0,2.6757914225260415
+PickPlaceCounterToCabinet,1,1001,1,8.46,0,0,0,0,b180b55-dirty,,sentence,wiring,204,Pick the milk from the counter and place it in the cabinet.,0.0,0.0,1.6397755940755208
+PickPlaceCounterToCabinet,2,1002,1,9.16,0,0,0,0,b180b55-dirty,,sentence,wiring,165,Pick the sweet potato from the counter and place it in the cabinet.,0.0,1.4901161193847656e-08,2.44775390625
+PickPlaceCounterToCabinet,3,1003,1,6.89,0,0,0,0,b180b55-dirty,,sentence,wiring,164,Pick the cheese from the counter and place it in the cabinet.,0.0,1.4901161193847656e-08,2.4198404947916665
+PickPlaceCounterToCabinet,4,1004,1,8.03,0,0,0,0,b180b55-dirty,,sentence,wiring,196,Pick the carrot from the counter and place it in the cabinet.,0.0,1.4901161193847656e-08,1.7956186930338542
+PickPlaceCounterToCabinet,5,1005,1,7.0,0,0,0,0,b180b55-dirty,,sentence,wiring,166,Pick the whisk from the counter and place it in the cabinet.,0.0,0.0,2.3878021240234375
+PickPlaceCounterToCabinet,6,1006,1,8.86,0,0,0,0,b180b55-dirty,,sentence,wiring,233,Pick the ketchup from the counter and place it in the cabinet.,0.0,7.450580596923828e-09,1.8275299072265625
+PickPlaceCounterToCabinet,7,1007,1,13.72,0,0,0,0,b180b55-dirty,,sentence,wiring,345,Pick the corn from the counter and place it in the cabinet.,0.0,5.960464477539063e-08,1.8167826334635417
+PickPlaceCounterToCabinet,8,1008,1,6.79,0,0,0,0,b180b55-dirty,,sentence,wiring,167,Pick the apple from the counter and place it in the cabinet.,0.0,1.4901161193847656e-08,1.802703857421875
+PickPlaceCounterToCabinet,9,1009,1,9.72,0,0,0,0,b180b55-dirty,,sentence,wiring,238,Pick the peach from the counter and place it in the cabinet.,0.0,0.0,1.5742390950520833

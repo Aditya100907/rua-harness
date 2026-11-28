@@ -1,0 +1,51 @@
+task,episode,seed,success,seconds,llm_calls,input_tokens,output_tokens,cost_usd,code_commit,checkpoint_step,format,run_id,steps,instruction,model_seconds,state_err0,image_err0,command_mode,point_error_cm,min_dist_cmd_cm,min_dist_true_cm,demo_episode,img_rowdiff0,objective,nfe,z0,determinism_fix
+NavigateKitchen,0,1000,0,104.31,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the toaster oven.,31.44,,,sentence,0.0,,,,5.9,mse,1,zero,1
+NavigateKitchen,1,1001,0,106.15,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the fridge.,31.11,,,sentence,0.0,,,,6.7,mse,1,zero,1
+NavigateKitchen,2,1002,0,128.63,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the coffee machine.,30.95,,,sentence,0.0,,,,3.9,mse,1,zero,1
+NavigateKitchen,3,1003,0,105.44,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the microwave.,31.57,,,sentence,0.0,,,,4.8,mse,1,zero,1
+NavigateKitchen,4,1004,0,112.36,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the stand mixer.,31.14,,,sentence,0.0,,,,5.7,mse,1,zero,1
+NavigateKitchen,5,1005,0,119.82,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the toaster oven.,31.65,,,sentence,0.0,,,,5.1,mse,1,zero,1
+NavigateKitchen,6,1006,0,107.06,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the dishwasher.,31.8,,,sentence,0.0,,,,3.9,mse,1,zero,1
+NavigateKitchen,7,1007,0,108.41,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the dishwasher.,30.86,,,sentence,0.0,,,,6.5,mse,1,zero,1
+NavigateKitchen,8,1008,0,104.09,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the sink.,31.0,,,sentence,0.0,,,,6.8,mse,1,zero,1
+NavigateKitchen,9,1009,0,110.53,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the toaster.,31.51,,,sentence,0.0,,,,7.9,mse,1,zero,1
+NavigateKitchen,10,1010,0,118.85,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the range hood.,30.96,,,sentence,0.0,,,,5.3,mse,1,zero,1
+NavigateKitchen,11,1011,1,25.27,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,105,Navigate to the dishwasher.,7.51,,,sentence,0.0,,,,6.8,mse,1,zero,1
+NavigateKitchen,12,1012,0,110.56,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the stand mixer.,31.73,,,sentence,0.0,,,,7.9,mse,1,zero,1
+NavigateKitchen,13,1013,0,118.62,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the oven.,31.64,,,sentence,0.0,,,,3.6,mse,1,zero,1
+NavigateKitchen,14,1014,0,116.43,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the shelves.,31.64,,,sentence,0.0,,,,6.1,mse,1,zero,1
+NavigateKitchen,15,1015,0,117.37,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the toaster oven.,30.79,,,sentence,0.0,,,,7.4,mse,1,zero,1
+NavigateKitchen,16,1016,0,131.26,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the microwave.,31.78,,,sentence,0.0,,,,4.7,mse,1,zero,1
+NavigateKitchen,17,1017,0,104.45,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the stove.,31.15,,,sentence,0.0,,,,3.6,mse,1,zero,1
+NavigateKitchen,18,1018,0,121.28,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the oven.,31.39,,,sentence,0.0,,,,5.9,mse,1,zero,1
+NavigateKitchen,19,1019,0,112.51,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the toaster.,31.25,,,sentence,0.0,,,,6.0,mse,1,zero,1
+NavigateKitchen,20,1020,0,122.96,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the dishwasher.,30.97,,,sentence,0.0,,,,2.7,mse,1,zero,1
+NavigateKitchen,21,1021,0,110.37,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the microwave.,31.06,,,sentence,0.0,,,,5.8,mse,1,zero,1
+NavigateKitchen,22,1022,0,122.83,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the microwave.,31.06,,,sentence,0.0,,,,6.2,mse,1,zero,1
+NavigateKitchen,23,1023,0,98.84,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the sink.,31.05,,,sentence,0.0,,,,4.5,mse,1,zero,1
+NavigateKitchen,24,1024,0,115.02,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the sink.,31.05,,,sentence,0.0,,,,6.4,mse,1,zero,1
+NavigateKitchen,25,1025,0,118.86,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the shelves.,31.61,,,sentence,0.0,,,,4.8,mse,1,zero,1
+NavigateKitchen,26,1026,0,122.14,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the microwave.,30.84,,,sentence,0.0,,,,5.9,mse,1,zero,1
+NavigateKitchen,27,1027,0,124.26,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the stand mixer.,31.42,,,sentence,0.0,,,,6.3,mse,1,zero,1
+NavigateKitchen,28,1028,0,114.04,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the toaster.,31.02,,,sentence,0.0,,,,6.5,mse,1,zero,1
+NavigateKitchen,29,1029,0,113.2,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the fridge.,31.31,,,sentence,0.0,,,,7.0,mse,1,zero,1
+NavigateKitchen,30,1030,0,112.32,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the stand mixer.,31.83,,,sentence,0.0,,,,5.4,mse,1,zero,1
+NavigateKitchen,31,1031,0,117.81,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the toaster.,30.68,,,sentence,0.0,,,,5.8,mse,1,zero,1
+NavigateKitchen,32,1032,0,108.59,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the electric kettle.,30.83,,,sentence,0.0,,,,5.0,mse,1,zero,1
+NavigateKitchen,33,1033,0,111.33,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the electric kettle.,31.12,,,sentence,0.0,,,,7.1,mse,1,zero,1
+NavigateKitchen,34,1034,0,126.1,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the sink.,30.8,,,sentence,0.0,,,,5.5,mse,1,zero,1
+NavigateKitchen,35,1035,0,103.37,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the electric kettle.,30.98,,,sentence,0.0,,,,2.8,mse,1,zero,1
+NavigateKitchen,36,1036,0,112.02,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the oven.,30.69,,,sentence,0.0,,,,4.9,mse,1,zero,1
+NavigateKitchen,37,1037,0,105.64,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the sink.,31.22,,,sentence,0.0,,,,6.2,mse,1,zero,1
+NavigateKitchen,38,1038,0,106.54,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the shelves.,30.82,,,sentence,0.0,,,,5.5,mse,1,zero,1
+NavigateKitchen,39,1039,0,108.85,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the fridge.,30.02,,,sentence,0.0,,,,8.8,mse,1,zero,1
+NavigateKitchen,40,1040,0,108.2,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the fridge.,31.44,,,sentence,0.0,,,,7.1,mse,1,zero,1
+NavigateKitchen,41,1041,0,120.75,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the toaster.,31.16,,,sentence,0.0,,,,3.3,mse,1,zero,1
+NavigateKitchen,42,1042,0,111.13,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the stand mixer.,31.07,,,sentence,0.0,,,,6.0,mse,1,zero,1
+NavigateKitchen,43,1043,0,118.11,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the stove.,30.68,,,sentence,0.0,,,,6.0,mse,1,zero,1
+NavigateKitchen,44,1044,0,107.75,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the coffee machine.,30.56,,,sentence,0.0,,,,4.5,mse,1,zero,1
+NavigateKitchen,45,1045,0,110.76,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the toaster oven.,31.59,,,sentence,0.0,,,,4.1,mse,1,zero,1
+NavigateKitchen,46,1046,0,107.16,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the coffee machine.,31.86,,,sentence,0.0,,,,8.8,mse,1,zero,1
+NavigateKitchen,47,1047,1,38.09,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,149,Navigate to the dishwasher.,10.66,,,sentence,0.0,,,,6.1,mse,1,zero,1
+NavigateKitchen,48,1048,0,96.13,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the microwave.,27.4,,,sentence,0.0,,,,7.7,mse,1,zero,1
+NavigateKitchen,49,1049,0,97.37,0,0,0,0,b180b55-dirty,100000,sentence,fs_mse_sentence_all18,450,Navigate to the stand mixer.,26.69,,,sentence,0.0,,,,6.8,mse,1,zero,1

@@ -9,8 +9,9 @@ Agent alone vs. agent plus policy. Success (%, Wilson 95% interval, episodes) an
 
 | Condition | Success | Seconds | LLM calls | In tokens | Out tokens | Cost (USD) |
 |---|---|---|---|---|---|---|
+| policy_only | 32.6 [32.0, 33.2] (n=25410) | 141.0 | 0.0 | 0 | 0 | 0.0000 |
 | agent_plus_policy | 0.0 [0.0, 79.3] (n=1) | 61.8 | 11.0 | 283,322 | 1,241 | 0.2922 |
-| scripted | 68.2 [61.0, 74.6] (n=176) | 5.8 | 0.0 | 0 | 0 | 0.0000 |
+| scripted | 64.7 [59.7, 69.5] (n=360) | 5.9 | 0.0 | 0 | 0 | 0.0000 |
 
 ## format_success
 
@@ -18,8 +19,13 @@ Success rate (%) by command format, with Wilson 95% interval and episode count. 
 
 | Format | Success |
 |---|---|
-| points_3d_rgb | 0.0 [0.0, 79.3] (n=1) |
-| scripted | 68.2 [61.0, 74.6] (n=176) |
+| kv_text | 24.1 [22.6, 25.6] (n=3250) |
+| points_2d | 40.4 [39.3, 41.6] (n=6750) |
+| points_3d | 19.3 [17.8, 21.0] (n=2250) |
+| points_3d_rgb | 16.8 [15.3, 18.4] (n=2251) |
+| pose_path | 28.3 [25.2, 31.6] (n=750) |
+| scripted | 64.7 [59.7, 69.5] (n=360) |
+| sentence | 36.9 [35.9, 37.8] (n=10160) |
 
 ## checkpoint_success
 
@@ -27,27 +33,533 @@ Success rate (%) by training step.
 
 | Format | Step | Success |
 |---|---|---|
+| kv_text | 5000 | 11.6 [9.2, 14.6] (n=550) |
+| kv_text | 10000 | 25.2 [21.9, 28.8] (n=600) |
+| kv_text | 15000 | 29.2 [25.7, 32.9] (n=600) |
+| kv_text | 20000 | 32.0 [29.4, 34.7] (n=1200) |
+| kv_text | 20001 | 2.7 [1.4, 5.2] (n=300) |
+| points_2d | 5000 | 18.7 [15.3, 22.5] (n=450) |
+| points_2d | 10000 | 30.2 [26.2, 34.6] (n=450) |
+| points_2d | 15000 | 46.0 [41.4, 50.6] (n=450) |
+| points_2d | 20000 | 42.6 [41.3, 44.0] (n=5400) |
+| points_3d | 5000 | 1.3 [0.4, 4.7] (n=150) |
+| points_3d | 10000 | 9.3 [5.6, 15.1] (n=150) |
+| points_3d | 15000 | 18.0 [12.7, 24.9] (n=150) |
+| points_3d | 20000 | 21.8 [19.9, 23.7] (n=1800) |
 | points_3d_rgb | 50 | 0.0 [0.0, 79.3] (n=1) |
+| points_3d_rgb | 5000 | 6.7 [3.7, 11.8] (n=150) |
+| points_3d_rgb | 10000 | 13.3 [8.8, 19.7] (n=150) |
+| points_3d_rgb | 15000 | 18.7 [13.2, 25.7] (n=150) |
+| points_3d_rgb | 20000 | 17.8 [16.1, 19.6] (n=1800) |
+| pose_path | 5000 | 6.7 [3.7, 11.8] (n=150) |
+| pose_path | 10000 | 26.0 [19.6, 33.6] (n=150) |
+| pose_path | 15000 | 35.3 [28.1, 43.3] (n=150) |
+| pose_path | 20000 | 36.7 [31.4, 42.3] (n=300) |
+| sentence | 0 | 0.0 [0.0, 12.1] (n=28) |
+| sentence | 5000 | 6.7 [5.6, 8.0] (n=1600) |
+| sentence | 10000 | 20.2 [17.2, 23.6] (n=600) |
+| sentence | 15000 | 43.1 [38.6, 47.7] (n=450) |
+| sentence | 20000 | 33.5 [30.8, 36.4] (n=1080) |
+| sentence | 50000 | 37.0 [33.9, 40.2] (n=900) |
+| sentence | 70000 | 0.0 [0.0, 5.1] (n=72) |
+| sentence | 100000 | 40.8 [37.6, 44.0] (n=900) |
+| sentence | 150000 | 47.8 [44.5, 51.0] (n=900) |
+| sentence | 200000 | 47.9 [44.6, 51.2] (n=900) |
+| sentence | 250000 | 49.8 [46.5, 53.0] (n=900) |
+| sentence | 300000 | 51.2 [48.9, 53.5] (n=1800) |
 
 ## per_task
 
 Success rate (%) per task and condition, with Wilson 95% interval and episode count.
 
-| Task | agent_plus_policy | scripted |
-|---|---|---|
-| OpenDrawer | 0.0 [0.0, 79.3] (n=1) | 59.2 [45.2, 71.8] (n=49) |
-| PickPlaceCounterToCabinet | - | 36.8 [25.5, 49.8] (n=57) |
-| TurnOnMicrowave | - | 100.0 [94.8, 100.0] (n=70) |
-| All tasks | 0.0 [0.0, 79.3] (n=1) | 68.2 [61.0, 74.6] (n=176) |
+| Task | agent_plus_policy | policy_only | scripted |
+|---|---|---|---|
+| CloseBlenderLid | - | 8.3 [5.8, 11.6] (n=350) | - |
+| CloseFridge | - | 57.1 [51.9, 62.2] (n=350) | - |
+| CloseToasterOvenDoor | - | 54.3 [49.0, 59.4] (n=350) | - |
+| CoffeeSetupMug | - | 41.1 [36.1, 46.4] (n=350) | - |
+| NavigateKitchen | - | 1.1 [0.4, 2.9] (n=350) | - |
+| OpenCabinet | - | 68.9 [63.8, 73.5] (n=350) | - |
+| OpenDrawer | 0.0 [0.0, 79.3] (n=1) | 39.9 [38.7, 41.0] (n=6804) | 65.6 [58.0, 72.5] (n=160) |
+| OpenStandMixerHead | - | 83.1 [78.9, 86.7] (n=350) | - |
+| PickPlaceCounterToCabinet | - | 15.1 [14.2, 16.0] (n=6652) | 40.0 [31.7, 48.9] (n=120) |
+| PickPlaceCounterToStove | - | 13.7 [10.5, 17.7] (n=350) | - |
+| PickPlaceDrawerToCounter | - | 23.7 [19.6, 28.4] (n=350) | - |
+| PickPlaceSinkToCounter | - | 43.4 [38.3, 48.7] (n=350) | - |
+| PickPlaceToasterToCounter | - | 80.9 [76.4, 84.6] (n=350) | - |
+| SlideDishwasherRack | - | 57.1 [51.9, 62.2] (n=350) | - |
+| TurnOffStove | - | 18.9 [15.1, 23.3] (n=350) | - |
+| TurnOnElectricKettle | - | 71.1 [66.2, 75.6] (n=350) | - |
+| TurnOnMicrowave | - | 32.0 [30.9, 33.1] (n=6704) | 100.0 [95.4, 100.0] (n=80) |
+| TurnOnSinkFaucet | - | 68.9 [63.8, 73.5] (n=350) | - |
+| All tasks | 0.0 [0.0, 79.3] (n=1) | 32.6 [32.0, 33.2] (n=25410) | 64.7 [59.7, 69.5] (n=360) |
 
 ## Sources
 
 | File | Condition | Rows | Commits | Missing columns |
 |---|---|---|---|---|
+| 2026-11-26_policy_only_wiring_OpenDrawer.csv | policy_only | 10 | b180b55-dirty | - |
+| 2026-11-26_policy_only_wiring_PickPlaceCounterToCabinet.csv | policy_only | 10 | b180b55-dirty | - |
+| 2026-11-26_policy_only_wiring_TurnOnMicrowave.csv | policy_only | 10 | b180b55-dirty | - |
+| 2026-11-26_policy_only_zero_test_OpenDrawer.csv | policy_only | 10 | b180b55-dirty | - |
+| 2026-11-26_policy_only_zero_test_PickPlaceCounterToCabinet.csv | policy_only | 8 | b180b55-dirty | - |
+| 2026-11-26_policy_only_zero_test_TurnOnMicrowave.csv | policy_only | 10 | b180b55-dirty | - |
 | 2026-11-27_agent_plus_policy_runner_smoke_test.csv | agent_plus_policy | 1 | 6d6f184-dirty | - |
-| 2026-11-27_scripted_kitchens_pretrain_n10.csv | scripted | 8 | d710c82 | - |
-| 2026-11-27_scripted_kitchens_recombined_n10.csv | scripted | 30 | f0b568e-dirty | - |
-| 2026-11-27_scripted_lookalike_guess_n20.csv | scripted | 9 | 4c2e347-dirty | - |
+| 2026-11-27_policy_only_abl_fm_5000_nfe10_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_abl_fm_5000_nfe10_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_abl_fm_5000_nfe10_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_abl_mse_5000_detfix_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_abl_mse_5000_nofix_rerun_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_abl_mse_5000_z0zero_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_abl_mse_5000_z0zero_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_abl_mse_5000_z0zero_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_20001_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_20001_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_20001_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_f4_kv_text_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_fm_sentence_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_fm_sentence_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_fm_sentence_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed1_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_kv_text_seed2_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_distractor_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_distractor_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_distractor_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_drop_name_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_drop_name_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_drop_name_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_drop_point_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_drop_point_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_drop_point_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_drop_source_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_drop_source_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_drop_source_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err0cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err0cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err0cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err10cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err10cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err10cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err1cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err1cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err1cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err2cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err2cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err2cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err5cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err5cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_err5cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_rename_thing_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_rename_thing_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_20000_rename_thing_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_distractor_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_distractor_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_distractor_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_drop_name_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_drop_point_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_drop_point_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_drop_source_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err0cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err0cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err0cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err10cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err10cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err10cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err1cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err1cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err1cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err2cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err2cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err2cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err5cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err5cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_err5cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_20000_rename_thing_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed1_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed2_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed2_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed2_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed2_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed2_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed2_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed2_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed2_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed2_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_2d_seed2_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_distractor_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_distractor_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_distractor_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_drop_name_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_drop_point_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_drop_point_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_drop_source_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err0cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err0cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err0cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err10cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err10cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err10cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err1cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err1cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err1cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err2cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err2cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err2cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err5cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err5cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_err5cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_20000_rename_thing_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_distractor_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_distractor_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_distractor_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_drop_name_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_drop_name_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_drop_name_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_drop_point_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_drop_point_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_drop_point_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_drop_source_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_drop_source_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err0cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err0cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err0cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err10cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err10cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err10cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err1cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err1cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err1cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err2cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err2cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err2cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err5cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err5cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_err5cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_rename_thing_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_20000_rename_thing_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_points_3d_rgb_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_pose_path_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_CloseBlenderLid.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_CloseFridge.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_CloseToasterOvenDoor.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_CoffeeSetupMug.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_NavigateKitchen.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_OpenCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_OpenStandMixerHead.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_PickPlaceCounterToStove.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_PickPlaceDrawerToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_PickPlaceSinkToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_PickPlaceToasterToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_SlideDishwasherRack.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_TurnOffStove.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_TurnOnElectricKettle.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_100000_TurnOnSinkFaucet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_CloseBlenderLid.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_CloseFridge.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_CloseToasterOvenDoor.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_CoffeeSetupMug.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_NavigateKitchen.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_OpenCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_OpenStandMixerHead.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_PickPlaceCounterToStove.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_PickPlaceDrawerToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_PickPlaceSinkToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_PickPlaceToasterToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_SlideDishwasherRack.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_TurnOffStove.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_TurnOnElectricKettle.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_all18_50000_TurnOnSinkFaucet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed1_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed2_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed2_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed2_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed2_15000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed2_15000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed2_15000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed2_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed2_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_fs_mse_sentence_seed2_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_mf_ddp4_bs256_5000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_mf_ddp4_bs256_5000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_mf_ddp4_bs256_5000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_10000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_10000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_10000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_20000_nfe4_OpenDrawer.csv | policy_only | 30 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_20000_nfe4_PickPlaceCounterToCabinet.csv | policy_only | 30 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_20000_nfe4_TurnOnMicrowave.csv | policy_only | 30 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_20000_z0zero_OpenDrawer.csv | policy_only | 30 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_20000_z0zero_PickPlaceCounterToCabinet.csv | policy_only | 30 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_20000_z0zero_TurnOnMicrowave.csv | policy_only | 30 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run1_smoke_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run2_all18_70000_OpenDrawer.csv | policy_only | 24 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run2_all18_70000_PickPlaceCounterToCabinet.csv | policy_only | 24 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run2_all18_70000_TurnOnMicrowave.csv | policy_only | 24 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run3_smoke_seed1_5000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run3_smoke_seed1_5000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_policy_only_run3_smoke_seed1_5000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-27_scripted_kitchens_pretrain_n10.csv | scripted | 30 | 6111203, d710c82 | - |
+| 2026-11-27_scripted_kitchens_pretrain_n10_drawer_v1_superseded.csv | scripted | 10 | d710c82 | - |
+| 2026-11-27_scripted_kitchens_recombined_n10.csv | scripted | 30 | 6111203, f0b568e-dirty | - |
+| 2026-11-27_scripted_kitchens_recombined_n10_drawer_v1_superseded.csv | scripted | 10 | f0b568e-dirty | - |
+| 2026-11-27_scripted_lookalike_guess_n20.csv | scripted | 20 | 4c2e347-dirty | - |
 | 2026-11-27_scripted_lookalike_n20.csv | scripted | 20 | f0b568e-dirty | - |
-| 2026-11-27_scripted_smoke50.csv | scripted | 79 | f3370c5-dirty | - |
-| 2026-11-27_scripted_unseen_names_n10.csv | scripted | 30 | f0b568e-dirty | - |
+| 2026-11-27_scripted_smoke50.csv | scripted | 150 | 6111203, f3370c5-dirty | - |
+| 2026-11-27_scripted_smoke50_drawer_v1_superseded.csv | scripted | 50 | f3370c5-dirty | - |
+| 2026-11-27_scripted_unseen_names_n10.csv | scripted | 30 | 6111203, f0b568e-dirty | - |
+| 2026-11-27_scripted_unseen_names_n10_drawer_v1_superseded.csv | scripted | 10 | f0b568e-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_drop_name_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_drop_name_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_drop_point_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_drop_source_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_drop_source_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_rename_thing_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_rename_thing_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_distractor_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_distractor_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_distractor_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_drop_name_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_drop_name_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_drop_name_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_drop_point_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_drop_point_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_drop_point_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_drop_source_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_drop_source_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_drop_source_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err0cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err0cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err0cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err10cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err10cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err10cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err1cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err1cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err1cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err2cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err2cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err2cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err5cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err5cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err5cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_rename_thing_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_rename_thing_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_rename_thing_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_3d_20000_drop_name_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_3d_20000_drop_name_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_3d_20000_drop_point_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_3d_20000_drop_source_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_3d_20000_drop_source_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_3d_20000_rename_thing_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_3d_20000_rename_thing_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_3d_rgb_20000_drop_source_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_3d_rgb_20000_rename_thing_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_CloseBlenderLid.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_CloseFridge.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_CloseToasterOvenDoor.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_CoffeeSetupMug.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_NavigateKitchen.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_OpenCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_OpenStandMixerHead.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_PickPlaceCounterToStove.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_PickPlaceDrawerToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_PickPlaceSinkToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_PickPlaceToasterToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_SlideDishwasherRack.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_TurnOffStove.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_TurnOnElectricKettle.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_150000_TurnOnSinkFaucet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_CloseBlenderLid.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_CloseFridge.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_CloseToasterOvenDoor.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_CoffeeSetupMug.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_NavigateKitchen.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_OpenCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_OpenStandMixerHead.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_PickPlaceCounterToStove.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_PickPlaceDrawerToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_PickPlaceSinkToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_PickPlaceToasterToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_SlideDishwasherRack.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_TurnOffStove.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_TurnOnElectricKettle.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_200000_TurnOnSinkFaucet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_CloseBlenderLid.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_CloseFridge.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_CloseToasterOvenDoor.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_CoffeeSetupMug.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_NavigateKitchen.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_OpenCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_OpenStandMixerHead.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_PickPlaceCounterToStove.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_PickPlaceDrawerToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_PickPlaceSinkToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_PickPlaceToasterToCounter.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_SlideDishwasherRack.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_TurnOffStove.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_TurnOnElectricKettle.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_250000_TurnOnSinkFaucet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_CloseBlenderLid.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_CloseFridge.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_CloseToasterOvenDoor.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_CoffeeSetupMug.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_NavigateKitchen.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_OpenCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_OpenStandMixerHead.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_PickPlaceCounterToStove.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_PickPlaceDrawerToCounter.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_PickPlaceSinkToCounter.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_PickPlaceToasterToCounter.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_SlideDishwasherRack.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_TurnOffStove.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_TurnOnElectricKettle.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_all18_300000_TurnOnSinkFaucet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_seed2_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_seed2_20000_PickPlaceCounterToCabinet.csv | policy_only | 100 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_seed2_20000_TurnOnMicrowave.csv | policy_only | 100 | b180b55-dirty | - |

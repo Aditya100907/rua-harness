@@ -1,0 +1,25 @@
+task,episode,seed,success,seconds,llm_calls,input_tokens,output_tokens,cost_usd,code_commit,checkpoint_step,format,run_id,steps,instruction,model_seconds,state_err0,image_err0,command_mode,point_error_cm,min_dist_cmd_cm,min_dist_true_cm,demo_episode,img_rowdiff0
+TurnOnMicrowave,0,1000,0,88.4,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.17,,,sentence,0.0,,,,6.9
+TurnOnMicrowave,1,1001,0,88.1,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.19,,,sentence,0.0,,,,3.8
+TurnOnMicrowave,2,1002,0,106.34,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.57,,,sentence,0.0,,,,5.0
+TurnOnMicrowave,3,1003,0,79.51,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,20.9,,,sentence,0.0,,,,6.6
+TurnOnMicrowave,4,1004,0,96.7,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,20.94,,,sentence,0.0,,,,7.6
+TurnOnMicrowave,5,1005,0,91.65,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.31,,,sentence,0.0,,,,5.3
+TurnOnMicrowave,6,1006,0,93.82,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.03,,,sentence,0.0,,,,6.0
+TurnOnMicrowave,7,1007,0,86.42,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,20.59,,,sentence,0.0,,,,6.2
+TurnOnMicrowave,8,1008,0,94.25,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.38,,,sentence,0.0,,,,4.8
+TurnOnMicrowave,9,1009,0,96.06,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.37,,,sentence,0.0,,,,7.8
+TurnOnMicrowave,10,1010,0,106.79,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.54,,,sentence,0.0,,,,5.3
+TurnOnMicrowave,11,1011,0,85.96,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.59,,,sentence,0.0,,,,6.0
+TurnOnMicrowave,12,1012,0,100.45,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.61,,,sentence,0.0,,,,8.3
+TurnOnMicrowave,13,1013,0,96.94,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.7,,,sentence,0.0,,,,4.8
+TurnOnMicrowave,14,1014,0,97.78,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.21,,,sentence,0.0,,,,6.0
+TurnOnMicrowave,15,1015,0,93.64,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.05,,,sentence,0.0,,,,6.0
+TurnOnMicrowave,16,1016,0,110.95,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.7,,,sentence,0.0,,,,5.4
+TurnOnMicrowave,17,1017,0,87.47,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.55,,,sentence,0.0,,,,3.3
+TurnOnMicrowave,18,1018,0,107.19,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.44,,,sentence,0.0,,,,3.4
+TurnOnMicrowave,19,1019,0,87.59,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,20.75,,,sentence,0.0,,,,4.8
+TurnOnMicrowave,20,1020,0,105.63,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.48,,,sentence,0.0,,,,3.4
+TurnOnMicrowave,21,1021,0,93.38,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.26,,,sentence,0.0,,,,3.9
+TurnOnMicrowave,22,1022,0,113.07,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,21.13,,,sentence,0.0,,,,3.4
+TurnOnMicrowave,23,1023,0,118.36,0,0,0,0,b180b55-dirty,70000,sentence,run2_all18,450,Press the start button on the microwave.,20.86,,,sentence,0.0,,,,5.8

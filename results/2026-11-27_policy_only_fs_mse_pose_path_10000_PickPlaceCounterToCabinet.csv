@@ -1,0 +1,51 @@
+task,episode,seed,success,seconds,llm_calls,input_tokens,output_tokens,cost_usd,code_commit,checkpoint_step,format,run_id,steps,instruction,model_seconds,state_err0,image_err0,command_mode,point_error_cm,min_dist_cmd_cm,min_dist_true_cm,demo_episode,img_rowdiff0,objective,nfe,z0,determinism_fix
+PickPlaceCounterToCabinet,0,1000,0,231.85,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object spray from counter to cabinet,33.53,,,demo_scene_452,,,,,5.8,mse,1,zero,1
+PickPlaceCounterToCabinet,1,1001,0,231.8,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object banana from counter to cabinet,34.26,,,demo_scene_453,,,,,6.0,mse,1,zero,1
+PickPlaceCounterToCabinet,2,1002,0,238.57,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object honey bottle from counter to cabinet,33.9,,,demo_scene_454,,,,,6.4,mse,1,zero,1
+PickPlaceCounterToCabinet,3,1003,0,188.15,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object donut from counter to cabinet,33.06,,,demo_scene_455,,,,,5.8,mse,1,zero,1
+PickPlaceCounterToCabinet,4,1004,0,231.35,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object egg from counter to cabinet,33.6,,,demo_scene_456,,,,,5.3,mse,1,zero,1
+PickPlaceCounterToCabinet,5,1005,0,187.33,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object candle from counter to cabinet,34.08,,,demo_scene_457,,,,,4.9,mse,1,zero,1
+PickPlaceCounterToCabinet,6,1006,0,214.37,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object condiment bottle from counter to cabinet,34.95,,,demo_scene_458,,,,,5.6,mse,1,zero,1
+PickPlaceCounterToCabinet,7,1007,1,56.08,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,224,skill pick place object rolling pin from counter to cabinet,10.15,,,demo_scene_459,,,,,5.2,mse,1,zero,1
+PickPlaceCounterToCabinet,8,1008,0,179.19,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object jar from counter to cabinet,33.82,,,demo_scene_460,,,,,4.9,mse,1,zero,1
+PickPlaceCounterToCabinet,9,1009,0,213.56,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object lime from counter to cabinet,33.92,,,demo_scene_461,,,,,8.4,mse,1,zero,1
+PickPlaceCounterToCabinet,10,1010,0,188.65,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object egg from counter to cabinet,32.73,,,demo_scene_462,,,,,4.4,mse,1,zero,1
+PickPlaceCounterToCabinet,11,1011,0,201.54,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object cereal from counter to cabinet,33.98,,,demo_scene_463,,,,,5.1,mse,1,zero,1
+PickPlaceCounterToCabinet,12,1012,1,190.21,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,621,skill pick place object lime from counter to cabinet,28.68,,,demo_scene_464,,,,,6.2,mse,1,zero,1
+PickPlaceCounterToCabinet,13,1013,0,196.26,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object teapot from counter to cabinet,33.7,,,demo_scene_465,,,,,6.3,mse,1,zero,1
+PickPlaceCounterToCabinet,14,1014,0,200.56,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object fish from counter to cabinet,34.55,,,demo_scene_466,,,,,6.1,mse,1,zero,1
+PickPlaceCounterToCabinet,15,1015,0,182.55,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object lemon from counter to cabinet,34.42,,,demo_scene_467,,,,,6.5,mse,1,zero,1
+PickPlaceCounterToCabinet,16,1016,0,251.02,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object donut from counter to cabinet,33.89,,,demo_scene_468,,,,,5.9,mse,1,zero,1
+PickPlaceCounterToCabinet,17,1017,0,251.38,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object bread flat from counter to cabinet,35.2,,,demo_scene_469,,,,,4.3,mse,1,zero,1
+PickPlaceCounterToCabinet,18,1018,0,187.13,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object broccoli from counter to cabinet,33.93,,,demo_scene_470,,,,,5.9,mse,1,zero,1
+PickPlaceCounterToCabinet,19,1019,1,69.35,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,273,skill pick place object ketchup from counter to cabinet,13.04,,,demo_scene_471,,,,,5.7,mse,1,zero,1
+PickPlaceCounterToCabinet,20,1020,0,182.48,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object beer from counter to cabinet,33.74,,,demo_scene_472,,,,,5.9,mse,1,zero,1
+PickPlaceCounterToCabinet,21,1021,1,65.87,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,221,skill pick place object bowl from counter to cabinet,10.33,,,demo_scene_473,,,,,5.4,mse,1,zero,1
+PickPlaceCounterToCabinet,22,1022,0,197.46,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object cinnamon from counter to cabinet,33.5,,,demo_scene_474,,,,,5.2,mse,1,zero,1
+PickPlaceCounterToCabinet,23,1023,0,215.27,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object cheese from counter to cabinet,34.08,,,demo_scene_475,,,,,5.0,mse,1,zero,1
+PickPlaceCounterToCabinet,24,1024,1,64.65,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,260,skill pick place object apple from counter to cabinet,12.31,,,demo_scene_476,,,,,4.4,mse,1,zero,1
+PickPlaceCounterToCabinet,25,1025,0,245.28,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object onion from counter to cabinet,33.33,,,demo_scene_477,,,,,4.6,mse,1,zero,1
+PickPlaceCounterToCabinet,26,1026,0,192.41,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object mug from counter to cabinet,33.64,,,demo_scene_478,,,,,5.0,mse,1,zero,1
+PickPlaceCounterToCabinet,27,1027,0,191.17,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object condiment bottle from counter to cabinet,33.38,,,demo_scene_479,,,,,6.2,mse,1,zero,1
+PickPlaceCounterToCabinet,28,1028,0,220.17,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object onion from counter to cabinet,34.52,,,demo_scene_480,,,,,5.7,mse,1,zero,1
+PickPlaceCounterToCabinet,29,1029,0,196.42,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object straw from counter to cabinet,33.75,,,demo_scene_481,,,,,6.3,mse,1,zero,1
+PickPlaceCounterToCabinet,30,1030,1,58.47,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,232,skill pick place object lime from counter to cabinet,9.99,,,demo_scene_482,,,,,6.2,mse,1,zero,1
+PickPlaceCounterToCabinet,31,1031,1,64.45,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,221,skill pick place object carrot from counter to cabinet,9.81,,,demo_scene_483,,,,,4.2,mse,1,zero,1
+PickPlaceCounterToCabinet,32,1032,0,227.45,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object corn from counter to cabinet,33.28,,,demo_scene_484,,,,,5.5,mse,1,zero,1
+PickPlaceCounterToCabinet,33,1033,1,64.73,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,263,skill pick place object fish from counter to cabinet,11.96,,,demo_scene_485,,,,,5.9,mse,1,zero,1
+PickPlaceCounterToCabinet,34,1034,0,265.32,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object kiwi from counter to cabinet,32.06,,,demo_scene_486,,,,,5.1,mse,1,zero,1
+PickPlaceCounterToCabinet,35,1035,0,234.58,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object sugar cube from counter to cabinet,33.52,,,demo_scene_487,,,,,5.8,mse,1,zero,1
+PickPlaceCounterToCabinet,36,1036,0,181.7,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object apple from counter to cabinet,34.25,,,demo_scene_488,,,,,6.3,mse,1,zero,1
+PickPlaceCounterToCabinet,37,1037,0,186.71,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object kebab skewer from counter to cabinet,32.82,,,demo_scene_489,,,,,7.5,mse,1,zero,1
+PickPlaceCounterToCabinet,38,1038,0,186.49,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object canned food from counter to cabinet,33.72,,,demo_scene_490,,,,,4.6,mse,1,zero,1
+PickPlaceCounterToCabinet,39,1039,0,207.88,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object shrimp from counter to cabinet,32.79,,,demo_scene_491,,,,,5.5,mse,1,zero,1
+PickPlaceCounterToCabinet,40,1040,0,180.77,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object teapot from counter to cabinet,32.9,,,demo_scene_492,,,,,6.4,mse,1,zero,1
+PickPlaceCounterToCabinet,41,1041,0,187.05,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object mushroom from counter to cabinet,34.33,,,demo_scene_493,,,,,5.1,mse,1,zero,1
+PickPlaceCounterToCabinet,42,1042,1,78.77,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,275,skill pick place object tongs from counter to cabinet,13.14,,,demo_scene_494,,,,,8.5,mse,1,zero,1
+PickPlaceCounterToCabinet,43,1043,0,195.46,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object juice from counter to cabinet,32.93,,,demo_scene_495,,,,,6.2,mse,1,zero,1
+PickPlaceCounterToCabinet,44,1044,0,233.77,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object bread from counter to cabinet,32.84,,,demo_scene_496,,,,,6.4,mse,1,zero,1
+PickPlaceCounterToCabinet,45,1045,0,209.12,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object cake from counter to cabinet,32.91,,,demo_scene_497,,,,,7.3,mse,1,zero,1
+PickPlaceCounterToCabinet,46,1046,1,58.09,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,200,skill pick place object boxed food from counter to cabinet,8.8,,,demo_scene_498,,,,,7.3,mse,1,zero,1
+PickPlaceCounterToCabinet,47,1047,0,214.84,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object sponge from counter to cabinet,32.64,,,demo_scene_499,,,,,5.3,mse,1,zero,1
+PickPlaceCounterToCabinet,48,1048,0,225.05,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object sponge from counter to cabinet,30.91,,,demo_scene_500,,,,,6.1,mse,1,zero,1
+PickPlaceCounterToCabinet,49,1049,0,206.79,0,0,0,0,b180b55-dirty,10000,pose_path,fs_mse_pose_path,750,skill pick place object liquor from counter to cabinet,31.61,,,demo_scene_501,,,,,5.6,mse,1,zero,1

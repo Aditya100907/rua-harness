@@ -1,0 +1,51 @@
+task,episode,seed,success,seconds,llm_calls,input_tokens,output_tokens,cost_usd,code_commit,checkpoint_step,format,run_id,steps,instruction,model_seconds,state_err0,image_err0,command_mode,point_error_cm,min_dist_cmd_cm,min_dist_true_cm,demo_episode,img_rowdiff0,objective,nfe,z0,determinism_fix
+PickPlaceCounterToCabinet,0,1000,1,65.82,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,228,skill pick place object coffee cup from counter to cabinet,10.36,,,perfect,0.0,0.5,0.5,,7.4,mse,1,zero,1
+PickPlaceCounterToCabinet,1,1001,1,57.5,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,213,skill pick place object ladle from counter to cabinet,11.04,,,perfect,0.0,1.0,1.0,,5.8,mse,1,zero,1
+PickPlaceCounterToCabinet,2,1002,1,61.1,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,194,skill pick place object bread from counter to cabinet,9.09,,,perfect,0.0,0.8,0.8,,5.5,mse,1,zero,1
+PickPlaceCounterToCabinet,3,1003,0,185.72,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object blender jug from counter to cabinet,33.88,,,perfect,0.0,11.4,11.4,,5.0,mse,1,zero,1
+PickPlaceCounterToCabinet,4,1004,0,208.61,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object boxed food from counter to cabinet,33.77,,,perfect,0.0,59.2,59.2,,5.4,mse,1,zero,1
+PickPlaceCounterToCabinet,5,1005,1,78.88,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,191,skill pick place object avocado from counter to cabinet,9.8,,,perfect,0.0,2.1,2.1,,5.3,mse,1,zero,1
+PickPlaceCounterToCabinet,6,1006,0,191.45,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object bell pepper from counter to cabinet,34.29,,,perfect,0.0,37.3,37.3,,6.2,mse,1,zero,1
+PickPlaceCounterToCabinet,7,1007,0,187.1,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object jar from counter to cabinet,32.85,,,perfect,0.0,30.7,30.7,,7.7,mse,1,zero,1
+PickPlaceCounterToCabinet,8,1008,0,191.42,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object sponge from counter to cabinet,33.23,,,perfect,0.0,2.9,2.9,,6.4,mse,1,zero,1
+PickPlaceCounterToCabinet,9,1009,0,186.2,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object aluminum foil from counter to cabinet,33.35,,,perfect,0.0,17.8,17.8,,5.5,mse,1,zero,1
+PickPlaceCounterToCabinet,10,1010,1,60.64,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,211,skill pick place object whisk from counter to cabinet,10.21,,,perfect,0.0,3.4,3.4,,6.7,mse,1,zero,1
+PickPlaceCounterToCabinet,11,1011,0,186.33,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object bell pepper from counter to cabinet,35.67,,,perfect,0.0,9.1,9.1,,6.1,mse,1,zero,1
+PickPlaceCounterToCabinet,12,1012,0,183.47,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object coffee cup from counter to cabinet,34.11,,,perfect,0.0,55.7,55.7,,5.4,mse,1,zero,1
+PickPlaceCounterToCabinet,13,1013,1,56.49,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,210,skill pick place object squash from counter to cabinet,9.53,,,perfect,0.0,1.3,1.3,,4.5,mse,1,zero,1
+PickPlaceCounterToCabinet,14,1014,1,45.54,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,176,skill pick place object cake from counter to cabinet,7.45,,,perfect,0.0,1.4,1.4,,6.2,mse,1,zero,1
+PickPlaceCounterToCabinet,15,1015,0,212.87,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object kettle non electric from counter to cabinet,32.26,,,perfect,0.0,5.3,5.3,,7.0,mse,1,zero,1
+PickPlaceCounterToCabinet,16,1016,0,272.11,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object donut from counter to cabinet,32.39,,,perfect,0.0,5.2,5.2,,6.1,mse,1,zero,1
+PickPlaceCounterToCabinet,17,1017,1,50.5,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,209,skill pick place object bell pepper from counter to cabinet,9.74,,,perfect,0.0,1.9,1.9,,6.4,mse,1,zero,1
+PickPlaceCounterToCabinet,18,1018,0,202.65,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object cereal from counter to cabinet,33.49,,,perfect,0.0,5.7,5.7,,7.4,mse,1,zero,1
+PickPlaceCounterToCabinet,19,1019,0,237.4,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object bread from counter to cabinet,32.46,,,perfect,0.0,5.8,5.8,,4.9,mse,1,zero,1
+PickPlaceCounterToCabinet,20,1020,1,64.69,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,231,skill pick place object kebab skewer from counter to cabinet,10.46,,,perfect,0.0,3.2,3.2,,5.6,mse,1,zero,1
+PickPlaceCounterToCabinet,21,1021,0,250.79,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object bottled drink from counter to cabinet,34.17,,,perfect,0.0,5.0,5.0,,5.9,mse,1,zero,1
+PickPlaceCounterToCabinet,22,1022,0,214.71,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object croissant from counter to cabinet,33.04,,,perfect,0.0,3.7,3.7,,5.9,mse,1,zero,1
+PickPlaceCounterToCabinet,23,1023,0,173.31,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object cup from counter to cabinet,32.64,,,perfect,0.0,10.3,10.3,,4.9,mse,1,zero,1
+PickPlaceCounterToCabinet,24,1024,0,194.84,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object egg from counter to cabinet,32.91,,,perfect,0.0,3.3,3.3,,6.2,mse,1,zero,1
+PickPlaceCounterToCabinet,25,1025,0,212.98,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object cheese grater from counter to cabinet,33.49,,,perfect,0.0,25.1,25.1,,5.2,mse,1,zero,1
+PickPlaceCounterToCabinet,26,1026,0,210.51,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object cream cheese stick from counter to cabinet,32.9,,,perfect,0.0,4.0,4.0,,5.4,mse,1,zero,1
+PickPlaceCounterToCabinet,27,1027,0,252.0,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object liquor from counter to cabinet,32.29,,,perfect,0.0,5.7,5.7,,5.9,mse,1,zero,1
+PickPlaceCounterToCabinet,28,1028,1,96.33,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,247,skill pick place object garlic from counter to cabinet,10.61,,,perfect,0.0,1.9,1.9,,6.5,mse,1,zero,1
+PickPlaceCounterToCabinet,29,1029,0,201.46,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object glass cup from counter to cabinet,33.98,,,perfect,0.0,20.0,20.0,,6.5,mse,1,zero,1
+PickPlaceCounterToCabinet,30,1030,1,60.99,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,242,skill pick place object cream cheese stick from counter to cabinet,10.72,,,perfect,0.0,3.0,3.0,,5.3,mse,1,zero,1
+PickPlaceCounterToCabinet,31,1031,1,59.14,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,199,skill pick place object squash from counter to cabinet,8.5,,,perfect,0.0,1.3,1.3,,7.5,mse,1,zero,1
+PickPlaceCounterToCabinet,32,1032,1,69.58,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,194,skill pick place object shaker from counter to cabinet,8.59,,,perfect,0.0,0.2,0.2,,5.4,mse,1,zero,1
+PickPlaceCounterToCabinet,33,1033,0,210.37,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object donut from counter to cabinet,33.47,,,perfect,0.0,0.4,0.4,,7.1,mse,1,zero,1
+PickPlaceCounterToCabinet,34,1034,0,221.99,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object wine from counter to cabinet,35.38,,,perfect,0.0,8.8,8.8,,5.9,mse,1,zero,1
+PickPlaceCounterToCabinet,35,1035,0,182.39,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object spray from counter to cabinet,31.19,,,perfect,0.0,2.0,2.0,,4.2,mse,1,zero,1
+PickPlaceCounterToCabinet,36,1036,1,51.94,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,183,skill pick place object canned food from counter to cabinet,7.92,,,perfect,0.0,2.0,2.0,,5.6,mse,1,zero,1
+PickPlaceCounterToCabinet,37,1037,0,196.88,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object pear from counter to cabinet,33.33,,,perfect,0.0,7.3,7.3,,5.6,mse,1,zero,1
+PickPlaceCounterToCabinet,38,1038,0,185.8,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object mustard from counter to cabinet,33.06,,,perfect,0.0,6.9,6.9,,5.6,mse,1,zero,1
+PickPlaceCounterToCabinet,39,1039,0,236.51,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object canned food from counter to cabinet,32.64,,,perfect,0.0,5.7,5.7,,6.1,mse,1,zero,1
+PickPlaceCounterToCabinet,40,1040,0,176.7,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object mayonnaise from counter to cabinet,30.26,,,perfect,0.0,9.0,9.0,,4.6,mse,1,zero,1
+PickPlaceCounterToCabinet,41,1041,1,64.03,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,241,skill pick place object tongs from counter to cabinet,11.12,,,perfect,0.0,4.0,4.0,,5.1,mse,1,zero,1
+PickPlaceCounterToCabinet,42,1042,1,83.52,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,290,skill pick place object kebab skewer from counter to cabinet,12.6,,,perfect,0.0,3.3,3.3,,7.7,mse,1,zero,1
+PickPlaceCounterToCabinet,43,1043,1,50.29,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,160,skill pick place object mustard from counter to cabinet,7.13,,,perfect,0.0,3.7,3.7,,5.6,mse,1,zero,1
+PickPlaceCounterToCabinet,44,1044,0,181.92,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object kiwi from counter to cabinet,32.13,,,perfect,0.0,12.9,12.9,,4.8,mse,1,zero,1
+PickPlaceCounterToCabinet,45,1045,0,190.55,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object cheese grater from counter to cabinet,32.92,,,perfect,0.0,195.6,195.6,,2.6,mse,1,zero,1
+PickPlaceCounterToCabinet,46,1046,0,198.92,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object egg from counter to cabinet,34.43,,,perfect,0.0,9.0,9.0,,7.2,mse,1,zero,1
+PickPlaceCounterToCabinet,47,1047,0,201.3,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object cake from counter to cabinet,30.77,,,perfect,0.0,6.1,6.1,,5.9,mse,1,zero,1
+PickPlaceCounterToCabinet,48,1048,0,178.71,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,750,skill pick place object cheese from counter to cabinet,32.36,,,perfect,0.0,46.0,46.0,,5.4,mse,1,zero,1
+PickPlaceCounterToCabinet,49,1049,1,50.1,0,0,0,0,b180b55-dirty,15000,kv_text,fs_mse_kv_text,203,skill pick place object wine from counter to cabinet,8.82,,,perfect,0.0,1.6,1.6,,6.6,mse,1,zero,1

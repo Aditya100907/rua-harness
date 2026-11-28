@@ -1,0 +1,11 @@
+task,episode,seed,success,seconds,llm_calls,input_tokens,output_tokens,cost_usd,code_commit,checkpoint_step,format,run_id,steps,instruction,model_seconds,state_err0,image_err0
+OpenDrawer,0,1000,1,12.04,0,0,0,0,b180b55-dirty,,sentence,wiring,318,Open the right drawer.,0.0,0.0,1.7823944091796875
+OpenDrawer,1,1001,1,9.25,0,0,0,0,b180b55-dirty,,sentence,wiring,219,Open the right drawer.,0.0,0.0,1.94427490234375
+OpenDrawer,2,1002,1,8.15,0,0,0,0,b180b55-dirty,,sentence,wiring,210,Open the right drawer.,0.0,2.9802322387695312e-08,1.7729543050130208
+OpenDrawer,3,1003,1,17.19,0,0,0,0,b180b55-dirty,,sentence,wiring,417,Open the right drawer.,0.0,0.0,1.84088134765625
+OpenDrawer,4,1004,1,8.89,0,0,0,0,b180b55-dirty,,sentence,wiring,192,Open the left drawer.,0.0,0.0,2.5356953938802085
+OpenDrawer,5,1005,1,8.09,0,0,0,0,b180b55-dirty,,sentence,wiring,223,Open the left drawer.,0.0,0.0,1.6806538899739583
+OpenDrawer,6,1006,1,11.27,0,0,0,0,b180b55-dirty,,sentence,wiring,255,Open the left drawer.,0.0,5.960464477539063e-08,2.105738321940104
+OpenDrawer,7,1007,1,12.18,0,0,0,0,b180b55-dirty,,sentence,wiring,328,Open the left drawer.,0.0,0.0,1.9727121988932292
+OpenDrawer,8,1008,1,7.54,0,0,0,0,b180b55-dirty,,sentence,wiring,197,Open the left drawer.,0.0,0.0,1.878204345703125
+OpenDrawer,9,1009,1,16.35,0,0,0,0,b180b55-dirty,,sentence,wiring,317,Open the right drawer.,0.0,1.4901161193847656e-08,1.7359415690104167

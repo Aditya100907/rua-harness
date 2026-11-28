@@ -1,0 +1,31 @@
+task,episode,seed,success,seconds,llm_calls,input_tokens,output_tokens,cost_usd,code_commit,checkpoint_step,format,run_id,steps,instruction,model_seconds,state_err0,image_err0,command_mode,point_error_cm,min_dist_cmd_cm,min_dist_true_cm,demo_episode,img_rowdiff0
+PickPlaceCounterToCabinet,0,1000,0,180.04,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the coffee cup from the counter and place it in the cabinet.,34.37,,,sentence,0.0,,,,7.4
+PickPlaceCounterToCabinet,1,1001,0,167.55,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the ladle from the counter and place it in the cabinet.,34.45,,,sentence,0.0,,,,5.8
+PickPlaceCounterToCabinet,2,1002,0,201.6,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the bread from the counter and place it in the cabinet.,34.4,,,sentence,0.0,,,,5.5
+PickPlaceCounterToCabinet,3,1003,0,162.9,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the blender jug from the counter and place it in the cabinet.,35.58,,,sentence,0.0,,,,5.0
+PickPlaceCounterToCabinet,4,1004,0,163.94,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the boxed food from the counter and place it in the cabinet.,34.71,,,sentence,0.0,,,,5.4
+PickPlaceCounterToCabinet,5,1005,0,238.56,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the avocado from the counter and place it in the cabinet.,34.49,,,sentence,0.0,,,,5.3
+PickPlaceCounterToCabinet,6,1006,0,165.39,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the bell pepper from the counter and place it in the cabinet.,33.01,,,sentence,0.0,,,,6.2
+PickPlaceCounterToCabinet,7,1007,0,169.24,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the jar from the counter and place it in the cabinet.,34.24,,,sentence,0.0,,,,7.7
+PickPlaceCounterToCabinet,8,1008,0,166.99,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the sponge from the counter and place it in the cabinet.,33.6,,,sentence,0.0,,,,6.4
+PickPlaceCounterToCabinet,9,1009,0,157.98,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the aluminum foil from the counter and place it in the cabinet.,34.48,,,sentence,0.0,,,,5.5
+PickPlaceCounterToCabinet,10,1010,0,180.56,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the whisk from the counter and place it in the cabinet.,35.03,,,sentence,0.0,,,,6.7
+PickPlaceCounterToCabinet,11,1011,0,161.5,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the bell pepper from the counter and place it in the cabinet.,35.29,,,sentence,0.0,,,,6.1
+PickPlaceCounterToCabinet,12,1012,0,163.24,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the coffee cup from the counter and place it in the cabinet.,34.9,,,sentence,0.0,,,,5.4
+PickPlaceCounterToCabinet,13,1013,0,167.45,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the squash from the counter and place it in the cabinet.,33.9,,,sentence,0.0,,,,4.5
+PickPlaceCounterToCabinet,14,1014,0,167.0,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the cake from the counter and place it in the cabinet.,34.72,,,sentence,0.0,,,,6.2
+PickPlaceCounterToCabinet,15,1015,0,175.26,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the kettle from the counter and place it in the cabinet.,32.93,,,sentence,0.0,,,,7.0
+PickPlaceCounterToCabinet,16,1016,0,233.41,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the donut from the counter and place it in the cabinet.,33.87,,,sentence,0.0,,,,6.1
+PickPlaceCounterToCabinet,17,1017,0,151.64,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the bell pepper from the counter and place it in the cabinet.,34.09,,,sentence,0.0,,,,6.4
+PickPlaceCounterToCabinet,18,1018,0,171.8,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the cereal from the counter and place it in the cabinet.,34.53,,,sentence,0.0,,,,7.4
+PickPlaceCounterToCabinet,19,1019,0,202.89,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the bread from the counter and place it in the cabinet.,33.57,,,sentence,0.0,,,,4.9
+PickPlaceCounterToCabinet,20,1020,0,197.51,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the onion from the counter and place it in the cabinet.,34.14,,,sentence,0.0,,,,5.2
+PickPlaceCounterToCabinet,21,1021,0,212.75,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the bottled drink from the counter and place it in the cabinet.,34.61,,,sentence,0.0,,,,5.9
+PickPlaceCounterToCabinet,22,1022,0,180.11,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the peeler from the counter and place it in the cabinet.,34.13,,,sentence,0.0,,,,5.6
+PickPlaceCounterToCabinet,23,1023,0,149.62,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the cup from the counter and place it in the cabinet.,34.39,,,sentence,0.0,,,,4.9
+PickPlaceCounterToCabinet,24,1024,0,169.82,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the egg from the counter and place it in the cabinet.,34.27,,,sentence,0.0,,,,6.2
+PickPlaceCounterToCabinet,25,1025,0,168.68,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the cheese grater from the counter and place it in the cabinet.,31.62,,,sentence,0.0,,,,5.2
+PickPlaceCounterToCabinet,26,1026,0,173.81,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the cream cheese stick from the counter and place it in the cabinet.,33.41,,,sentence,0.0,,,,5.4
+PickPlaceCounterToCabinet,27,1027,0,193.44,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the liquor from the counter and place it in the cabinet.,31.79,,,sentence,0.0,,,,5.9
+PickPlaceCounterToCabinet,28,1028,0,226.31,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the garlic from the counter and place it in the cabinet.,32.18,,,sentence,0.0,,,,6.5
+PickPlaceCounterToCabinet,29,1029,0,171.5,0,0,0,0,b180b55-dirty,20000,sentence,run1_smoke,750,Pick the glass cup from the counter and place it in the cabinet.,34.85,,,sentence,0.0,,,,6.5
