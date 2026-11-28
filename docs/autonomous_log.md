@@ -75,3 +75,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 18:14 sentence 15k PickPlace 14/50 (28%). seed1 at 1k steps; depth3 851/1559; kv_text and points_2d at about 10.4k.
 - 18:34 sentence 20k final: 46/100, 26/100, 43/100. kv_text 10k: drawer 33/50, microwave 18/50. points_2d 10k: 25/50, 15/50. depth3 1155/1559.
 - 18:55 points_3d_rgb 5k 10/0/0; pose_path 5k 5/1/4 (demo scenes); kv_text 10k pick 9/50; points_2d 10k pick 6/50. depth3 1386/1559; points_3d starts after.
+- 19:15 kv_text 15k: pick 18/50, microwave 21/50; points_2d 15k microwave 25/50; sentence seed1 5k drawer 8/50 (seed0 5k: 8/50), microwave 0/50 (seed0: 4/50). 18-task run scored at 50k (34901901). depth3 1553/1559.
