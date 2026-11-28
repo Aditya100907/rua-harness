@@ -23,7 +23,7 @@ SCR=/nfs/roberts/scratch/pi_dr877/ak3288
 E=$PROJ/envs/vllm
 MODEL=${MODEL:-Qwen/Qwen3-VL-8B-Instruct}
 PORT=${PORT:-18400}
-MAXLEN=${MAXLEN:-32768}
+MAXLEN=${MAXLEN:-12288}   # episodes use at most about 3.5k tokens; 32768 did not fit the KV cache on a 32 GB GPU (Nov 28)
 START_GRACE_MIN=${START_GRACE_MIN:-40}
 IDLE_MIN=${IDLE_MIN:-20}
 ADDR=$PROJ/apollo-lab/runs/vlm_server.txt
@@ -36,7 +36,7 @@ echo "== $(date '+%F %T') $HOST model $MODEL port $PORT job ${SLURM_JOB_ID:-}"
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader || true
 
 "$E/bin/vllm" serve "$MODEL" --host 0.0.0.0 --port "$PORT" --served-model-name vlm \
-    --max-model-len "$MAXLEN" --limit-mm-per-prompt '{"image": 12}' --gpu-memory-utilization 0.85 \
+    --max-model-len "$MAXLEN" --limit-mm-per-prompt '{"image": 12}' --gpu-memory-utilization 0.90 \
     --seed 0 > "$LOG" 2>&1 &
 SERVER=$!
 cleanup() {
