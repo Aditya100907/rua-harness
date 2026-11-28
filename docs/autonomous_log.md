@@ -106,3 +106,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 14:50 Daily entry appended to PROJECT_CONTEXT.md section 16 (reread first, own line only).
 - 14:51 Twin data merged (34972030): 496 of 502 demos with a twin, 446 train, 50 held-out; loads on Bouchet. docs/twin_data.md and research journal updated.
 - 14:56 New priorities: standing orders updated; William's branch has only a push check; helpers started for run_skill inside HexaShell and the Diffusion Policy baseline; depth-noise training built and two noise-trained point-map runs queued (pool B); Dec 15 checklist in docs/sim_to_real.md.
+- 15:00 vLLM server 34972032 failed: KV cache too small for 32768 context on a smaller gpu_devel GPU. Set max length 12288, util 0.90; cancelled the waiting snap clients and relaunched.
