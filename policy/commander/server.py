@@ -26,7 +26,7 @@ CAM_NAMES = {"left": "robot0_agentview_left", "right": "robot0_agentview_right",
 
 
 class Episode:
-    def __init__(self, task, seed, ckpt, epdir: Path, size=256):
+    def __init__(self, task, seed, ckpt, epdir: Path, size=256, snap: bool = False):
         from simlib.truth import target_part
         from policy.run_skill import _runner, default_device
         self.task, self.seed, self.ckpt, self.dir = task, seed, ckpt, epdir
@@ -42,6 +42,10 @@ class Episode:
         self.steps, self.n_look, self.n_skill, self.success, self.done = 0, 0, 0, False, False
         self.log = []
         self.part = target_part(self.env, task)        # grading only
+        # decode-first control (snap): replace the agent's grasp point by the nearest plausible referent.
+        # Candidates come from simulator state, so this is an upper bound for a perception-based snapper.
+        self.snap = snap
+        self.snap_candidates = snap_candidates(self.env, task) if snap else []
         self.t0 = time.time()
 
     def _save_images(self) -> dict:
@@ -92,6 +96,11 @@ class Episode:
             return {"error": f"bad command: {e}"}
         g = self._lift(cmd.get("object"))
         p = self._lift(cmd.get("target"))
+        snapped = None
+        if self.snap and g is not None and self.snap_candidates:
+            names, pts = zip(*self.snap_candidates)
+            k = int(np.argmin([np.linalg.norm(np.asarray(q) - g) for q in pts]))
+            g, snapped = np.asarray(pts[k], dtype=np.float64), names[k]
         command = {"kv_text": to_policy_text(c), "grasp_world": g, "place_world": p,
                    "has": [g is not None, p is not None]}
         sentence = to_sentence(c)
@@ -109,7 +118,8 @@ class Episode:
         if p is not None and self.part.dest_pos is not None:
             err["place_err_cm"] = round(100 * float(np.linalg.norm(p - np.asarray(self.part.dest_pos))), 1)
         self.log.append({"command": cmd, "sent_text": command["kv_text"], "sentence": sentence, "steps": r["steps"],
-                         "reason": r["reason"], **err})
+                         "reason": r["reason"], "snapped_to": snapped,
+                         "snapped_to_target": (snapped == "TARGET") if snapped is not None else None, **err})
         imgs = self._save_images()
         return {"status": "skill stopped", "robot_seconds": r["robot_seconds"],
                 "robot_seconds_used": self.steps / 20, "robot_seconds_left": (self.horizon - self.steps) / 20,
@@ -126,6 +136,29 @@ class Episode:
                 "n_skill": self.n_skill, "grasp_err_cm_first": errs[0] if errs else None,
                 "place_err_cm_first": perrs[0] if perrs else None, "log": self.log, "lang": self.lang,
                 "wall_seconds": round(time.time() - self.t0, 1)}
+
+
+def snap_candidates(env, task: str) -> list:
+    """(name, world point) referents the agent could mean; the true target is named "TARGET"."""
+    from simlib.truth import find_elements, object_names, object_position, target_part
+    part = target_part(env, task)
+    out = []
+    if part.object_pos is not None and task.startswith(("PickPlace", "CoffeeSetupMug")):
+        out.append(("TARGET", part.object_pos))
+        out += [(n, object_position(env, n)) for n in object_names(env) if n != part.object]
+    elif task == "OpenDrawer" or task == "CloseDrawer":
+        from robocasa.models.fixtures.cabinets import Drawer
+        tgt = env.drawer.name
+        for name, fx in env.fixtures.items():
+            if not isinstance(fx, Drawer):
+                continue
+            kind, _, pos = find_elements(env, fx.name, [r"^door_handle_reg_main$", r"handle"])
+            if kind is None:
+                continue
+            out.append(("TARGET" if fx.name == tgt else fx.name, np.mean(pos, 0)))
+    else:   # other tasks: only the task's own part, so snapping equals the perfect command
+        out.append(("TARGET", part.pos))
+    return out
 
 
 def serve(ep: Episode, port: int):

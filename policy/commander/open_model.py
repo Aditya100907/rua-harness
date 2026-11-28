@@ -220,14 +220,14 @@ def check_command(cmd: dict, coords: str, sent: int) -> tuple[dict | None, str |
 
 
 def run_episode(task: str, seed: int, ckpt: str, epdir: Path, chat_args: dict, coords: str, img_size: int,
-                max_calls: int, wall_limit: float, keep_images: int) -> dict:
+                max_calls: int, wall_limit: float, keep_images: int, snap: bool = False) -> dict:
     from policy.commander.server import Episode
     from rua_harness.command import DIRECTIONS, SKILLS
     epdir.mkdir(parents=True, exist_ok=True)
     for f in ("calls.jsonl",):
         (epdir / f).unlink(missing_ok=True)
     chat = Chat(log_path=epdir / "calls.jsonl", **chat_args)
-    ep = Episode(task, seed, ckpt, epdir)
+    ep = Episode(task, seed, ckpt, epdir, snap=snap)
     t0 = time.time()
     ep.look({})
     sysmsg = SYSTEM.format(skills=", ".join(sorted(SKILLS)), directions=", ".join(DIRECTIONS),
@@ -285,7 +285,8 @@ def run_episode(task: str, seed: int, ckpt: str, epdir: Path, chat_args: dict, c
             "llm_seconds": round(chat.seconds, 1), "robot_seconds": fin["robot_seconds"], "n_skill": fin["n_skill"],
             "grasp_err_cm": g[0] if g else "", "place_err_cm": p[0] if p else "",
             "grasp_err_cm_all": ";".join(map(str, g)), "place_err_cm_all": ";".join(map(str, p)),
-            "agent_status": status, "instruction": fin["lang"],
+            "agent_status": status, "instruction": fin["lang"], "snap": int(snap),
+            "snapped_to_target": ";".join(str(l.get("snapped_to_target")) for l in fin["log"]),
             "sent_text": " | ".join(l["sent_text"] for l in fin["log"]),
             "sentence": " | ".join(l["sentence"] for l in fin["log"])}
 
@@ -293,7 +294,7 @@ def run_episode(task: str, seed: int, ckpt: str, epdir: Path, chat_args: dict, c
 COLS = ["task", "episode", "seed", "success", "seconds", "llm_calls", "input_tokens", "output_tokens", "cost_usd",
         "code_commit", "checkpoint_step", "format", "run_id", "robot_seconds", "n_skill", "grasp_err_cm",
         "place_err_cm", "llm_seconds", "grasp_err_cm_all", "place_err_cm_all", "agent_status", "model", "coords",
-        "img_size", "instruction", "sent_text", "sentence"]
+        "img_size", "instruction", "sent_text", "sentence", "snap", "snapped_to_target"]
 
 
 def main():
@@ -316,6 +317,8 @@ def main():
     ap.add_argument("--max-tokens", type=int, default=400)
     ap.add_argument("--keep-images", type=int, default=2, help="image sets kept in the context")
     ap.add_argument("--wall-limit", type=float, default=1800)
+    ap.add_argument("--snap", action="store_true",
+                    help="decode-first control: snap the agent's grasp point to the nearest plausible referent")
     args = ap.parse_args()
     ck = Path(args.ckpt)
     fmt = json.loads((ck.parent / "config.json").read_text()).get("format", "sentence")
@@ -336,7 +339,7 @@ def main():
             import torch
             torch.manual_seed(seed)
             r = run_episode(task, seed, str(ck), root / f"{task}_{seed}", chat_args, args.coords, args.img_size,
-                            args.max_calls, args.wall_limit, args.keep_images)
+                            args.max_calls, args.wall_limit, args.keep_images, snap=args.snap)
             row = dict(task=task, episode=i, seed=seed, code_commit=commit, format=fmt,
                        checkpoint_step=ck.stem.split("_")[-1].lstrip("0") or "0", run_id=ck.parent.name,
                        model=args.model_id or args.model, coords=args.coords, img_size=args.img_size, **r)
