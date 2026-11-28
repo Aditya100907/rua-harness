@@ -15,3 +15,5 @@ Each claim, evidence for, evidence against, confidence. Revised as results arriv
 | Date | Gap at L3 | No-command drops | Status |
 |---|---|---|---|
 | Nov 28 | not measurable yet: no L3 (twin) scenes or twin-trained checkpoints; at L0 the F2/F3/F4 spread on 3 tasks is points_2d 65 / kv_text 55 / points_3d 41 on the drawer (old labels, points_3d one seed) | no-command control running (first results due today) | twin data being built; relabelled runs next |
+
+| 6 | Under a real agent, a coordinate format loses its perfect-command lead | pilot (Qwen3-VL-8B, 10 episodes per task, old labels): points_2d 17/30 perfect vs 6/30 agent; sentence 10/30 vs 5/30; agent pointing error 10 to 16 cm, at or beyond the policy's capture radius | one seed, small n, old labels | low (pilot) |

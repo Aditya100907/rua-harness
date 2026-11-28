@@ -143,3 +143,13 @@ Settings shared by every run: left + wrist cameras, shipped quantiles, held-out-
 ## Nov 28, 14:30. Relabel to test-time points: how far the old training points were
 - Grasp-point shift, hindsight (gripper-close) label vs test-time perfect command, all demos: PickPlaceCounterToCabinet median 2.3 to 2.8 cm per chunk (p95 up to 8.6, max 15.9); OpenDrawer median 2.4 to 3.1 cm (max 6.6); **TurnOnMicrowave median 18.8 to 22.1 cm (p95 32 to 38, max 44)**.
 - **Means:** for the microwave, the old point formats were trained with points about 20 cm from the start button, the point they got at test. The old microwave scores of point formats (points_2d 56%, points_3d 18%, points_3d_rgb 25%) were measured under that mismatch and do not count. The relabelled runs (P0) are the clean comparison.
+
+## Nov 28, 14:42. First agent-written commands (open model, pilot)
+- **Tested:** Qwen3-VL-8B-Instruct (vLLM on Bouchet, free) as the commander: it sees the left, right and wrist images and writes one command (names plus a pixel per object), lifted to 3D with depth; up to 6 calls per episode. Checkpoints: fs_mse_sentence and fs_mse_points_2d (seed 0, 20k, **old labels**). 10 episodes per smoke task, seeds 1000 to 1009. Perfect-command success on the same checkpoints and seeds for comparison.
+| Checkpoint | Drawer | PickPlace | Microwave | Total | Perfect commands |
+|---|---|---|---|---|---|
+| sentence | 2/10 | 2/10 | 1/10 | 5/30 | 10/30 |
+| points_2d | 0/10 | 0/10 | 6/10 | 6/30 | 17/30 |
+- Commander pointing error (grasp point vs ground truth, median): drawer 15.2 to 16.5 cm, pick-place 15.3 cm, microwave 9.8 cm. Median 1 to 2 model calls and 1.3k to 3.5k input tokens per episode; 2 to 3.5 minutes per episode on CPU nodes.
+- **Means (pilot, one seed, n=10 per cell):** with perfect commands points_2d leads sentence 17 to 10; with the agent writing the commands they tie (6 vs 5). points_2d holds on the microwave, where the agent's error is about 10 cm, and collapses on the drawer and pick-place, where it is about 15 cm, consistent with the capture radius seen in the tolerance sweep (drawer seed 0: 37/50 at up to 10 cm, 28/50 at 20 cm, 13/50 at 40 cm). This is the pattern the research predicted (coordinate formats lose more under a real writer). Sentence also drops (10 to 5), likely because the agent's wording differs from the training instructions.
+- **Next:** repeat on the relabelled checkpoints (P0) and with the P-2 drawing; add the decode-first snap row (P8) on the logged commands; more episodes.
