@@ -114,3 +114,38 @@ counted as success; `twin_moved_cm` shows whether the twin was picked up.
   no demo shows a contact with it.
 - Only PickPlaceCounterToCabinet. The same code should work for the other counter pick-place
   tasks with a different source name; not tried.
+
+## Full run on Bouchet (Nov 28)
+
+| | count |
+|---|---|
+| demos | 502 (131,904 frames) |
+| twin placed, first pass | 493 |
+| twin placed, relaxed pass (`--relaxed`: up to 60 cm, left or right camera) | 3 (episodes 331, 278, 168) |
+| failed, stock frames kept, left out of the lists | 6 (episodes 70, 152, 192, 223, 265, 277): no spot with 40 twin pixels in view |
+| training demos with a twin (`runs/twin_train.json`, episodes 0 to 451) | 446 |
+| held-out evaluation scenes (`runs/twin_heldout50.json`, 452 to 501) | 50 |
+
+- Jobs: smoke chunk 34967024, array 34967215 (indices 1 to 50, 10 demos each), relaxed pass
+  34970787, merge 34972030. All COMPLETED.
+- Time: median 89 s per demo (mean 93, p95 148, max 251) on 4-CPU day nodes with llvmpipe;
+  12.8 CPU-hours for the first pass.
+- Checks over all 496: max original-body error 0.0 mm, twin drift 0.0 mm. First pass, frame 0
+  twin pixels: left median 189 (min 40), right median 138 (0 in 83 demos), wrist median 547 (0 in
+  27). Twin to target 15.2 to 44.6 cm (median 25.4), to grasp point 15.0 to 48.5, to nearest demo
+  gripper position 10.2 to 46.3. 106 object categories.
+- Episode 278 (relaxed) has the twin only in the right camera at frame 0.
+- Store: `$SCR/frames/PickPlaceCounterToCabinetTwin/` (left 3.2 GB, right 3.2 GB, wrist), labels
+  `$SCR/labels/PickPlaceCounterToCabinetTwin.jsonl`, lists in `$PROJ/apollo-lab/runs/`.
+  `RoboCasaDataset(["PickPlaceCounterToCabinetTwin"], episodes=twin_train.json)` loads on Bouchet
+  (115,153 frames).
+
+## How to use
+
+    # train (points_2d example)
+    python -m policy.train --tasks PickPlaceCounterToCabinetTwin --episodes-json $ROOT/runs/twin_train.json \
+      --format points_2d --cams left wrist --objective mse --quantiles dataset ...
+    # score on twin scenes, correct point and counterfactual point (CPU array)
+    CKPT=... TASKS=PickPlaceCounterToCabinetTwin EPISODES=50 \
+      EVAL_ARGS="--demo-scenes $ROOT/runs/twin_heldout50.json" sbatch --array=0 policy/slurm/eval_array.sbatch
+    ... EVAL_ARGS="--demo-scenes $ROOT/runs/twin_heldout50.json --twin-point" NOTE=<run>_twinpoint ...
