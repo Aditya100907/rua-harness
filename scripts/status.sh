@@ -1,7 +1,9 @@
 #!/bin/bash
 # One screen: running jobs, latest checkpoint and loss per run, latest success numbers, watcher.
-#   bash scripts/status.sh            (from the Mac, through ssh bouchet)
-ssh bouchet 'bash -s' <<'REMOTE'
+#   bash scripts/status.sh            (from the Mac through ssh bouchet, or directly on Bouchet)
+source "$(dirname "$0")/on_bouchet.sh"
+if [ "$ON_BOUCHET" = 1 ]; then RUN=(bash -s); else RUN=(ssh bouchet 'bash -s'); fi
+"${RUN[@]}" <<'REMOTE'
 P=/nfs/roberts/project/pi_dr877/ak3288; R=$P/apollo-lab
 echo "== jobs (GPU and agent)"; squeue -u ak3288 -h -o "%.10i %.24j %.2t %.10M %.12P %R" | grep -v " day " ; echo "   CPU jobs on day: $(squeue -u ak3288 -h -p day | wc -l)"
 echo "== runs: last checkpoint, step, loss, steps/s"

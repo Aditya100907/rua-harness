@@ -2,6 +2,9 @@
 # Standing orders: at 7 hours into an SSH connection to Bouchet, alert Adi (macOS notification + spoken
 # message) that Duo is needed. Checks every 10 minutes; alerts once per master connection.
 #   nohup bash scripts/ssh_duo_alert.sh &
+# Mac only. A session running on Bouchet's agent partition needs no SSH connection, so no Duo alert.
+source "$(dirname "$0")/on_bouchet.sh"
+if [ "$ON_BOUCHET" = 1 ]; then echo "on Bouchet: no SSH master connection to watch; Duo alert not needed"; exit 0; fi
 ALERTED=""
 while true; do
   PID=$(ssh -O check bouchet 2>&1 | grep -o "pid=[0-9]*" | cut -d= -f2)
