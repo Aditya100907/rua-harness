@@ -97,3 +97,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 14:10 Launched the open-model batch: Qwen3-VL-8B commander, sentence and points_2d checkpoints, 10 episodes per smoke task (60 episodes), against server 34966848 (until 14:56).
 - 14:11 PROPOSALS v4: P-2 drawing options built (check job 34967929), P-3 sweep mode added.
 - 14:14 Relabel merged (502/514/543). TurnOnMicrowave old labels were about 20 cm off the test-time button point. Mark check resubmitted (absolute path).
+- 14:14 Queued P0 (fsc_points_2d seeds 0-2) and fsc_points_3d_dist, fsc_points_3d, fsc_points_3d_rgb, all on test-time labels (pool A).
