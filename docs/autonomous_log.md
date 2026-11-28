@@ -92,3 +92,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 13:58 Twin-distractor data (backlog 1): policy/twin_data.py built and tested on 5 demos on the Mac (all placed, twin visible, original bodies exact, demo actions still succeed with the twin present); eval --twin / --twin-point added. Smoke chunk 0 on Bouchet: job 34967024 (day CPU).
 - 14:00 Twin smoke chunk 34967024 on Bouchet: episode 0 placed identically to the Mac, 105 s per demo on a day CPU node (render about 73 s). Submitted the rest: array 34967215 (indices 1-50, 10 demos each, %40).
 - 14:00 PROPOSALS v3: adopted P0, P0b, P-1. Name swap added to sweeps.
+- 14:01 P-1 rescore submitted (sentence and points_2d, 3 seeds each, 100 OpenDrawer rollouts per run).
