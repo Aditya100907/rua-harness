@@ -1,7 +1,7 @@
 # Status
 
 Keep this current. A new session reads it first and continues from "Next".
-Last updated: Fri Nov 27, 2026, 16:30 ET.
+Last updated: Sat Nov 28, 2026, 13:55 ET.
 
 ## Goal for Sun Nov 29, night
 Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, agent plus policy. Success, seconds, LLM calls and tokens per episode.
@@ -35,14 +35,16 @@ Stock DEM trained with the MeanFlow recipe does not learn usable actions here: r
 - A policy that scores above 20% on any smoke task (the gate).
 - The container build and the GitHub workflow.
 
-## Running (Nov 27, 16:55; live view: `bash scripts/status.sh`)
-- **Gate passed (16:52):** abl_mse (regression, 5k steps) OpenDrawer 22/50 (44%), PickPlace 0/50, Microwave 0/50. abl_fm (flow matching) 0/50 on all three. Objective chosen: mse.
-- **Format study on mse** (3 smoke tasks, 20k steps, seed 0, held-out-50 split, left + wrist, shipped quantiles): fs_mse_sentence 34894170, fs_mse_kv_text 34894764, fs_mse_points_2d 34894765, fs_mse_points_3d_rgb 34894766, fs_mse_points_3d 34894767, fs_mse_pose_path 34894768; 18-task sentence fs_mse_sentence_all18 34894769 (300k). Watcher (34894756) scores every 5k steps on CPU nodes and holds the cap at 8 GPUs.
-- SAM 3 service 34895235 (gpu_devel, until 23:04): http://a1125u42n01:18300, address in `runs/sam3_service.txt`, smoke test passed (`docs/sam3_service.md`).
-- hx_check 34894785 (day): HexaShell target split vs our eval scenes, seeds 1000-1049.
-- fs_fm_sentence 34894171: flow matching at 20k with the same settings (does fm catch up with more steps).
-- MeanFlow batch-size test mf_ddp4_bs256 finished 5k steps; conditioning check and simulator eval (34894664) running.
-- HexaShell target split done (matches our eval on 15/15 scenes). SAM 3 service works (smoke test passed) but is stopped: YCRC cancels idle GPU jobs, so start it on demand with the HexaShell runs (`docs/sam3_service.md`).
+## Results so far (Sat Nov 28, 13:55)
+- 18-task stock DEM with regression: 51.2% at 300k steps (paper 55.6% with MeanFlow).
+- Format study (3 tasks, 3 seeds for sentence, kv_text, points_2d): points_2d beats sentence on drawer (65 vs 53%) and microwave (56 vs 44%); kv_text no different; learned 3D point tokens worse (1 seed). Policies follow the name, not the point (distractor test). Full tables: `docs/MORNING_REPORT.md`, `docs/research_journal.md`.
+
+## Running (Sat Nov 28, 13:55; watcher queue)
+- Name dropout 0.5 for points_2d and points_3d_rgb (can points carry the object choice?); Part N sweeps follow automatically.
+- Held-out objects: sentence and points_2d on the object split, scored on held-out val scenes.
+- points_2d and kv_text on all 18 tasks (300k).
+- Second seeds for points_3d and points_3d_rgb.
+- SAM 3 service: stopped; start on demand with HexaShell runs (`docs/sam3_service.md`).
 
 ## Next: policy track (new priorities from Adi, Nov 27 afternoon)
 1. **Gate: PASSED** (abl_mse 22/50 on OpenDrawer).

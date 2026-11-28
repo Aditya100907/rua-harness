@@ -1,23 +1,28 @@
 # Morning report, Fri Nov 27
 
-Updated through the night. Last update: Nov 27, 07:00 ET.
+Last update: Sat Nov 28, 13:55 ET.
 
-## 1. Bottom line
-Everything around the policy works and is tested (data, replay 30/30, eval wiring 30/30, zero test 0/28, labels, five command formats, held-out split, a self-driving cluster queue), but stock DEM as trained here does not work yet: run 1 scores 0% on drawer and pick-place and 0% on the microwave at 20k steps, and the kv_text run gets 7% on the microwave. A diagnosis shows the model's actions are dominated by sampling noise and it barely uses the images, so this is a training-recipe problem, not an evaluation bug; four one-change ablations and two sampling tests are running. The gate (D3) has not passed, so no format-study result counts yet.
+## 1. Bottom line (updated Sat Nov 28, 13:55)
+DEM's MeanFlow recipe did not learn here, but the same model trained by plain regression works: 51.2% over all 18 tasks at 300k steps (paper: 55.6%), and the format study on 3 tasks now has 3-seed results. Drawing the grasp and place points on the camera images raises success on the drawer (65% vs 53%) and microwave (56% vs 44%) over the plain sentence, while structured text alone and learned 3D point tokens do not help. But the policy does not follow a point to a different object and collapses when the object name is removed: it relies on the text, so "points steer the policy" is not supported yet; a name-dropout test of that is running.
 
 ## 2. Numbers
-- **Replay test (B2):** Bouchet: PickPlaceCounterToCabinet 10/10, OpenDrawer 10/10, TurnOnMicrowave 10/10 (job 34841442). Mac: OpenDrawer 10/10, TurnOnMicrowave 10/10.
-- **Wiring test (D1.1):** demo actions through the eval loop: 10/10 on each smoke task (job 34841796). Env state at reset equals the recorded state to 1e-8; rendered image vs video frame: 1.7 to 2.5 grey levels mean error.
-- **Zero test (D1.2):** untrained head: 0/8, 0/10, 0/10 (job 34841793; 2 episodes lost to GPU out-of-memory, fixed).
-- **Training speed (C2):** H100 80GB, batch 64, 2 cameras: 3.27 steps/s, GPU 83% busy, data wait 0%, 32 GB. Hours: 20k = 1.7 h, 100k = 8.5 h, 300k = 25.5 h. L40S: 1.16 steps/s (20k = 4.8 h). Run 2 on H100 runs at 3.29 steps/s.
-- **Hindsight labels (E2, F1):** all 18 tasks labeled, counts equal episode counts. Grasp point to object origin, 20 demos per task: median 1.6 to 5.6 cm across the 6 pick-style tasks; every grasp point lies within the object's extent. Details: `docs/labels_notes.md`.
-- **Geometry (E1):** pixel lifted to 3D lands 3.2 cm (left) and 3.5 cm (right) from the object origin; depth must be flipped (28 to 43 cm error otherwise). `docs/geometry_notes.md`.
-- **Scripted oracle baseline (F7)**, ground-truth positions, no learning, 50 episodes each, seeds 1000 to 1049: PickPlaceCounterToCabinet 23/50 (46%), OpenDrawer 41/50 (82%), TurnOnMicrowave 50/50 (100%). This is the bar the learned policy has to clear on these tasks.
-- **Test sets (Y), scripted baseline, small samples:** look-alike distractors 6/20 when it goes for the target, 3/20 when it picks one of the two at random; recombined kitchens 4/10, 8/10, 10/10; RoboCasa's pretrain kitchens 7/10, 5/10, 10/10.
-- **Commander (Part O) smoke test, 1 episode, 50-step checkpoint:** 62 s, 11 turns, 283k input tokens (90% cache reads), 1.2k output, $0.29 at list price. Pointing error 81.5 cm with the arm in the way, 3.1 cm from the clear camera.
-- **Policy timing on the Mac (M-series, MPS):** 47 ms per act call, 118 ms per robot second. GPU numbers pending (job 34847608).
-- **Learned policy (stock DEM, run1_smoke, left + right):** 5k: 0/50, 0/50, 0/50 (pick-place, drawer, microwave); 10k: 0/50 on all three. **f4_kv_text:** 20k: 0/100, 0/100, 7/100. Run 2 (18 tasks) at 70k: scoring now. Paper category numbers for comparison: drawers 79.5%, buttons 81.5%, pick-place 33.2%.
-- **Why (Part K, `docs/research_journal.md`):** on its own training frames the 20k model's action error is 0.19 versus 0.16 for always predicting the mean action; with the noise fixed, predictions vary 0.09 across frames but 0.18 across noise draws on one frame; blanking the images barely changes the error. The flow-matching error (raw_mse) stays near 1 for the whole run; the falling total loss is the dispersive term.
+**18-task stock DEM (sentence, regression, left + wrist, 300k steps, one seed, 100 episodes per task):** 51.2% (921/1800). Curve: 37.0% at 50k, 40.8% at 100k, 47.8% at 150k, 47.9% at 200k, 49.8% at 250k, 51.2% at 300k. Best: OpenStandMixerHead 88%, PickPlaceToasterToCounter 81%, OpenCabinet 78%, TurnOnElectricKettle 78%. Worst: NavigateKitchen 0%, CloseBlenderLid 10%, PickPlaceCounterToStove 16%.
+
+**Format study (3 smoke tasks, regression, 20k steps, 100 episodes per seed per task; pooled 95% CI):**
+| Format | Seeds | OpenDrawer | PickPlace | Microwave |
+|---|---|---|---|---|
+| sentence | 3 | 53% (48 to 59) | 22% (17 to 27) | 44% (39 to 50) |
+| kv_text | 3 | 55% (49 to 60) | 23% (19 to 28) | 48% (42 to 53) |
+| points_2d | 3 | **65% (59 to 70)** | 23% (19 to 28) | **56% (51 to 62)** |
+| pose_path (demo scenes) | 1 | 56% | 16% | 38% |
+| points_3d | 1 | 41% | 12% | 18% |
+| points_3d_rgb | 1 | 33% | 7% | 25% |
+
+**Part N (points formats):** success is flat for point errors of 0 to 10 cm. With the grasp point on a distractor, the gripper reaches the distractor in 1 to 5 of 50 episodes and the true object in 10 to 27. Removing or renaming the object name collapses OpenDrawer to 0 to 2 of 50 on most runs.
+
+**What failed and why (details in `docs/research_journal.md`):** MeanFlow as trained here never beat predicting the mean action (0% on drawer and pick-place at 20k on 3 tasks and at 70k on 18; a 4x larger batch did not help; one-demo overfitting failed). Regression memorizes one demo (action error 0.009) and passed the gate at 5k (OpenDrawer 22/50).
+
+**Other numbers:** replay 30/30; eval wiring 30/30; untrained 0/28; scripted oracle 46% / 82% / 100% (pick, drawer, microwave); training speed 3.27 steps/s (MeanFlow, H100), 5.4 steps/s (regression, H200); determinism fix changed OpenDrawer by 1 episode (21 vs 22 of 50).
 
 ## 3. Done
 - A1 downloads verified (18 tasks, 500 to 543 each). A2 simtest OK after re-downloading assets. A3 dataset notes. A4 3 tasks on the Mac.
