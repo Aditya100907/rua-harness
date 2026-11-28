@@ -41,3 +41,6 @@ Limits to know: YCRC's module denies `scancel` (the session cannot cancel jobs) 
 
 ## 7. Running the autonomous Claude session on Bouchet (new, Nov 28)
 Everything is built and tested except two steps that need Adi's login: the Claude login on Bouchet and the GitHub push method (deploy key recommended, with branch protection on main). Commands: `setup/agent_session_README.md`. Notes: YCRC's module denies `scancel` and asks before rsync/ssh/tmux/kill/git push (an unanswered ask pauses the session). Terms caveat from the research session: Anthropic's consumer terms restrict automated use except via API key or explicit permission; the current Mac session runs on the subscription too. **Recommendation:** do the two login steps, and decide the terms question (subscription with permission, or an API key, which costs money).
+
+## 8. Lab facts for the real robot (needed for the Dec 15 xArm run; new Nov 28)
+Only Adi can ask Xiatao. Questions (from docs/sim_to_real.md sections 4 and 5): which arm and gripper; fixed or mobile base; which camera(s), where mounted, and whether one gives depth; control interface and rate; compute next to the robot; who supervises over break. **Recommendation:** send these this week; without them the stand-in simulator, training data and control bridge cannot start. A draft message can go in docs/weekly_update_draft.md if useful.
