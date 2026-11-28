@@ -38,7 +38,7 @@ check() {  # name, command...
 
 if [ "$MODE" = check ]; then
   SIF=${EBROOTCLAUDE:-/nonexistent}/claude-mod.sif
-  SLURMB=/opt/slurm/current,/var/lib/slurmconf,/run/munge
+  SLURMB=/opt/slurm/current,$(readlink -f /opt/slurm/current),/var/lib/slurmconf,/run/munge   # as the claude wrapper binds them
   check "tmux on node"            tmux -V
   check "claude module"           bash -c 'echo $EBVERSIONCLAUDE; test -n "$EBVERSIONCLAUDE"'
   check "claude --version"        bash -c "cd '$AGENT_WORKDIR' && claude --version"
