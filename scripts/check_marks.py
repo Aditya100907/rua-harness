@@ -20,7 +20,7 @@ from simlib.camera import camera_K, camera_T, world_to_pixel
 task = "PickPlaceCounterToCabinet"
 ds = paths.task_dir(task)
 store = PointMapStore()
-labels = {l["episode"]: l for l in load_labels(task, paths.frames_base().parent / "labels_center")}
+labels = {l["episode"]: l for l in load_labels(task, paths.frames_base().parent / "labels")}
 env = sim.make_env(ds, cams=["left", "right", "wrist"])
 worst = 0.0
 for ep in (0, 7, 31):
