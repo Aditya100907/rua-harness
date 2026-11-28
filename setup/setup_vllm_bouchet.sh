@@ -17,7 +17,7 @@ module load miniconda
 # shellcheck disable=SC1091
 source "$(conda info --base)/etc/profile.d/conda.sh"
 [ -x "$E/bin/python" ] || conda create -y -q -p "$E" python=3.12
-"$E/bin/python" -m pip install -q "vllm==$VLLM_VERSION" huggingface_hub
+"$E/bin/python" -m pip install -q "vllm==$VLLM_VERSION" "transformers==4.57.1" huggingface_hub   # vllm 0.11 predates transformers 5
 "$E/bin/python" -c "import vllm, torch, transformers; print('vllm', vllm.__version__, 'torch', torch.__version__, 'cuda', torch.version.cuda, 'transformers', transformers.__version__)"
 for m in $MODELS; do
     "$E/bin/python" - "$m" <<'EOF'
