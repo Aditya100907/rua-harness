@@ -46,7 +46,9 @@ def wrap_dataset(ds, args):
         return ds
     from policy.variants import CommandDataset
     return CommandDataset(ds, args.format, labels_dir=args.labels_dir, point_noise_cm=args.point_noise_cm,
-                          name_dropout=getattr(args, "name_dropout", 0.0))
+                          name_dropout=getattr(args, "name_dropout", 0.0),
+                          mark_radius=getattr(args, "mark_radius", 4), mark_all_cams=getattr(args, "mark_all_cams", False),
+                          noise_per_episode=getattr(args, "noise_per_episode", False))
 
 
 class DoneHead(torch.nn.Module):

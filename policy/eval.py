@@ -134,12 +134,25 @@ class PolicyRunner:
         if self.format == "points_2d" and self.cmd is not None:
             from policy.variants import CAM_IN_BASE, base_to_pixel, draw_points, world_to_base
             st = sim.state16(obs)
+            r = int(self.cfg.get("mark_radius", 4) or 4)
             out = []
             for k, cam in enumerate(self.cams):
-                if cam in CAM_IN_BASE:
+                if self.cfg.get("mark_all_cams") and self.env is not None:
+                    from simlib.camera import camera_K, camera_T, world_to_pixel
+                    name = sim.CAMERAS[cam]
+                    K, T = camera_K(self.env.sim, name, 256, 256), camera_T(self.env.sim, name)
+                    uv = []
+                    for key, h in zip(("grasp_world", "place_world"), self.cmd["has"]):
+                        if not h:
+                            uv.append(None)
+                            continue
+                        (u, v), z = world_to_pixel(self.cmd[key], K, T)
+                        uv.append((u, v, z))
+                    out.append(draw_points(imgs[k], uv, r=r))
+                elif cam in CAM_IN_BASE:
                     uv = [base_to_pixel(world_to_base(self.cmd[key], st), cam) if h else None
                           for key, h in zip(("grasp_world", "place_world"), self.cmd["has"])]
-                    out.append(draw_points(imgs[k], uv))
+                    out.append(draw_points(imgs[k], uv, r=r))
                 else:
                     out.append(imgs[k])
             imgs = np.stack(out)

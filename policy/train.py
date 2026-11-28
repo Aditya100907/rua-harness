@@ -65,6 +65,10 @@ def parse_args(argv=None):
                          "mse = deterministic regression (evaluate with --z0 zero)")
     ap.add_argument("--name-dropout", type=float, default=0.0,
                     help="probability of replacing the object name with 'object' in the command text (point formats)")
+    ap.add_argument("--mark-radius", type=int, default=4, help="points_2d mark radius in px (P-2: about 11)")
+    ap.add_argument("--mark-all-cams", action="store_true",
+                    help="points_2d: draw on every camera incl. the wrist (needs 3-camera depth renders, --depth-dir)")
+    ap.add_argument("--noise-per-episode", action="store_true", help="hold the point noise fixed for each episode")
     ap.add_argument("--depth-dir", default=None, help="re-rendered depth folder for point-map formats (sets RUA_DEPTH)")
     ap.add_argument("--init-from", default=None,
                     help="start from this checkpoint (e.g. a converted research checkpoint, policy/research_ckpt.py); "

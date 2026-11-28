@@ -73,7 +73,8 @@ def base_to_pixel(p_base: np.ndarray, cam: str) -> tuple[float, float, float]:
 
 
 def draw_points(img: np.ndarray, pts: list, colors=((0, 255, 0), (255, 0, 0)), r: int = 4) -> np.ndarray:
-    """Draw filled circles with a dark outline at (u, v) pixels. pts entries may be None."""
+    """Draw marks at (u, v) pixels; pts entries may be None. r <= 5: the original small dot (black outline +
+    colored disk). r > 5: a high-contrast mark (black disk, white ring, colored centre), PROPOSALS P-2."""
     import cv2
     out = np.ascontiguousarray(img.copy())
     for p, c in zip(pts, colors):
@@ -82,9 +83,19 @@ def draw_points(img: np.ndarray, pts: list, colors=((0, 255, 0), (255, 0, 0)), r
         u, v, z = p
         if z <= 0 or not (0 <= u < out.shape[1] and 0 <= v < out.shape[0]):
             continue
-        cv2.circle(out, (int(round(u)), int(round(v))), r + 1, (0, 0, 0), -1)
-        cv2.circle(out, (int(round(u)), int(round(v))), r, c, -1)
+        uv = (int(round(u)), int(round(v)))
+        if r <= 5:
+            cv2.circle(out, uv, r + 1, (0, 0, 0), -1)
+            cv2.circle(out, uv, r, c, -1)
+        else:
+            cv2.circle(out, uv, r + 2, (0, 0, 0), -1)
+            cv2.circle(out, uv, r, (255, 255, 255), -1)
+            cv2.circle(out, uv, max(2, r - 4), c, -1)
     return out
+
+
+def base_to_world(p_base: np.ndarray, state: np.ndarray) -> np.ndarray:
+    return R.from_quat(state[3:7]).apply(np.asarray(p_base)) + state[0:3]
 
 
 def eef_pose_base(state: np.ndarray) -> np.ndarray:
@@ -96,7 +107,8 @@ class CommandDataset:
     """Wraps RoboCasaDataset: replaces the text with the format's command text and adds geometry."""
 
     def __init__(self, base, fmt: str, labels_dir=None, point_noise_cm: float = 2.0, rot_noise_deg: float = 3.0,
-                 name_dropout: float = 0.0):
+                 name_dropout: float = 0.0, mark_radius: int = 4, mark_all_cams: bool = False,
+                 noise_per_episode: bool = False):
         from pathlib import Path
         from policy import paths
         from policy.label_commands import load_labels
@@ -105,6 +117,9 @@ class CommandDataset:
         # name dropout: with this probability the object name in the command text becomes "object", so the
         # policy has to find the object from the point (same token as policy.commands_gt drop="name")
         self.name_dropout = name_dropout
+        # PROPOSALS P-2: mark size, marks on every camera (incl. the wrist, projected with the per-frame camera
+        # poses saved with the re-rendered depth), and point noise held fixed for the whole episode
+        self.mark_radius, self.mark_all_cams, self.noise_per_episode = mark_radius, mark_all_cams, noise_per_episode
         ld = Path(labels_dir) if labels_dir else paths.frames_base().parent / "labels"
         self.labels = [{lb["episode"]: lb for lb in load_labels(t, ld)} for t in base.tasks]
         self.norm_stats, self.tables, self.tasks = base.norm_stats, base.tables, base.tasks
@@ -134,6 +149,8 @@ class CommandDataset:
         g = int(tb["starts"][ep]) + t
         state = tb["states"][g]
         rng = np.random.default_rng() if self.rng is None else self.rng
+        if self.noise_per_episode:      # same noise draw for every frame of this episode
+            rng = np.random.default_rng(int(ti) * 1_000_003 + int(ep))
         pts, mask = [], []
         for key in ("grasp_world", "place_world"):
             p = lb.get(key)
@@ -145,9 +162,23 @@ class CommandDataset:
         if self.fmt == "points_2d":
             imgs = []
             for k, cam in enumerate(self.base.cams):
-                if cam in CAM_IN_BASE:
+                if self.mark_all_cams:
+                    from simlib.camera import world_to_pixel
+                    if self._pm is None:
+                        from policy.rerender import PointMapStore
+                        self._pm = PointMapStore()
+                    K, T = self._pm.camera(self.tasks[ti], ep, t, cam, frame="world")
+                    uv = []
+                    for p, m in zip(pts, mask):
+                        if not m:
+                            uv.append(None)
+                            continue
+                        (u, v), z = world_to_pixel(base_to_world(p, state), K, T)
+                        uv.append((u, v, z))
+                    imgs.append(draw_points(s["images"][k], uv, r=self.mark_radius))
+                elif cam in CAM_IN_BASE:
                     uv = [base_to_pixel(p, cam) if m else None for p, m in zip(pts, mask)]
-                    imgs.append(draw_points(s["images"][k], uv))
+                    imgs.append(draw_points(s["images"][k], uv, r=self.mark_radius))
                 else:
                     imgs.append(s["images"][k])
             s["images"] = np.stack(imgs)
