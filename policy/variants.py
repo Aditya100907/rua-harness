@@ -31,8 +31,25 @@ CAM_IN_BASE = {
 K256 = np.array([[221.703, 0, 128.0], [0, 221.703, 128.0], [0, 0, 1]])
 PATH_LEN, PATH_STRIDE = 8, 8
 POINT_FORMATS = ("points_3d", "points_3d_rgb")
-POINTMAP_FORMATS = ("points_3d",)          # color replaced by the point map (needs re-rendered depth)
+POINTMAP_FORMATS = ("points_3d", "points_3d_dist")   # color replaced by a geometric image (needs depth)
+DIST_FORMATS = ("points_3d_dist",)   # per-pixel distance to the grasp and place points + height (no point tokens)
 PM_RANGE = 1.5                              # metres: base-frame xyz in [-1.5, 1.5] -> [0, 1]
+
+
+def distmap_to_image(pm: np.ndarray, grasp, place) -> np.ndarray:
+    """[3, H, W] base-frame xyz + base-frame command points -> uint8 [H, W, 3]: distance to the grasp
+    point, distance to the place point (0-1.5 m -> 255-0, nearer is brighter; absent point -> 0), and height
+    (z in [-1.5, 1.5] m). The command enters through the vision path instead of as appended tokens."""
+    xyz = np.nan_to_num(pm.transpose(1, 2, 0), nan=1e3)
+    chans = []
+    for p in (grasp, place):
+        if p is None:
+            chans.append(np.zeros(xyz.shape[:2]))
+        else:
+            d = np.linalg.norm(xyz - np.asarray(p)[None, None], axis=-1)
+            chans.append(np.clip(1 - d / 1.5, 0, 1))
+    chans.append(np.clip((np.nan_to_num(pm[2], nan=-PM_RANGE) + PM_RANGE) / (2 * PM_RANGE), 0, 1))
+    return (np.stack(chans, -1) * 255).round().astype(np.uint8)
 
 
 def pointmap_to_image(pm: np.ndarray) -> np.ndarray:
@@ -138,8 +155,13 @@ class CommandDataset:
             if self._pm is None:
                 from policy.rerender import PointMapStore
                 self._pm = PointMapStore()
-            s["images"] = np.stack([pointmap_to_image(self._pm.point_map(self.tasks[ti], ep, t, cam=c, frame="base"))
-                                    for c in self.base.cams])
+            pms = [self._pm.point_map(self.tasks[ti], ep, t, cam=c, frame="base") for c in self.base.cams]
+            if self.fmt in DIST_FORMATS:
+                gp = pts[0] if mask[0] else None
+                pp = pts[1] if mask[1] else None
+                s["images"] = np.stack([distmap_to_image(pm, gp, pp) for pm in pms])
+            else:
+                s["images"] = np.stack([pointmap_to_image(pm) for pm in pms])
         if self.fmt in POINT_FORMATS:
             s["points"] = np.concatenate([np.stack(pts).astype(np.float32),
                                           np.asarray(mask, np.float32)[:, None]], 1)   # [2, 4]

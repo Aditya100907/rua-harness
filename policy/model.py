@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import torch
 
-FORMATS = ("sentence", "kv_text", "points_2d", "points_3d", "points_3d_rgb", "pose_path")
+FORMATS = ("sentence", "kv_text", "points_2d", "points_3d", "points_3d_rgb", "pose_path", "points_3d_dist")
 
 
 def build_policy(fmt: str = "sentence", cams: int = 2, offline: bool = False, freeze_vision: bool = False,
@@ -25,7 +25,7 @@ def build_policy(fmt: str = "sentence", cams: int = 2, offline: bool = False, fr
     cfg = DEMConfig(action_dim=12, proprio_dim=16, chunk=16, num_cameras=cams, freeze_vision=freeze_vision,
                     vision_pretrained=not offline, language_pretrained=not offline,
                     dispersive_weight=dispersive_weight, ratio_r_eq_t=ratio_r_eq_t)
-    if fmt in ("sentence", "kv_text", "points_2d"):
+    if fmt in ("sentence", "kv_text", "points_2d", "points_3d_dist"):
         return DEM(cfg)
     from policy.variants import PointDEM
     return PointDEM(cfg, fmt)
@@ -34,7 +34,7 @@ def build_policy(fmt: str = "sentence", cams: int = 2, offline: bool = False, fr
 def load_policy(path, offline: bool = False, map_location="cpu"):
     ck = torch.load(path, map_location="cpu", weights_only=True)
     fmt = ck.get("rua_format", "sentence")
-    if fmt in ("sentence", "kv_text", "points_2d"):    # plain DEM weights; the format only changes inputs
+    if fmt in ("sentence", "kv_text", "points_2d", "points_3d_dist"):    # plain DEM weights; only inputs change
         from dem import DEM
         return DEM.load(path, map_location=map_location)
     from policy.variants import PointDEM

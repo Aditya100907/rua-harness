@@ -104,7 +104,7 @@ class PolicyRunner:
     def _images(self, obs: dict) -> np.ndarray:
         if getattr(self, "blank_images", False):          # control: no visual input
             return np.zeros((len(self.cams), 256, 256, 3), np.uint8)
-        if self.format == "points_3d":      # point map from live depth, in the current base frame
+        if self.format in ("points_3d", "points_3d_dist"):   # geometric image from live depth, current base frame
             from policy.variants import pointmap_to_image
             from simlib.camera import views
             if self.env is None:
@@ -116,7 +116,13 @@ class PolicyRunner:
             for c in self.cams:
                 pm = v[sim.CAMERAS[c]].point_map()                      # [H, W, 3] world
                 pb = R.from_quat(st[3:7]).inv().apply(pm.reshape(-1, 3) - st[0:3]).reshape(pm.shape)
-                out.append(pointmap_to_image(pb.transpose(2, 0, 1)))
+                if self.format == "points_3d_dist":
+                    from policy.variants import distmap_to_image, world_to_base
+                    gp, pp = [world_to_base(self.cmd[k], st) if h else None
+                              for k, h in zip(("grasp_world", "place_world"), self.cmd["has"])]
+                    out.append(distmap_to_image(pb.transpose(2, 0, 1), gp, pp))
+                else:
+                    out.append(pointmap_to_image(pb.transpose(2, 0, 1)))
             return np.stack(out)
         imgs = sim.images(obs, self.cams)
         if self.format == "points_2d" and self.cmd is not None:
@@ -260,7 +266,7 @@ def main() -> None:
         ds = paths.task_dir(task)
         H = args.horizon or paths.horizon(task)
         env = sim.make_env(ds, cams=sorted(set(cams) | {"left", "right"}), size=256,
-                           depth=bool(runner and runner.format == "points_3d"))
+                           depth=bool(runner and runner.format in ("points_3d", "points_3d_dist")))
         n_ok = 0
         for i in range(args.shard, args.episodes, args.nshards):
             seed = args.seed0 + i

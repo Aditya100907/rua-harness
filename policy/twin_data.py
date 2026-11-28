@@ -409,6 +409,10 @@ def build_episode(env, ds: Path, ep: int, size: int = 256, quality: int = 95, re
                 if t == 0:
                     first_rgb[c] = rgb
                 blobs[c].append(encode_jpeg(rgb, quality))
+        if t == 0:
+            import mujoco
+            seg = env.sim.render(camera_name=sim.CAMERAS["left"], height=size, width=size, segmentation=True)[::-1]
+            first_rgb["twin_mask_left"] = (seg[..., 0] == int(mujoco.mjtObj.mjOBJ_GEOM)) & np.isin(seg[..., 1], list(tg))
     twin_pos_end = d.xpos[names2.index(f"{TWIN}_main")].copy()
     meta = {"episode": ep, "source_task": SOURCE, "source_episode": ep, "has_twin": True,
             "category": info["cat"], "twin_pos": [round(float(v), 5) for v in best["pos"]],
@@ -447,16 +451,20 @@ def save_part(path: Path, arrays: dict) -> None:
 
 
 def save_png(first_rgb: dict, meta: dict, out: Path) -> Path:
-    """Frame 0, left | right | wrist, with the twin and the target marked in the left view."""
+    """Frame 0, left | right | wrist. Left view: the twin outlined in magenta (from the
+    segmentation render), the target's position marked with a green cross."""
     import cv2
     from policy.variants import base_to_pixel, world_to_base
     out.mkdir(parents=True, exist_ok=True)
-    left = first_rgb["left"].copy()
+    left = np.ascontiguousarray(first_rgb["left"].copy())
+    mask = first_rgb.get("twin_mask_left")
+    if mask is not None and mask.any():
+        cs, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        cv2.drawContours(left, cs, -1, (255, 0, 255), 1)
     st16, _ = _episode_low_dim(paths.task_dir(SOURCE), meta["source_episode"])
-    for p, col in ((meta["twin_pos"], (255, 0, 255)), (meta["target_pos0"], (0, 255, 0))):
-        u, v, z = base_to_pixel(world_to_base(np.asarray(p), st16[0]), "left")
-        if z > 0:
-            cv2.circle(left, (int(round(u)), int(round(v))), 9, col, 2)
+    u, v, z = base_to_pixel(world_to_base(np.asarray(meta["target_pos0"]), st16[0]), "left")
+    if z > 0:
+        cv2.drawMarker(left, (int(round(u)), int(round(v))), (0, 255, 0), cv2.MARKER_CROSS, 10, 1)
     img = np.concatenate([left, first_rgb["right"], first_rgb["wrist"]], 1)
     f = out / f"twin_ep{meta['episode']:03d}.png"
     cv2.imwrite(str(f), img[:, :, ::-1])
