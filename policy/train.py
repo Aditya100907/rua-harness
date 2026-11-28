@@ -63,6 +63,8 @@ def parse_args(argv=None):
     ap.add_argument("--objective", default="meanflow", choices=["meanflow", "fm", "mse"],
                     help="meanflow (DEM recipe); fm = plain flow matching (r = t, sample with --nfe > 1); "
                          "mse = deterministic regression (evaluate with --z0 zero)")
+    ap.add_argument("--name-dropout", type=float, default=0.0,
+                    help="probability of replacing the object name with 'object' in the command text (point formats)")
     ap.add_argument("--depth-dir", default=None, help="re-rendered depth folder for point-map formats (sets RUA_DEPTH)")
     ap.add_argument("--init-from", default=None,
                     help="start from this checkpoint (e.g. a converted research checkpoint, policy/research_ckpt.py); "

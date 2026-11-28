@@ -78,12 +78,16 @@ def eef_pose_base(state: np.ndarray) -> np.ndarray:
 class CommandDataset:
     """Wraps RoboCasaDataset: replaces the text with the format's command text and adds geometry."""
 
-    def __init__(self, base, fmt: str, labels_dir=None, point_noise_cm: float = 2.0, rot_noise_deg: float = 3.0):
+    def __init__(self, base, fmt: str, labels_dir=None, point_noise_cm: float = 2.0, rot_noise_deg: float = 3.0,
+                 name_dropout: float = 0.0):
         from pathlib import Path
         from policy import paths
         from policy.label_commands import load_labels
         self.base, self.fmt = base, fmt
         self.noise_m, self.rot_noise = point_noise_cm / 100.0, rot_noise_deg
+        # name dropout: with this probability the object name in the command text becomes "object", so the
+        # policy has to find the object from the point (same token as policy.commands_gt drop="name")
+        self.name_dropout = name_dropout
         ld = Path(labels_dir) if labels_dir else paths.frames_base().parent / "labels"
         self.labels = [{lb["episode"]: lb for lb in load_labels(t, ld)} for t in base.tasks]
         self.norm_stats, self.tables, self.tasks = base.norm_stats, base.tables, base.tasks
@@ -96,7 +100,10 @@ class CommandDataset:
     def instructions(self):
         if self.fmt == "sentence":
             return self.base.instructions()
-        return sorted({lb["kv_text"] for d in self.labels for lb in d.values()})
+        texts = {lb["kv_text"] for d in self.labels for lb in d.values()}
+        if self.name_dropout:
+            texts |= {dropped_name_text(lb) for d in self.labels for lb in d.values()}
+        return sorted(texts)
 
     def __getitem__(self, i: int) -> dict:
         s = self.base[i]
@@ -104,6 +111,8 @@ class CommandDataset:
         lb = self.labels[ti][ep]
         if self.fmt != "sentence":
             s["text"] = lb["kv_text"]
+            if self.name_dropout and np.random.default_rng().random() < self.name_dropout:
+                s["text"] = dropped_name_text(lb)
         tb = self.tables[ti]
         g = int(tb["starts"][ep]) + t
         state = tb["states"][g]
@@ -146,6 +155,16 @@ class CommandDataset:
             q_b = R.from_rotvec(rng.normal(0, np.deg2rad(self.rot_noise), (PATH_LEN, 3))) * q_b
             s["path"] = np.concatenate([p_b, q_b.as_quat()], 1).astype(np.float32)   # [8, 7]
         return s
+
+
+def dropped_name_text(lb: dict) -> str:
+    """The label's command text with the object name replaced by "object" (as commands_gt drop="name")."""
+    from rua_harness.command import Command, Ref, to_policy_text
+    c = lb["command"]
+    cmd = Command(skill=c["skill"], object=Ref("object") if c.get("object") else None,
+                  target=Ref(c["target"]["name"]) if c.get("target") else None,
+                  source=c.get("source"), direction=c.get("direction"))
+    return to_policy_text(cmd)
 
 
 def collate_variant(batch):

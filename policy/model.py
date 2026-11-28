@@ -45,7 +45,8 @@ def wrap_dataset(ds, args):
     if args.format == "sentence":
         return ds
     from policy.variants import CommandDataset
-    return CommandDataset(ds, args.format, labels_dir=args.labels_dir, point_noise_cm=args.point_noise_cm)
+    return CommandDataset(ds, args.format, labels_dir=args.labels_dir, point_noise_cm=args.point_noise_cm,
+                          name_dropout=getattr(args, "name_dropout", 0.0))
 
 
 class DoneHead(torch.nn.Module):
