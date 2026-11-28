@@ -69,6 +69,15 @@ MIN_FROM_GRASP = 0.15                              # m, 3D distance twin <-> gra
 MIN_FROM_EEF = 0.10                                # m, 3D distance twin <-> every gripper position
 HEIGHT_TOL = 0.015                                 # m, support height must match the target's
 MIN_LEFT_PX = 40                                   # twin pixels in the left camera at frame 0
+VIS_CAMS = ["left"]                                # cameras that may satisfy MIN_LEFT_PX
+RELAXED = False
+
+
+def relax() -> None:
+    """Second pass for demos that failed: spots up to 60 cm from the target, and the twin may be
+    seen in the left OR the right camera (40 pixels at frame 0). Recorded as relaxed in the meta."""
+    global MAX_FROM_TARGET, VIS_CAMS, RELAXED
+    MAX_FROM_TARGET, VIS_CAMS, RELAXED = 0.60, ["left", "right"], True
 N_CANDIDATES = 400
 N_KEEP = 4                                         # kept candidates compared for wrist visibility
 CHECK_EVERY = 10                                   # body-position check frames
@@ -342,7 +351,7 @@ def evaluate_candidate(env, info: dict, smap: StateMap, cand: dict, tg: set, sup
             return {"ok": False, "why": f"contact at frame {t}: {bad[:2]}"}
         if t == 0:
             vis = {c: _seg_pixels(env.sim, c, tg) for c in CAMS}
-            if vis["left"] < MIN_LEFT_PX:
+            if max(vis[c] for c in VIS_CAMS) < MIN_LEFT_PX:
                 return {"ok": False, "why": f"left pixels {vis['left']}", "px0": vis}
     return {"ok": True, "px0": vis}
 
@@ -428,7 +437,8 @@ def build_episode(env, ds: Path, ep: int, size: int = 256, quality: int = 95, re
             "twin_drift_mm": round(1000 * float(np.linalg.norm(twin_pos_end - best["pos"])), 4),
             "n_frames": T, "n_candidates": best["n_candidates"], "n_tried": best["n_tried"],
             "n_kept": best["n_kept"], "rejects": best["rejects"],
-            "seconds_stock_place_total": [round(t_stock, 1), round(t_place, 1), round(time.time() - t0, 1)]}
+            "seconds_stock_place_total": [round(t_stock, 1), round(t_place, 1), round(time.time() - t0, 1)],
+            "relaxed": RELAXED}
     if err > 1e-3:
         raise RuntimeError(f"original bodies moved by {1000 * err:.3f} mm with the twin added")
     if max(best["px0"].values()) <= 0:
@@ -631,6 +641,7 @@ def main() -> None:
     b.add_argument("--out", default=None, help="frames base (default paths.frames_base())")
     b.add_argument("--force", action="store_true")
     b.add_argument("--save-png", default=None, help="write frame 0 (left|right|wrist) PNGs here")
+    b.add_argument("--relaxed", action="store_true", help="second pass for failed demos (see relax())")
     mg = sub.add_parser("merge")
     mg.add_argument("--out", default=None)
     mg.add_argument("--labels", default=None)
@@ -650,6 +661,8 @@ def main() -> None:
         if not eps:
             print("no episodes in this range", flush=True)
             return
+        if args.relaxed:
+            relax()
         rows = build(eps, base, args.force, Path(args.save_png) if args.save_png else None)
         bad = [r for r in rows if "error" in r]
         print(f"done: {len(rows) - len(bad)} built, {len(bad)} failed", flush=True)
