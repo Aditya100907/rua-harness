@@ -31,3 +31,10 @@ Not chosen. Evidence will come from F4/F6 (formats with perfect commands) and Pa
 
 ## 6. Our evaluation's scenes are not fully reproducible (new, Nov 27 17:10) (RESOLVED Nov 27, 17:25)
 Done at Adi's request: HexaShell's `dict.fromkeys` fix is applied at runtime in `policy/sim.py` via `policy/determinism.py`, on by default. It did not change the gate score (OpenDrawer 21/50 with the fix vs 22/50 without; `docs/research_journal.md`, 17:26). Evals before about 17:25 ran without it.
+
+## 6. Move the autonomous session to Bouchet (backlog 9, Sat Nov 28)
+Everything that needs no login is done and tested (`setup/agent_session_README.md`). Three steps need you:
+1. Log in to Claude once on an agent node (subscription login, not an API key): `ssh bouchet`, `salloc -p agent --mem=4G -t 0:30:00`, `module load claude`, `cd /nfs/roberts/project/pi_dr877/ak3288/apollo-lab/rua-harness-git`, `claude`, follow the login URL, `/exit`, `exit`.
+2. Choose how commits reach GitHub. **Recommendation: A**, a write deploy key for this repo made on Bouchet, plus branch protection on `main` (it has none now). B: no push from Bouchet; pull from the Mac. Exact commands in the README. Note that A pushes from the job, outside the YCRC sandbox, so YCRC's "ask before git push" prompt does not apply to those pushes.
+3. Stop the Mac session, then `sbatch --export=ALL,AGENT_PUSH=1 setup/agent_session.sbatch` from the clone. Attach with `ssh -t $(squeue -u ak3288 -n claude_agent -h -o %N) tmux attach -t claude`.
+Limits to know: YCRC's module denies `scancel` (the session cannot cancel jobs) and asks before `rsync`, `tmux`, `kill`, `git push`; an unanswered ask pauses the session. The agent partition allows 2 running jobs and the watcher uses one.

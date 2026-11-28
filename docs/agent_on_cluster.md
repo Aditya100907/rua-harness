@@ -1,5 +1,7 @@
 # Running a coding agent on Bouchet
 
+**Update Sat Nov 28: tested, and a launcher exists.** See `setup/agent_session_README.md` for the launcher, the test results and the commands Adi must run. Verified on an agent node: the `claude` module (2.1.314-0.1) runs, inside tmux too; outbound network from inside the Claude container reaches Anthropic, GitHub, PyPI and HuggingFace; `squeue` and `sbatch` work from inside the container. The module's managed settings deny `scancel` and ask before `rsync`, `ssh`, `tmux`, `kill` and `git push`; `~/.ssh` is hidden. The text below is the original docs-only note.
+
 Task M4. Can a coding agent (for example Claude Code) run on Bouchet itself, with internet access, so it can drive jobs without Adi's Mac staying on? Written 2026-11-26 from the YCRC docs only. Nothing was logged in to or tested on the cluster.
 
 **Short answer: yes, and YCRC supports it.** Bouchet has an `agent` partition built for long coding-agent sessions. YCRC provides a sandboxed `claude` module (beta) that runs Claude Code with your own Anthropic account. You do not need to install Node or Claude Code yourself.

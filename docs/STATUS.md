@@ -57,6 +57,7 @@ Stock DEM trained with the MeanFlow recipe does not learn usable actions here: r
 See `docs/agent_port_spec.md`.
 
 ## Blocked
+- Backlog 9 (session on Bouchet's agent partition): built and dry-run tested; needs Adi's Claude login on Bouchet and a GitHub push credential (`docs/decisions_needed.md` item 6, `setup/agent_session_README.md`).
 - Nov 27, 07:10: SSH to Bouchet needs a new Duo approval (the 8-hour shared connection expired). Asked Adi to run `ssh bouchet` once. Until then: no syncs, the fixed watcher is not restarted (it was stopped at 06:30 after its resubmit bug); jobs already queued keep running.
 - Part W (RPent baseline): needs a planner LLM with credentials, which costs money or needs a terms check (Adi: `docs/decisions_needed.md` item 5). RPent is installed and its simulator checks pass (`docs/rpent_notes.md`).
 - HexaShell already has a RoboCasa port; whether William still ports it is Adi's call (`docs/decisions_needed.md` item 1).
