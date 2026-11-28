@@ -168,3 +168,19 @@ Questions to put to him, written as facts we need.
 8. **Scene:** whether a real kitchen counter, cabinet, drawer and microwave are available, or a tabletop proxy.
 9. **Safety:** workspace limits, speed limits, and who must be present when the robot runs.
 10. **Timeline:** whether a real-robot experiment is expected for this paper or later.
+
+## 5. What must be true by Dec 15 to run the xArm 7 (Adi's priority 4, written Nov 28)
+The real robot stays in scope whatever the point-map track scores in simulation. A first real run on Dec 15 needs every item below. Status as of Nov 28.
+
+| # | Must be true by Dec 15 | Owner | Status Nov 28 | How we check it |
+|---|---|---|---|---|
+| 1 | Lab facts in hand: arm model and gripper, base (fixed or mobile), camera(s) and mounting, depth source, control rate, compute next to the robot (section 4) | Adi asks Xiatao | not asked | written answers in this file |
+| 2 | A simulated stand-in that matches the real setup: xArm 7 (or the lab's arm) with the real gripper's state in the 16-number layout, camera(s) placed as on the real rig, the real control rate | policy side | XArm7Omron subclass builds and moves (section 2); gripper state and start pose not matched | replay test on a few teleoperated or scripted demos in the stand-in: 9 of 10 succeed |
+| 3 | Training data for that embodiment: either demos in the stand-in (scripted from the oracle, `policy/scripted.py` style, or MimicGen-style retargeting of the PandaOmron demos) or a small set of real teleoperated demos | policy side, then lab | none | at least 200 demos per task for 2 tasks |
+| 4 | A point-map policy that works in simulation with realistic depth: trained with D435-like noise (`--depth-noise d435`), scored with the evaluation-time noise sweep (section 3) | policy side | clean point-map runs (fsc_points_3d, fsc_points_3d_dist) and noise-trained runs (fsc_points_3d_dn_d435, fsc_points_3d_dist_dn_d435) queued on the test-time labels | success at d435 noise within 10 points of clean on the drawer task |
+| 5 | Camera calibration pipeline: intrinsics and camera-to-base extrinsics on the real rig, expressed in the same convention as `simlib/camera.py` (OpenCV axes, top-row-first images) | lab + policy side | the simulator side is verified (pixel to world within about 3 cm, docs/geometry_notes.md); nothing real yet | a checkerboard or AprilTag test: a measured point lifts to within 2 cm |
+| 6 | Control bridge: our 12-number action (delta end-effector pose in the base frame, gripper, base and mode) mapped to the arm's own interface at 20 Hz, with step limits and an emergency stop | lab + policy side | the action convention is documented (section 1); no driver code | the arm tracks a scripted 10 cm square in delta mode within 1 cm |
+| 7 | A command source for the real run: perfect commands from a human click (the selection row) before any agent, then the agent | policy side | the commander and snap control exist in simulation | one task end to end with a human-clicked point |
+| 8 | Safety and supervision plan: workspace limits, speed limits, a person at the stop button, what counts as a stop | lab | not started | written and agreed with Xiatao |
+
+**Critical path:** items 1, 3 and 6. Item 1 is a question for Xiatao this week; without it items 2, 3, 5 and 6 cannot start. If item 3 is not ready by Dec 8, the fallback is a fixed-base tabletop setup with the Panda simulator policy retrained in a matching fixed-base scene, and the first real run tests calibration and the control bridge with scripted motions only.
