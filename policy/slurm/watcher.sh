@@ -16,9 +16,9 @@ GPU_CAP=${GPU_CAP:-8}
 JOB_CAP=${JOB_CAP:-12}
 EVAL_RESERVE=${EVAL_RESERVE:-0}   # scoring runs on CPU nodes now (YCRC cancels GPU jobs with 0% use)
 CK=$PROJ/checkpoints
-Q=$ROOT/runs/queue.txt
+Q=${QUEUE_FILE:-$ROOT/runs/queue.txt}
 QDONE=$ROOT/runs/queue_done.txt
-LOG=$ROOT/logs/watcher.log
+LOG=${WATCHER_LOG:-$ROOT/logs/watcher.log}
 touch $Q $QDONE
 
 gpus_in_use() {  # sum of GPUs requested by my running and pending jobs (a 4-GPU job counts 4)
@@ -39,11 +39,13 @@ best_partition() {  # earliest predicted start among the partitions we train on
 }
 
 launch_train() {  # run args
+  if [ -n "${DRYRUN:-}" ]; then echo "dry-$1"; return; fi
   bash $REPO/policy/slurm/launch_train.sh "$1" "$2"
 }
 
 cycle() {
   local msg="" n_resub=0 n_eval=0 n_queue=0
+  if [ -z "${QUEUE_ONLY:-}" ]; then
   # 1. dead training runs
   for d in $CK/*/; do
     run=$(basename $d)
@@ -106,23 +108,52 @@ import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['step
     tasks=$(python -c "import json;print(' '.join(json.load(open('$d/config.json'))['tasks']))")
     j=$(TASKS="$tasks" bash $REPO/policy/slurm/sweeps.sh $fck 50) && touch $d/scored/sweeps && msg="$msg sweeps:$run:$j"
   done
-  # 3. queue
+  fi   # end of steps 1, 2, 2b (skipped with QUEUE_ONLY=1, for tests)
+  # 3. queue, with GPU pools (Adi, Nov 28): A = fast 3-task experiments (4), B = long runs (3),
+  #    C = open model and HexaShell (1). Lines: "POOL | RUN | ARGS" or "RUN | ARGS" (pool from length).
+  #    A pool may exceed its share only when the other pools have nothing queued.
   while [ $(gpus_in_use) -lt $((GPU_CAP - EVAL_RESERVE)) ] && [ $(jobs_in_use) -lt $JOB_CAP ]; do
-    line=$(grep -v '^\s*#' $Q | grep -v '^\s*$' | head -1)
-    [ -z "$line" ] && break
-    run=$(echo "$line" | cut -d'|' -f1 | xargs); args=$(echo "$line" | cut -d'|' -f2- | xargs)
-    # remove the line from the queue first, so a failure cannot launch it twice
-    grep -vxF "$line" $Q > $Q.tmp; mv $Q.tmp $Q
-    if [ -d $CK/$run ] || job_exists $run; then echo "$(date +%F_%T) SKIP exists $line" >> $QDONE; continue; fi
-    mkdir -p $CK/$run; echo "$args" > $CK/$run/args.txt
-    j=$(launch_train $run "$args"); echo "$(date +%F_%T) $j $line" >> $QDONE
-    n_queue=$((n_queue+1)); msg="$msg queue:$run:$j"
+    pick=""; pickpool=""
+    declare -A used=([A]=0 [B]=0 [C]=0) queued=([A]=0 [B]=0 [C]=0)
+    for jn in $(squeue -u $USER -h -t R,PD -o "%j|%P" | grep "|gpu" | cut -d"|" -f1); do
+      pl=$(cat $CK/$jn/pool.txt 2>/dev/null || echo C); used[$pl]=$(( ${used[$pl]:-0} + 1 ))
+    done
+    mapfile -t LINES < <(grep -v '^\s*#' $Q | grep -v '^\s*$')
+    for line in "${LINES[@]}"; do
+      nf=$(echo "$line" | awk -F'|' '{print NF}')
+      if [ "$nf" -ge 3 ]; then pl=$(echo "$line" | cut -d'|' -f1 | xargs)
+      else st=$(echo "$line" | grep -o -- '--steps [0-9]*' | awk '{print $2}'); pl=A; [ "${st:-0}" -gt 30000 ] && pl=B; fi
+      queued[$pl]=$(( ${queued[$pl]:-0} + 1 ))
+    done
+    declare -A share=([A]=4 [B]=3 [C]=1)
+    for want_borrow in 0 1; do
+      for line in "${LINES[@]}"; do
+        nf=$(echo "$line" | awk -F'|' '{print NF}')
+        if [ "$nf" -ge 3 ]; then pl=$(echo "$line" | cut -d'|' -f1 | xargs)
+        else st=$(echo "$line" | grep -o -- '--steps [0-9]*' | awk '{print $2}'); pl=A; [ "${st:-0}" -gt 30000 ] && pl=B; fi
+        if [ ${used[$pl]} -lt ${share[$pl]} ]; then pick="$line"; pickpool=$pl; break 2; fi
+        if [ $want_borrow = 1 ]; then
+          others=0; for o in A B C; do [ $o != $pl ] && [ ${used[$o]} -lt ${share[$o]} ] && [ ${queued[$o]} -gt 0 ] && others=1; done
+          [ $others = 0 ] && { pick="$line"; pickpool=$pl; break 2; }
+        fi
+      done
+    done
+    [ -z "$pick" ] && break
+    nf=$(echo "$pick" | awk -F'|' '{print NF}')
+    if [ "$nf" -ge 3 ]; then run=$(echo "$pick" | cut -d'|' -f2 | xargs); args=$(echo "$pick" | cut -d'|' -f3- | xargs)
+    else run=$(echo "$pick" | cut -d'|' -f1 | xargs); args=$(echo "$pick" | cut -d'|' -f2- | xargs); fi
+    grep -vxF "$pick" $Q > $Q.tmp; mv $Q.tmp $Q
+    if [ -d $CK/$run ] || job_exists $run; then echo "$(date +%F_%T) SKIP exists $pick" >> $QDONE; continue; fi
+    mkdir -p $CK/$run; echo "$args" > $CK/$run/args.txt; echo $pickpool > $CK/$run/pool.txt
+    j=$(launch_train $run "$args"); echo "$(date +%F_%T) $j pool $pickpool $pick" >> $QDONE
+    n_queue=$((n_queue+1)); msg="$msg queue:$run:$pickpool:$j"
   done
   # 4. tables
   (cd $REPO && python scripts/make_tables.py > /dev/null 2>&1) || msg="$msg tables:FAILED"
   echo "$(date +%F_%T) gpus=$(gpus_in_use)/$GPU_CAP jobs=$(jobs_in_use) resub=$n_resub eval=$n_eval queue=$n_queue qleft=$(grep -cv '^\s*#\|^\s*$' $Q)$msg" >> $LOG
 }
 
+if [ -n "${SOURCE_ONLY:-}" ]; then return 0 2>/dev/null || exit 0; fi   # tests: define functions only
 if [ "${1:-}" = "once" ]; then cycle; exit 0; fi
 while true; do
   cycle
