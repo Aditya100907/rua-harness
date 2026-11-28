@@ -76,6 +76,9 @@ class PolicyRunner:
         self.quant = task_quantiles(self.stats, stats_task)
         self.cmd = None
         self.env = env
+        if self.format == "diffusion_policy":         # no language input: one-hot task id
+            self.policy.set_task(stats_task)
+            return {"text": instruction}
         if self.format == "sentence":
             if (cmd_opts or {}).get("drop") == "all":
                 instruction = ""                       # control: no command
@@ -189,10 +192,12 @@ class PolicyRunner:
         torch = self.torch
         from dem import preprocess_images
         qs, qa = self.quant
-        imgs = preprocess_images(self._images(obs), size=256, device=self.device)[None]
         sn = qs.normalize(sim.state16(obs))
         if self.stats.get("clip"):
             sn = np.clip(sn, -self.stats["clip"], self.stats["clip"])
+        if self.format == "diffusion_policy":         # same images, state and unnormalization; DP's own sampler
+            return qa.unnormalize(self.policy.predict(self._images(obs), sn))
+        imgs = preprocess_images(self._images(obs), size=256, device=self.device)[None]
         st = torch.as_tensor(sn, dtype=torch.float32, device=self.device)[None]
         with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16, enabled=self.device.startswith("cuda")):
             vis = self.policy.encode_vision(imgs)
@@ -426,7 +431,7 @@ def main() -> None:
                 mode = "name_swap" if args.name_swap else "blank_images" if args.blank_images else ("distractor" if wrong else "perfect") + (f"_rate{args.distractor_rate:g}" if args.distractor_rate else "") \
                     if (args.distractor or args.distractor_rate) else (f"drop_{args.drop}" if args.drop else
                                                              (f"rename" if args.rename else "perfect"))
-                extra_row.update(command_mode=mode if runner.format != "sentence" else "sentence",
+                extra_row.update(command_mode={"sentence": "sentence", "diffusion_policy": "task_onehot"}.get(runner.format, mode),
                                  point_error_cm=args.point_error_cm,
                                  min_dist_cmd_cm=round(100 * min(track["cmd"]), 1) if track["cmd"] else "",
                                  min_dist_true_cm=round(100 * min(track["true"]), 1) if track["true"] else "")

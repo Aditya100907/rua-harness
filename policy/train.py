@@ -130,6 +130,11 @@ def save_ckpt(policy, out: Path, step: int, fmt: str = "sentence") -> Path:
 
 
 def main(argv=None) -> None:
+    import sys
+    av = list(sys.argv[1:] if argv is None else argv)
+    if "diffusion_policy" in av:      # the Diffusion Policy baseline has its own loop (policy/dp_train.py)
+        from policy import dp_train
+        return dp_train.main(av)
     args = parse_args(argv)
     if args.depth_dir:
         os.environ["RUA_DEPTH"] = args.depth_dir      # read by policy.rerender.PointMapStore (inherited by workers)

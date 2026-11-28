@@ -35,6 +35,9 @@ def build_policy(fmt: str = "sentence", cams: int = 2, offline: bool = False, fr
 def load_policy(path, offline: bool = False, map_location="cpu"):
     ck = torch.load(path, map_location="cpu", weights_only=True)
     fmt = ck.get("rua_format", "sentence")
+    if fmt == "diffusion_policy":        # end-to-end baseline (policy/diffusion_policy.py)
+        from policy.diffusion_policy import DPPolicy
+        return DPPolicy.load(path, map_location=map_location)
     if fmt in ("sentence", "kv_text", "points_2d", "points_3d_dist", "sentence_spatial"):  # plain DEM; inputs change
         from dem import DEM
         return DEM.load(path, map_location=map_location)
