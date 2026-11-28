@@ -129,8 +129,19 @@ class CommandDataset:
     def __len__(self):
         return len(self.base)
 
+    def _twin_meta(self, task: str) -> dict:
+        from policy import paths
+        if task not in paths.VIRTUAL_TASKS:
+            return {}
+        if not hasattr(self, "_tm"):
+            from policy import twin_data
+            self._tm = twin_data.load_meta()
+        return self._tm
+
     def instructions(self):
         if self.fmt == "sentence":
+            return self.base.instructions()
+        if self.fmt == "sentence_spatial":    # spatial variants are encoded lazily by DEM's cache
             return self.base.instructions()
         texts = {lb["kv_text"] for d in self.labels for lb in d.values()}
         if self.name_dropout:
@@ -141,11 +152,18 @@ class CommandDataset:
         s = self.base[i]
         ti, ep, t = s["task"], s["episode"], s["frame"]
         lb = self.labels[ti][ep]
-        if self.fmt != "sentence":
+        tb = self.tables[ti]
+        if self.fmt == "sentence_spatial":
+            # P2 third arm: the episode's own instruction, plus a spatial word in twin scenes
+            meta = self._twin_meta(self.tasks[ti]).get(ep)
+            if meta and meta.get("has_twin"):
+                st0 = tb["states"][int(tb["starts"][ep])]
+                word = spatial_word(meta["target_pos0"], meta["twin_pos"], st0)
+                s["text"] = spatial_sentence(s["text"], meta.get("category", lb.get("object_cat", "")), word)
+        elif self.fmt != "sentence":
             s["text"] = lb["kv_text"]
             if self.name_dropout and np.random.default_rng().random() < self.name_dropout:
                 s["text"] = dropped_name_text(lb)
-        tb = self.tables[ti]
         g = int(tb["starts"][ep]) + t
         state = tb["states"][g]
         rng = np.random.default_rng() if self.rng is None else self.rng
@@ -167,7 +185,8 @@ class CommandDataset:
                     if self._pm is None:
                         from policy.rerender import PointMapStore
                         self._pm = PointMapStore()
-                    K, T = self._pm.camera(self.tasks[ti], ep, t, cam, frame="world")
+                    from policy.paths import source_task      # twin scenes share the source demo's camera poses
+                    K, T = self._pm.camera(source_task(self.tasks[ti]), ep, t, cam, frame="world")
                     uv = []
                     for p, m in zip(pts, mask):
                         if not m:
@@ -208,6 +227,25 @@ class CommandDataset:
             q_b = R.from_rotvec(rng.normal(0, np.deg2rad(self.rot_noise), (PATH_LEN, 3))) * q_b
             s["path"] = np.concatenate([p_b, q_b.as_quat()], 1).astype(np.float32)   # [8, 7]
         return s
+
+
+def spatial_word(target_world, other_world, base_state) -> str:
+    """Word that tells the target apart from its twin, seen from the robot (base frame: +x forward, +y left)."""
+    a = world_to_base(np.asarray(target_world), base_state)
+    b = world_to_base(np.asarray(other_world), base_state)
+    dx, dy = a[0] - b[0], a[1] - b[1]
+    if abs(dy) >= abs(dx):
+        return "left" if dy > 0 else "right"
+    return "farther" if dx > 0 else "closer"
+
+
+def spatial_sentence(lang: str, category: str, word: str) -> str:
+    """Insert the spatial word before the object's name: "Pick the honey bottle ..." -> "Pick the left honey bottle ..."."""
+    name = category.replace("_", " ")
+    i = lang.lower().find(name.lower())
+    if i < 0:
+        return f"{lang.rstrip('.')} (the {word} one)."
+    return lang[:i] + word + " " + lang[i:]
 
 
 def dropped_name_text(lb: dict) -> str:

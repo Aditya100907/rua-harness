@@ -71,15 +71,28 @@ cycle() {
     d=$(dirname $ck); run=$(basename $d)
     step=$(basename $ck .pt | sed 's/ckpt_0*//'); step=${step:-0}
     mkdir -p $d/scored
-    [ -f $d/scored/$step ] && { grep -q "objsplit_train" $d/config.json 2>/dev/null && [ ! -f $d/scored/${step}_ho ] || continue; }
+    [ -f $d/scored/$step ] && { { grep -q "objsplit_train" $d/config.json 2>/dev/null && [ ! -f $d/scored/${step}_ho ]; } || { grep -q "Twin" $d/config.json 2>/dev/null && [ ! -f $d/scored/${step}_twin ]; } || continue; }
     grep -q '"untrained": true' $d/config.json 2>/dev/null && { touch $d/scored/$step; continue; }
     read ntasks want tasks <<< $(python -c "
-import json; c=json.load(open('$d/config.json')); print(len(c['tasks']), c['steps'], ' '.join(c['tasks']))")
+import json; c=json.load(open('$d/config.json')); print(len([t for t in c['tasks'] if 'Twin' not in t]), c['steps'], ' '.join(c['tasks']))")
     final=0; [ "$step" -ge "$want" ] && final=1
     if [ "$ntasks" -gt 3 ] && [ $final -eq 0 ] && [ $((step % 50000)) -ne 0 ]; then touch $d/scored/$step; continue; fi
     if [ "$ntasks" -le 3 ] && [ $final -eq 0 ] && [ $((step % 5000)) -ne 0 ]; then touch $d/scored/$step; continue; fi
     eps=50; [ $final -eq 1 ] && eps=100
     conc=$ntasks                          # CPU jobs: no GPU cap
+    # twin-trained runs: the virtual twin task is scored separately on held-out twin scenes (L3)
+    if echo "$tasks" | grep -q "Twin"; then
+      if [ ! -f $d/scored/${step}_twin ]; then
+        TJ=$ROOT/runs/twin_heldout50.json
+        j3=$(CKPT=$ck TASKS="PickPlaceCounterToCabinetTwin" EPISODES=50 NOTE=${run}_${step}_twinL3 \
+             EVAL_ARGS="--demo-scenes $TJ" sbatch --parsable --job-name=evaltw_${run}_$step --array=0 \
+             $REPO/policy/slurm/eval_array.sbatch) && \
+        j4=$(CKPT=$ck TASKS="PickPlaceCounterToCabinetTwin" EPISODES=50 NOTE=${run}_${step}_twinpoint \
+             EVAL_ARGS="--demo-scenes $TJ --twin-point" sbatch --parsable --job-name=evaltp_${run}_$step --array=0 \
+             $REPO/policy/slurm/eval_array.sbatch) && touch $d/scored/${step}_twin && msg="$msg evaltwin:${run}@$step:$j3,$j4"
+      fi
+      tasks=$(echo $tasks | tr " " "\n" | grep -v Twin | tr "\n" " "); ntasks=$(echo $tasks | wc -w); conc=$ntasks
+    fi
     if [ ! -f $d/scored/$step ]; then
       ea=""; [ "$ntasks" -le 3 ] && ea="--save-traj"    # trajectories for failure sorting (E5)
       j=$(CKPT=$ck TASKS="$tasks" EPISODES=$eps EVAL_ARGS="$ea" sbatch --parsable --job-name=eval_${run}_$step \

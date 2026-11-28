@@ -81,6 +81,27 @@ class PolicyRunner:
                 instruction = ""                       # control: no command
             self.policy.set_instruction(instruction)
             return {"text": instruction}
+        if self.format == "sentence_spatial":
+            # P2 third arm: in twin scenes add the spatial word for the commanded copy (the twin with --twin-point)
+            text = instruction
+            try:
+                from policy.twin_data import twin_position
+                from policy.variants import spatial_sentence, spatial_word
+                from simlib.truth import object_position
+                tw, tg = twin_position(env), object_position(env, "obj")
+                st0 = sim.state16(env._get_observations(force_update=True))
+                cmd_twin = bool((cmd_opts or {}).get("twin"))
+                word = spatial_word(tw, tg, st0) if cmd_twin else spatial_word(tg, tw, st0)
+                cat = (env.get_ep_meta().get("object_cfgs") and "") or ""
+                from policy.label_commands import ep_names
+                cat = ep_names(env.get_ep_meta())["objects"].get("obj", "")
+                text = spatial_sentence(instruction, cat, word)
+            except Exception:
+                pass                                   # no twin in this scene: plain instruction
+            if (cmd_opts or {}).get("drop") == "all":
+                text = ""
+            self.policy.set_instruction(text)
+            return {"text": text}
         if self.format == "pose_path":
             # demo-scene evaluation: the "perfect" path is the held-out demo's own future (time-indexed)
             self.cmd = {"kv_text": (cmd_opts or {}).get("kv_text", instruction)}
