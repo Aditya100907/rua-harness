@@ -88,3 +88,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 13:48 Watcher restarted with GPU pools (dry-run verified: free shares filled first, borrowing only when other pools' queues are empty).
 - 13:48 Backlog 9 helper done: agent-partition session built and dry-run tested (claude module, tmux, network, slurm all OK); blocked on Adi's Claude login and a GitHub push method. YCRC's managed settings deny scancel and ask before rsync/ssh/tmux/kill/git push.
 - 13:51 Added points_3d_dist (distance channels through the vision path); smoke-tested train and eval on the Mac.
+- 13:55 vLLM helper handed back: env rebuild 34966847 -> server 34966848 (gpu_devel) -> smoke episodes 34966849/50 chained. Stopped fs_mse_points_3d_rgb_seed1 for the cap.

@@ -65,9 +65,15 @@ class PolicyRunner:
                  rng: np.random.Generator | None = None) -> dict:
         """Returns the command used (for formats other than `sentence`, built from ground truth at reset)."""
         from policy.data import task_quantiles
-        if task not in self.stats["per_task"]:
-            raise KeyError(f"{task} was not in this checkpoint's training tasks")
-        self.quant = task_quantiles(self.stats, task)
+        stats_task = task
+        if task not in self.stats["per_task"]:       # a virtual task (twin scenes) uses its source's stats
+            stats_task = paths.source_task(task)
+        if stats_task not in self.stats["per_task"]:
+            src = [t for t, s in paths.VIRTUAL_TASKS.items() if s == task and t in self.stats["per_task"]]
+            if not src:
+                raise KeyError(f"{task} was not in this checkpoint's training tasks")
+            stats_task = src[0]                       # trained on the twin task, evaluated on the stock one
+        self.quant = task_quantiles(self.stats, stats_task)
         self.cmd = None
         self.env = env
         if self.format == "sentence":
@@ -234,6 +240,11 @@ def main() -> None:
     ap.add_argument("--z0", default="random", choices=["random", "zero"], help="sampling noise")
     ap.add_argument("--nfe", type=int, default=1, help="MeanFlow steps per action chunk")
     ap.add_argument("--demo-scenes", default="", help="JSON task -> demo episode ids: replay those initial scenes")
+    ap.add_argument("--twin", action="store_true",
+                    help="with --demo-scenes: add the target's twin to each scene (policy/twin_data.py; "
+                         "on by default for the task PickPlaceCounterToCabinetTwin)")
+    ap.add_argument("--twin-point", action="store_true",
+                    help="twin scenes: the command's grasp point is on the twin (counterfactual command)")
     args = ap.parse_args()
     if args.no_determinism_fix:
         import os as _os
@@ -258,7 +269,10 @@ def main() -> None:
     f = open(out, "a", newline="")
     w = csv.DictWriter(f, fieldnames=COLS + ["model_seconds", "state_err0", "image_err0", "command_mode", "point_error_cm",
                                        "min_dist_cmd_cm", "min_dist_true_cm", "demo_episode", "img_rowdiff0",
-                                       "objective", "nfe", "z0", "determinism_fix"], extrasaction="ignore")
+                                       "objective", "nfe", "z0", "determinism_fix"]
+                       + (["min_dist_twin_cm", "went_to", "twin_moved_cm"]
+                          if (args.twin or args.twin_point or any(t in paths.VIRTUAL_TASKS for t in args.tasks)) else []),
+                       extrasaction="ignore")
     if new:
         w.writeheader()
     cams = runner.cams if runner else ["left", "right"]
@@ -320,11 +334,20 @@ def main() -> None:
                                 reset_obs=obs0, record=args.save_traj)
                 extra_row.update(command_mode=f"demo_scene_{ep}" + ("_TRAINED" if ep in train_eps else ""))
             else:
+                twin = args.twin or args.twin_point or task in paths.VIRTUAL_TASKS
+                if twin and not args.demo_scenes:
+                    raise SystemExit("twin scenes need --demo-scenes (e.g. runs/twin_heldout50.json)")
                 if args.demo_scenes:
                     eps = json.loads(Path(args.demo_scenes).read_text())[task]
                     if i >= len(eps):
                         continue
-                    obs0 = sim.reset_to_episode(env, ds, eps[i])
+                    if twin:
+                        from policy import twin_data
+                        if not hasattr(runner, "_twin_meta"):
+                            runner._twin_meta = twin_data.load_meta()
+                        obs0 = twin_data.reset_to_twin_episode(env, ds, eps[i], runner._twin_meta.get(eps[i]))
+                    else:
+                        obs0 = sim.reset_to_episode(env, ds, eps[i])
                     extra_row["demo_episode"] = eps[i]
                 else:
                     env.rng = np.random.default_rng(seed)
@@ -334,13 +357,22 @@ def main() -> None:
                                             np.random.default_rng(seed + 991).random() < args.distractor_rate)
                 opts = dict(point_error_cm=args.point_error_cm, distractor=wrong, drop=args.drop,
                             rename=args.rename)
+                if args.twin_point:
+                    opts["twin"] = True
                 cmd = runner.set_task(task, instr, env=env, cmd_opts=opts, rng=np.random.default_rng(seed + 7))
                 instr = cmd["text"]
-                track = {"cmd": [], "true": []}
+                track = {"cmd": [], "true": [], "twin": []}
                 g_cmd, g_true = cmd.get("grasp_world"), cmd.get("true_grasp_world")
+                if twin:
+                    from policy.twin_data import twin_position
+                    twin0 = twin_position(env).copy()
+                    if g_true is None:          # sentence format: no command points; the target at reset
+                        g_true = np.asarray(env.sim.data.body_xpos[env.obj_body_id["obj"]]).copy()
 
                 def on_step(o):
                     e = np.asarray(o["robot0_eef_pos"])
+                    if twin:
+                        track["twin"].append(np.linalg.norm(e - twin_position(env)))
                     if g_cmd is not None:
                         track["cmd"].append(np.linalg.norm(e - g_cmd))
                     if g_true is not None:
@@ -354,6 +386,15 @@ def main() -> None:
                                  point_error_cm=args.point_error_cm,
                                  min_dist_cmd_cm=round(100 * min(track["cmd"]), 1) if track["cmd"] else "",
                                  min_dist_true_cm=round(100 * min(track["true"]), 1) if track["true"] else "")
+                if twin:
+                    # which copy the gripper went to: the one it came closer to (min gripper distance;
+                    # the twin's live position, the target's position at reset)
+                    dt_, dw_ = min(track["true"] or [np.inf]), min(track["twin"] or [np.inf])
+                    extra_row.update(command_mode=("twin_point" if args.twin_point else "twin_perfect")
+                                     + ("" if runner.format != "sentence" else "_sentence"),
+                                     min_dist_twin_cm=round(100 * dw_, 1),
+                                     went_to="target" if dt_ < dw_ else "twin",
+                                     twin_moved_cm=round(100 * float(np.linalg.norm(twin_position(env) - twin0)), 1))
             # render sanity at reset: mean change between neighbouring pixel rows (about 6 clean, 25+ corrupt)
             extra_row["img_rowdiff0"] = round(float(np.abs(np.diff(sim.images(obs0, ["left"])[0].astype(np.int16),
                                                                    axis=0)).mean()), 1)

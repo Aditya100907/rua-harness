@@ -19,6 +19,10 @@ ATOMIC_SEEN = [
     "PickPlaceToasterToCounter", "SlideDishwasherRack", "TurnOffStove", "TurnOnElectricKettle",
     "TurnOnMicrowave", "TurnOnSinkFaucet",
 ]
+# Virtual tasks: same demos (parquet, instructions, env) as the source task, their own frame
+# store and labels. PickPlaceCounterToCabinetTwin: every demo re-rendered with a twin of the
+# target object on the counter (policy/twin_data.py).
+VIRTUAL_TASKS = {"PickPlaceCounterToCabinetTwin": "PickPlaceCounterToCabinet"}
 REPO = Path(__file__).resolve().parents[1]
 BOUCHET_SCRATCH = Path("/nfs/roberts/scratch/pi_dr877/ak3288")
 
@@ -39,8 +43,14 @@ def frames_base() -> Path:
     return Path.home() / "apollo-lab" / "runs" / "frames"
 
 
+def source_task(task: str) -> str:
+    """The RoboCasa task behind `task` (itself unless it is a virtual task)."""
+    return VIRTUAL_TASKS.get(task, task)
+
+
 def task_dir(task: str, base: Path | None = None) -> Path:
-    """The `lerobot/` folder of a task's target human demos."""
+    """The `lerobot/` folder of a task's target human demos (the source task's, for a virtual task)."""
+    task = source_task(task)
     base = Path(base) if base else data_base()
     hits = sorted((base / "v1.0" / "target" / "atomic" / task).glob("*/lerobot"))
     if not hits:
@@ -51,7 +61,7 @@ def task_dir(task: str, base: Path | None = None) -> Path:
 def horizon(task: str) -> int:
     """Episode step limit RoboCasa uses for a task."""
     from robocasa.utils.dataset_registry import ATOMIC_TASK_DATASETS
-    return int(ATOMIC_TASK_DATASETS[task]["horizon"])
+    return int(ATOMIC_TASK_DATASETS[source_task(task)]["horizon"])
 
 
 def code_commit() -> str:

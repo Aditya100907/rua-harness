@@ -14,6 +14,8 @@ Error modes (Part N):
   distractor      grasp point on a distractor object instead of the target (N2, F6 check)
   drop            "point" (mask all points), "name" (object name -> "object"), "source" (N3)
   rename          replace the object name with this string (N4)
+  twin            grasp point on the twin of the target (twin scenes from policy/twin_data.py):
+                  the counterfactual command, same name, the point on the other copy
 """
 from __future__ import annotations
 
@@ -30,8 +32,10 @@ def _is_pick(task: str) -> bool:
 
 
 def perfect_command(env, task: str, rng: np.random.Generator | None = None, point_error_cm: float = 0.0,
-                    distractor: bool = False, drop: str = "", rename: str = "") -> dict:
+                    distractor: bool = False, drop: str = "", rename: str = "", twin: bool = False) -> dict:
+    from policy.paths import source_task
     from simlib.truth import object_names, object_position, target_part
+    task = source_task(task)
     rng = rng or np.random.default_rng(0)
     names = ep_names(env.get_ep_meta())
     tmpl = dict(ATOMIC_SEEN[task])
@@ -52,6 +56,10 @@ def perfect_command(env, task: str, rng: np.random.Generator | None = None, poin
                 d = sorted(others, key=lambda n: np.linalg.norm(object_position(env, n) - grasp))[0]
                 grasp = object_position(env, d)
                 info["distractor_name"] = d
+        if twin:
+            from policy.twin_data import twin_position
+            grasp = twin_position(env).copy()
+            info["distractor_name"] = "twin"
     else:
         pos = part.positions or [part.pos]
         grasp = pos[int(np.argmin([np.linalg.norm(np.asarray(p) - eef) for p in pos]))]
