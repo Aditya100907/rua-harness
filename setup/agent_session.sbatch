@@ -9,7 +9,9 @@
 #
 # Options (pass with --export=ALL,NAME=value):
 #   AGENT_MODE=run|check   check = test modules, tmux, claude --version, network, Slurm, git; start nothing.
-#   AGENT_WORKDIR=path     the git clone Claude works in (default $A/rua-harness-git).
+#   AGENT_WORKDIR=path     the git clone Claude works in (default: $A/rua-harness if it is a clone, else
+#                          $A/rua-harness-git).
+#   AGENT_SKIP_LOGIN_CHECK=1  start even if ~/.claude/.credentials.json is missing (if the login lives elsewhere).
 #   AGENT_PUSH=1           push the clone's branch to GitHub every 10 minutes from this job, outside the
 #                          YCRC sandbox, with Adi's GitHub key. Off by default; see the README.
 #SBATCH --partition=agent
@@ -21,7 +23,11 @@
 set -u
 P=/nfs/roberts/project/pi_dr877/ak3288
 A=$P/apollo-lab
-export AGENT_WORKDIR=${AGENT_WORKDIR:-$A/rua-harness-git}
+# The git clone. If the jobs' folder (rua-harness) has become the clone, use it; else rua-harness-git.
+if [ -z "${AGENT_WORKDIR:-}" ]; then
+  if [ -d $A/rua-harness/.git ]; then AGENT_WORKDIR=$A/rua-harness; else AGENT_WORKDIR=$A/rua-harness-git; fi
+fi
+export AGENT_WORKDIR
 export AGENT_LOGDIR=$A/logs
 MODE=${AGENT_MODE:-run}
 SESSION=claude
@@ -65,7 +71,7 @@ if [ "$MODE" = check ]; then
 fi
 
 # --- run mode ---
-if [ ! -s "$HOME/.claude/.credentials.json" ]; then
+if [ ! -s "$HOME/.claude/.credentials.json" ] && [ "${AGENT_SKIP_LOGIN_CHECK:-0}" != 1 ]; then
   say "Claude is not logged in on Bouchet (no ~/.claude/.credentials.json). Adi must log in once; see setup/agent_session_README.md. Exiting."
   exit 1
 fi
