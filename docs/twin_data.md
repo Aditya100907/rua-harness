@@ -49,6 +49,8 @@ two objects. Only the point, which stays on the true object, says which one to p
   played open loop in the twin scene, still succeed; the twin moved 0.003 mm.
 - Frame 0 of the stored JPEGs against a live observation of the twin eval scene: mean absolute
   error 1.7 (0 to 255), JPEG noise.
+- End to end on the Mac: a 2-step points_2d checkpoint trained on the twin task (5 demos)
+  and evaluated on one twin scene with `--twin-point` writes all columns (smoke test only).
 - Training data loads: `RoboCasaDataset(["PickPlaceCounterToCabinetTwin"])` gives the same state,
   actions and instruction as the source task, and twin images (merge test on 10 episodes, 5 with
   twin, 5 filled from the source store, which match the source exactly).
@@ -96,7 +98,7 @@ rebuilds each held-out demo's initial scene, adds its twin as a free body at the
 `twin_meta.jsonl` (or recomputes it the same way) and runs the policy. `--twin` does the same for
 the stock task name. Extra columns: `min_dist_twin_cm` (gripper to the twin's live position),
 `min_dist_true_cm` (gripper to the target's position at reset), `went_to` (the copy the gripper
-came closer to), `twin_moved_cm`. `--twin-point` puts the command's grasp point on the twin
+came closer to, or "neither" when it came within 5 cm of neither, as in the N2 distractor test), `twin_moved_cm`. `--twin-point` puts the command's grasp point on the twin
 instead of the target: the counterfactual command (same name, other copy). A checkpoint trained
 only on the stock task is scored with the stock task's normalization.
 

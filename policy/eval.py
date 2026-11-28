@@ -389,13 +389,13 @@ def main() -> None:
                                  min_dist_cmd_cm=round(100 * min(track["cmd"]), 1) if track["cmd"] else "",
                                  min_dist_true_cm=round(100 * min(track["true"]), 1) if track["true"] else "")
                 if twin:
-                    # which copy the gripper went to: the one it came closer to (min gripper distance;
-                    # the twin's live position, the target's position at reset)
+                    # which copy the gripper went to: the one it came closer to, if within 5 cm (as the N2
+                    # distractor test); the twin's live position, the target's position at reset
                     dt_, dw_ = min(track["true"] or [np.inf]), min(track["twin"] or [np.inf])
                     extra_row.update(command_mode=("twin_point" if args.twin_point else "twin_perfect")
                                      + ("" if runner.format != "sentence" else "_sentence"),
                                      min_dist_twin_cm=round(100 * dw_, 1),
-                                     went_to="target" if dt_ < dw_ else "twin",
+                                     went_to=("neither" if min(dt_, dw_) > 0.05 else "target" if dt_ < dw_ else "twin"),
                                      twin_moved_cm=round(100 * float(np.linalg.norm(twin_position(env) - twin0)), 1))
             # render sanity at reset: mean change between neighbouring pixel rows (about 6 clean, 25+ corrupt)
             extra_row["img_rowdiff0"] = round(float(np.abs(np.diff(sim.images(obs0, ["left"])[0].astype(np.int16),
