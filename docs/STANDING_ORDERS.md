@@ -74,6 +74,20 @@ is next, what needs me. Append a dated entry to the log in
 ~/Desktop/APOLLO-Lab/PROJECT_CONTEXT.md once a day. Reread that file before
 editing it and change only your own lines, since other sessions edit it too.
 
-## Additions
-- (Sat Nov 28) Adi's second priority set: read `~/Desktop/APOLLO-Lab/research/litreview-2026-11-27/00_SYNTHESIS.md` and `00_RUNNING_LOG.md`; run them alongside the backlog. GPU pools: 4 fast 3-task experiments, 3 long runs, 1 open model and HexaShell; move GPUs between pools when a queue is empty. Fix the perfect-command mismatch before more format scores count. Must-run controls: no command, blank image, snap to nearest object, rule-based commander. Verify every cited paper before using its numbers (log in docs/related_notes.md). Track the Dec 13 decision number in docs/findings.md. When the two plans conflict on a method detail, test both and record the result in docs/decisions_log.md.
-- (Sat Nov 28) Each cycle, read `~/Desktop/APOLLO-Lab/research/litreview-2026-11-27/PROPOSALS.md` and pull from it when choosing the next experiment. Never edit that folder.
+## Current priorities (Adi, Sat Nov 28, about 15:00). These are decisions. They replace the two
+## additions that were here (the research-synthesis priority set and reading PROPOSALS.md each cycle).
+1. System benchmark. William runs HexaShell alone and is on schedule; do not run HexaShell alone yourself.
+   Your part: (b) the policy alone on the same seeds, and (c) build and test run_skill inside HexaShell's
+   RoboCasa port so it is ready the moment his baseline lands. When his branch appears on GitHub, read it
+   and line up seeds, model and split with his. Then run all three conditions on the 3 smoke tasks, then
+   all 18: success, seconds, LLM calls, tokens.
+2. Add Diffusion Policy as the end-to-end baseline: same demos, same evaluation.
+3. The system table and the 18-task rows stay in the paper. They are the foundation.
+4. The real robot stays in scope. Keep the 3D point-map track alive for it whatever its simulation score:
+   clean reruns, depth-noise training, and a sim-to-real plan for the xArm 7 in docs/sim_to_real.md stating
+   what must be true by Dec 15 to run it.
+5. The interaction-layer experiments (twins, name dropout, tolerance sweeps, agent-written commands)
+   continue on their GPU share.
+GPU shares: interaction layer 4 (pool A), long runs (18-task rows, Diffusion Policy, seeds) 3 (pool B),
+open model / HexaShell run_skill 1 (pool C), borrowing when a pool's queue is empty. The research folder
+(~/Desktop/APOLLO-Lab/research/litreview-2026-11-27/, read-only) is an optional input for the interaction share.
