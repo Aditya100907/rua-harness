@@ -73,3 +73,7 @@ Rewrite docs/DAILY.md at 9am and 9pm: what was learned, what is running, what
 is next, what needs me. Append a dated entry to the log in
 ~/Desktop/APOLLO-Lab/PROJECT_CONTEXT.md once a day. Reread that file before
 editing it and change only your own lines, since other sessions edit it too.
+
+## Additions
+- (Sat Nov 28) Adi's second priority set: read `~/Desktop/APOLLO-Lab/research/litreview-2026-11-27/00_SYNTHESIS.md` and `00_RUNNING_LOG.md`; run them alongside the backlog. GPU pools: 4 fast 3-task experiments, 3 long runs, 1 open model and HexaShell; move GPUs between pools when a queue is empty. Fix the perfect-command mismatch before more format scores count. Must-run controls: no command, blank image, snap to nearest object, rule-based commander. Verify every cited paper before using its numbers (log in docs/related_notes.md). Track the Dec 13 decision number in docs/findings.md. When the two plans conflict on a method detail, test both and record the result in docs/decisions_log.md.
+- (Sat Nov 28) Each cycle, read `~/Desktop/APOLLO-Lab/research/litreview-2026-11-27/PROPOSALS.md` and pull from it when choosing the next experiment. Never edit that folder.
