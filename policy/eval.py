@@ -71,6 +71,8 @@ class PolicyRunner:
         self.cmd = None
         self.env = env
         if self.format == "sentence":
+            if (cmd_opts or {}).get("drop") == "all":
+                instruction = ""                       # control: no command
             self.policy.set_instruction(instruction)
             return {"text": instruction}
         if self.format == "pose_path":
@@ -100,6 +102,8 @@ class PolicyRunner:
         return np.concatenate([p_b, q_b.as_quat()], 1).astype(np.float32)
 
     def _images(self, obs: dict) -> np.ndarray:
+        if getattr(self, "blank_images", False):          # control: no visual input
+            return np.zeros((len(self.cams), 256, 256, 3), np.uint8)
         if self.format == "points_3d":      # point map from live depth, in the current base frame
             from policy.variants import pointmap_to_image
             from simlib.camera import views
@@ -215,7 +219,9 @@ def main() -> None:
     ap.add_argument("--distractor", action="store_true", help="N2/F6: grasp point on a distractor object")
     ap.add_argument("--distractor-rate", type=float, default=0.0,
                     help="referent axis: per episode (by seed), put the grasp point on a distractor with this probability")
-    ap.add_argument("--drop", default="", choices=["", "point", "name", "source"], help="N3: drop a field")
+    ap.add_argument("--drop", default="", choices=["", "point", "name", "source", "all"],
+                    help="N3: drop a field; 'all' = no command (control)")
+    ap.add_argument("--blank-images", action="store_true", help="control: the policy's camera images are zeroed")
     ap.add_argument("--rename", default="", help="N4: call the object by this name")
     ap.add_argument("--no-determinism-fix", action="store_true",
                     help="run without HexaShell's counter-region determinism fix (policy/determinism.py)")
@@ -232,6 +238,7 @@ def main() -> None:
     runner, step, run_id, fmt = None, "", "", "sentence"
     if not args.wiring:
         runner = PolicyRunner(args.ckpt, device=dev, nfe=args.nfe, z0=args.z0)
+        runner.blank_images = args.blank_images
         fmt = runner.format
         ck = Path(args.ckpt)
         step = int(ck.stem.split("_")[-1]) if ck.stem.startswith("ckpt_") else ""
@@ -334,7 +341,7 @@ def main() -> None:
                         track["true"].append(np.linalg.norm(e - g_true))
                 r = run_episode(env, task, seed, lambda o, t: runner.act(o), H, execute=args.execute,
                                 video=frames, reset_obs=obs0, record=args.save_traj, on_step=on_step)
-                mode = ("distractor" if wrong else "perfect") + (f"_rate{args.distractor_rate:g}" if args.distractor_rate else "") \
+                mode = "blank_images" if args.blank_images else ("distractor" if wrong else "perfect") + (f"_rate{args.distractor_rate:g}" if args.distractor_rate else "") \
                     if (args.distractor or args.distractor_rate) else (f"drop_{args.drop}" if args.drop else
                                                              (f"rename" if args.rename else "perfect"))
                 extra_row.update(command_mode=mode if runner.format != "sentence" else "sentence",

@@ -64,16 +64,17 @@ def perfect_command(env, task: str, rng: np.random.Generator | None = None, poin
     obj = tmpl.get("object")
     if rename and obj:
         obj = rename
-    if drop == "name" and obj:
+    if drop in ("name", "all") and obj:
         obj = "object"
-    src = None if drop == "source" else tmpl.get("source")
+    src = None if drop in ("source", "all") else tmpl.get("source")
     cmd = Command(skill=tmpl["skill"], object=Ref(obj) if obj else None,
                   target=Ref(tmpl["target"]) if tmpl.get("target") else None,
                   source=src, direction=tmpl.get("direction"))
-    has = [pts[0] is not None and drop != "point" and obj is not None,
-           pts[1] is not None and drop != "point"]
+    no_pt = drop in ("point", "all")
+    has = [pts[0] is not None and not no_pt and obj is not None,
+           pts[1] is not None and not no_pt]
     if task == "NavigateKitchen":
-        has = [False, pts[1] is not None and drop != "point"]
+        has = [False, pts[1] is not None and not no_pt]
     return {"kv_text": to_policy_text(cmd), "grasp_world": pts[0], "place_world": pts[1], "has": has,
             "true_grasp_world": None if part.object_pos is None and _is_pick(task) else
             (part.object_pos if _is_pick(task) else grasp), **info}
