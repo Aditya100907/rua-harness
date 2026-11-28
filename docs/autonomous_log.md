@@ -90,3 +90,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 13:51 Added points_3d_dist (distance channels through the vision path); smoke-tested train and eval on the Mac.
 - 13:55 vLLM helper handed back: env rebuild 34966847 -> server 34966848 (gpu_devel) -> smoke episodes 34966849/50 chained. Stopped fs_mse_points_3d_rgb_seed1 for the cap.
 - 13:58 Twin-distractor data (backlog 1): policy/twin_data.py built and tested on 5 demos on the Mac (all placed, twin visible, original bodies exact, demo actions still succeed with the twin present); eval --twin / --twin-point added. Smoke chunk 0 on Bouchet: job 34967024 (day CPU).
+- 14:00 Twin smoke chunk 34967024 on Bouchet: episode 0 placed identically to the Mac, 105 s per demo on a day CPU node (render about 73 s). Submitted the rest: array 34967215 (indices 1-50, 10 demos each, %40).
