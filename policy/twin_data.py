@@ -509,13 +509,13 @@ def build(episodes: list[int], base: Path | None = None, force: bool = False, pn
 # ------------------------------------------------------------------ merge into a frame store
 
 def merge(base: Path | None = None, labels_dir: Path | None = None, runs_dir: Path | None = None,
-          heldout_from: int = 452) -> dict:
+          heldout_from: int = 452, max_episodes: int | None = None) -> dict:
     """Concatenate the part files in episode order into <cam>.bin / .idx.npy, same global frame
     indexing as the source task. Episodes without a part file get the source task's frames and
     has_twin false (and are left out of twin_train.json)."""
     from policy.extract_frames import FrameStore, episode_lengths
     ds = paths.task_dir(SOURCE)
-    lens = episode_lengths(ds)
+    lens = episode_lengths(ds)[:max_episodes]          # max_episodes: first N only (tests)
     od = out_dir(base)
     src = None
     metas = []
@@ -560,7 +560,7 @@ def merge(base: Path | None = None, labels_dir: Path | None = None, runs_dir: Pa
     from policy.label_commands import load_labels
     ld = Path(labels_dir) if labels_dir else paths.frames_base().parent / "labels"
     with open(ld / f"{TASK}.jsonl", "w") as f:
-        for lb, mt in zip(load_labels(SOURCE, ld), metas):
+        for lb, mt in zip(load_labels(SOURCE, ld)[:len(metas)], metas):
             assert lb["episode"] == mt["episode"]
             lb = dict(lb, task=TASK, source_task=SOURCE, has_twin=mt["has_twin"],
                       twin_world=mt.get("twin_pos"), twin_cat=mt.get("category"))
@@ -635,6 +635,7 @@ def main() -> None:
     mg.add_argument("--out", default=None)
     mg.add_argument("--labels", default=None)
     mg.add_argument("--runs", default=None)
+    mg.add_argument("--max-episodes", type=int, default=None, help="first N episodes only (tests)")
     args = ap.parse_args()
     base = Path(args.out) if args.out else None
     if args.cmd == "build":
@@ -653,7 +654,7 @@ def main() -> None:
         bad = [r for r in rows if "error" in r]
         print(f"done: {len(rows) - len(bad)} built, {len(bad)} failed", flush=True)
     else:
-        print(json.dumps(merge(base, args.labels, args.runs), indent=1))
+        print(json.dumps(merge(base, args.labels, args.runs, max_episodes=args.max_episodes), indent=1))
 
 
 if __name__ == "__main__":
