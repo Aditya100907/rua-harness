@@ -96,3 +96,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 14:10 Bug: cluster results recorded code_commit b180b55-dirty (stale .git in the rsync copy beat the COMMIT file). Fixed; earlier cluster CSVs carry the wrong commit (the right one is the sync commit at the time, in git history). vLLM smoke: sentence 1/1 (2 calls, 3.5k tokens, 115 s), points_2d 0/1 (out of time); grasp error 16.6 cm both.
 - 14:10 Launched the open-model batch: Qwen3-VL-8B commander, sentence and points_2d checkpoints, 10 episodes per smoke task (60 episodes), against server 34966848 (until 14:56).
 - 14:11 PROPOSALS v4: P-2 drawing options built (check job 34967929), P-3 sweep mode added.
+- 14:14 Relabel merged (502/514/543). TurnOnMicrowave old labels were about 20 cm off the test-time button point. Mark check resubmitted (absolute path).
