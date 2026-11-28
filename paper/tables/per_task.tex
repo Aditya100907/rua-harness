@@ -5,15 +5,30 @@
 \caption{Success rate (\%) per task and condition, with Wilson 95\% interval and episode count.}
 \label{tab:per_task}
 \begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{lcc}
+\begin{tabular}{lccc}
 \toprule
-Task & agent\_plus\_policy & scripted \\
+Task & agent\_plus\_policy & policy\_only & scripted \\
 \midrule
-OpenDrawer & 0.0 [0.0, 79.3] (n=1) & 59.2 [45.2, 71.8] (n=49) \\
-PickPlaceCounterToCabinet & - & 36.8 [25.5, 49.8] (n=57) \\
-TurnOnMicrowave & - & 100.0 [94.8, 100.0] (n=70) \\
+CloseBlenderLid & - & 8.3 [5.8, 11.6] (n=350) & - \\
+CloseFridge & - & 57.1 [51.9, 62.2] (n=350) & - \\
+CloseToasterOvenDoor & - & 54.3 [49.0, 59.4] (n=350) & - \\
+CoffeeSetupMug & - & 41.1 [36.1, 46.4] (n=350) & - \\
+NavigateKitchen & - & 1.1 [0.4, 2.9] (n=350) & - \\
+OpenCabinet & - & 68.9 [63.8, 73.5] (n=350) & - \\
+OpenDrawer & 0.0 [0.0, 79.3] (n=1) & 39.9 [38.7, 41.0] (n=6804) & 65.6 [58.0, 72.5] (n=160) \\
+OpenStandMixerHead & - & 83.1 [78.9, 86.7] (n=350) & - \\
+PickPlaceCounterToCabinet & - & 15.1 [14.2, 16.0] (n=6652) & 40.0 [31.7, 48.9] (n=120) \\
+PickPlaceCounterToStove & - & 13.7 [10.5, 17.7] (n=350) & - \\
+PickPlaceDrawerToCounter & - & 23.7 [19.6, 28.4] (n=350) & - \\
+PickPlaceSinkToCounter & - & 43.4 [38.3, 48.7] (n=350) & - \\
+PickPlaceToasterToCounter & - & 80.9 [76.4, 84.6] (n=350) & - \\
+SlideDishwasherRack & - & 57.1 [51.9, 62.2] (n=350) & - \\
+TurnOffStove & - & 18.9 [15.1, 23.3] (n=350) & - \\
+TurnOnElectricKettle & - & 71.1 [66.2, 75.6] (n=350) & - \\
+TurnOnMicrowave & - & 32.0 [30.9, 33.1] (n=6704) & 100.0 [95.4, 100.0] (n=80) \\
+TurnOnSinkFaucet & - & 68.9 [63.8, 73.5] (n=350) & - \\
 \midrule
-All tasks & 0.0 [0.0, 79.3] (n=1) & 68.2 [61.0, 74.6] (n=176) \\
+All tasks & 0.0 [0.0, 79.3] (n=1) & 32.6 [32.0, 33.2] (n=25410) & 64.7 [59.7, 69.5] (n=360) \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
