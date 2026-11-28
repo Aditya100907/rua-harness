@@ -321,6 +321,11 @@ class PointMapStore:
         """[3, H, W] float32 point map in the world or robot base frame. NaN where invalid."""
         d = self.depth(task, ep, t, cam)
         K, T = self.camera(task, ep, t, cam, frame)
+        lvl = os.environ.get("RUA_DEPTH_NOISE", "")
+        if lvl and lvl != "clean":       # real-robot track: train with sensor-like depth noise (policy/noise)
+            from policy.noise.depth_noise import apply_level
+            noisy = apply_level(lvl, np.nan_to_num(d, nan=0.0), np.random.default_rng(), fx=float(K[0, 0]))
+            d = np.where(noisy > 0, noisy, np.nan).astype(np.float32)
         H, W = d.shape
         u, v = np.meshgrid(np.arange(W, dtype=np.float32) + 0.5, np.arange(H, dtype=np.float32) + 0.5)
         x = (u - K[0, 2]) * d / K[0, 0]

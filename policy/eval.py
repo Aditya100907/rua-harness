@@ -137,6 +137,12 @@ class PolicyRunner:
             if self.env is None:
                 raise RuntimeError("points_3d needs the env (build it with depth=True)")
             v = views(self.env, obs, [sim.CAMERAS[c] for c in self.cams])
+            lvl = getattr(self, "depth_noise", "")
+            if lvl and lvl != "clean":
+                from policy.noise.depth_noise import apply_level
+                for name, view in v.items():
+                    noisy = apply_level(lvl, np.nan_to_num(view.depth, nan=0.0), np.random.default_rng(), fx=float(view.K[0, 0]))
+                    view.depth = np.where(noisy > 0, noisy, np.nan)
             st = sim.state16(obs)
             from scipy.spatial.transform import Rotation as R
             out = []
@@ -268,6 +274,7 @@ def main() -> None:
     ap.add_argument("--drop", default="", choices=["", "point", "name", "source", "all"],
                     help="N3: drop a field; 'all' = no command (control)")
     ap.add_argument("--blank-images", action="store_true", help="control: the policy's camera images are zeroed")
+    ap.add_argument("--depth-noise", default="", help="point-map formats: depth-noise level at test (policy/noise SWEEP)")
     ap.add_argument("--rename", default="", help="N4: call the object by this name")
     ap.add_argument("--name-swap", action="store_true",
                     help="referent test: name another object in the scene, keep the point on the true target")
@@ -292,6 +299,7 @@ def main() -> None:
     if not args.wiring:
         runner = PolicyRunner(args.ckpt, device=dev, nfe=args.nfe, z0=args.z0)
         runner.blank_images = args.blank_images
+        runner.depth_noise = args.depth_noise
         fmt = runner.format
         ck = Path(args.ckpt)
         step = int(ck.stem.split("_")[-1]) if ck.stem.startswith("ckpt_") else ""

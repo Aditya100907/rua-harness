@@ -69,6 +69,7 @@ def parse_args(argv=None):
     ap.add_argument("--mark-all-cams", action="store_true",
                     help="points_2d: draw on every camera incl. the wrist (needs 3-camera depth renders, --depth-dir)")
     ap.add_argument("--noise-per-episode", action="store_true", help="hold the point noise fixed for each episode")
+    ap.add_argument("--depth-noise", default="", help="depth-noise level for point-map formats (policy/noise SWEEP)")
     ap.add_argument("--depth-dir", default=None, help="re-rendered depth folder for point-map formats (sets RUA_DEPTH)")
     ap.add_argument("--init-from", default=None,
                     help="start from this checkpoint (e.g. a converted research checkpoint, policy/research_ckpt.py); "
@@ -132,6 +133,8 @@ def main(argv=None) -> None:
     args = parse_args(argv)
     if args.depth_dir:
         os.environ["RUA_DEPTH"] = args.depth_dir      # read by policy.rerender.PointMapStore (inherited by workers)
+    if args.depth_noise:
+        os.environ["RUA_DEPTH_NOISE"] = args.depth_noise
     out = Path(args.out).expanduser()
     out.mkdir(parents=True, exist_ok=True)
     torch.manual_seed(args.seed)
