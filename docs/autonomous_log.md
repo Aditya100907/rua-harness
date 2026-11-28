@@ -103,3 +103,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 14:37 Twin array 34967215 + 34967024 done: 493 of 502 demos built (443 train, 50 held-out), 9 failed (8 no spot with 40 left-camera pixels, 1 no free counter spot). Median 89 s per demo, 12.8 CPU-hours. Relaxed second pass for the 9: job 34970787.
 - 14:40 Open-model pilot done: sentence 5/30 (perfect 10/30), points_2d 6/30 (perfect 17/30); error 10-16 cm. Journal and findings updated.
 - 14:48 Snap control built and launched (points_2d, 30 episodes). OpenDrawer kitchens hold many drawers (11 handles at seed 1000), relevant to P-1.
+- 14:50 Daily entry appended to PROJECT_CONTEXT.md section 16 (reread first, own line only).
