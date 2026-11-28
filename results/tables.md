@@ -9,8 +9,8 @@ Agent alone vs. agent plus policy. Success (%, Wilson 95% interval, episodes) an
 
 | Condition | Success | Seconds | LLM calls | In tokens | Out tokens | Cost (USD) |
 |---|---|---|---|---|---|---|
-| policy_only | 32.6 [32.0, 33.2] (n=25410) | 141.0 | 0.0 | 0 | 0 | 0.0000 |
-| agent_plus_policy | 0.0 [0.0, 79.3] (n=1) | 61.8 | 11.0 | 283,322 | 1,241 | 0.2922 |
+| policy_only | 32.9 [32.3, 33.5] (n=26310) | 140.6 | 0.0 | 0 | 0 | 0.0000 |
+| agent_plus_policy | 19.0 [11.2, 30.4] (n=63) | 178.2 | 2.0 | 7,795 | 222 | 0.0046 |
 | scripted | 64.7 [59.7, 69.5] (n=360) | 5.9 | 0.0 | 0 | 0 | 0.0000 |
 
 ## format_success
@@ -20,12 +20,12 @@ Success rate (%) by command format, with Wilson 95% interval and episode count. 
 | Format | Success |
 |---|---|
 | kv_text | 24.1 [22.6, 25.6] (n=3250) |
-| points_2d | 40.4 [39.3, 41.6] (n=6750) |
+| points_2d | 40.5 [39.4, 41.6] (n=7531) |
 | points_3d | 19.3 [17.8, 21.0] (n=2250) |
 | points_3d_rgb | 16.8 [15.3, 18.4] (n=2251) |
 | pose_path | 28.3 [25.2, 31.6] (n=750) |
 | scripted | 64.7 [59.7, 69.5] (n=360) |
-| sentence | 36.9 [35.9, 37.8] (n=10160) |
+| sentence | 36.9 [35.9, 37.8] (n=10341) |
 
 ## checkpoint_success
 
@@ -41,7 +41,7 @@ Success rate (%) by training step.
 | points_2d | 5000 | 18.7 [15.3, 22.5] (n=450) |
 | points_2d | 10000 | 30.2 [26.2, 34.6] (n=450) |
 | points_2d | 15000 | 46.0 [41.4, 50.6] (n=450) |
-| points_2d | 20000 | 42.6 [41.3, 44.0] (n=5400) |
+| points_2d | 20000 | 42.4 [41.2, 43.6] (n=6181) |
 | points_3d | 5000 | 1.3 [0.4, 4.7] (n=150) |
 | points_3d | 10000 | 9.3 [5.6, 15.1] (n=150) |
 | points_3d | 15000 | 18.0 [12.7, 24.9] (n=150) |
@@ -59,7 +59,7 @@ Success rate (%) by training step.
 | sentence | 5000 | 6.7 [5.6, 8.0] (n=1600) |
 | sentence | 10000 | 20.2 [17.2, 23.6] (n=600) |
 | sentence | 15000 | 43.1 [38.6, 47.7] (n=450) |
-| sentence | 20000 | 33.5 [30.8, 36.4] (n=1080) |
+| sentence | 20000 | 34.2 [31.6, 36.8] (n=1261) |
 | sentence | 50000 | 37.0 [33.9, 40.2] (n=900) |
 | sentence | 70000 | 0.0 [0.0, 5.1] (n=72) |
 | sentence | 100000 | 40.8 [37.6, 44.0] (n=900) |
@@ -80,9 +80,9 @@ Success rate (%) per task and condition, with Wilson 95% interval and episode co
 | CoffeeSetupMug | - | 41.1 [36.1, 46.4] (n=350) | - |
 | NavigateKitchen | - | 1.1 [0.4, 2.9] (n=350) | - |
 | OpenCabinet | - | 68.9 [63.8, 73.5] (n=350) | - |
-| OpenDrawer | 0.0 [0.0, 79.3] (n=1) | 39.9 [38.7, 41.0] (n=6804) | 65.6 [58.0, 72.5] (n=160) |
+| OpenDrawer | 13.0 [4.5, 32.1] (n=23) | 40.1 [39.0, 41.2] (n=7054) | 65.6 [58.0, 72.5] (n=160) |
 | OpenStandMixerHead | - | 83.1 [78.9, 86.7] (n=350) | - |
-| PickPlaceCounterToCabinet | - | 15.1 [14.2, 16.0] (n=6652) | 40.0 [31.7, 48.9] (n=120) |
+| PickPlaceCounterToCabinet | 10.0 [2.8, 30.1] (n=20) | 15.1 [14.3, 16.0] (n=6902) | 40.0 [31.7, 48.9] (n=120) |
 | PickPlaceCounterToStove | - | 13.7 [10.5, 17.7] (n=350) | - |
 | PickPlaceDrawerToCounter | - | 23.7 [19.6, 28.4] (n=350) | - |
 | PickPlaceSinkToCounter | - | 43.4 [38.3, 48.7] (n=350) | - |
@@ -90,9 +90,9 @@ Success rate (%) per task and condition, with Wilson 95% interval and episode co
 | SlideDishwasherRack | - | 57.1 [51.9, 62.2] (n=350) | - |
 | TurnOffStove | - | 18.9 [15.1, 23.3] (n=350) | - |
 | TurnOnElectricKettle | - | 71.1 [66.2, 75.6] (n=350) | - |
-| TurnOnMicrowave | - | 32.0 [30.9, 33.1] (n=6704) | 100.0 [95.4, 100.0] (n=80) |
+| TurnOnMicrowave | 35.0 [18.1, 56.7] (n=20) | 33.2 [32.1, 34.3] (n=7104) | 100.0 [95.4, 100.0] (n=80) |
 | TurnOnSinkFaucet | - | 68.9 [63.8, 73.5] (n=350) | - |
-| All tasks | 0.0 [0.0, 79.3] (n=1) | 32.6 [32.0, 33.2] (n=25410) | 64.7 [59.7, 69.5] (n=360) |
+| All tasks | 19.0 [11.2, 30.4] (n=63) | 32.9 [32.3, 33.5] (n=26310) | 64.7 [59.7, 69.5] (n=360) |
 
 ## Sources
 
@@ -440,11 +440,30 @@ Success rate (%) per task and condition, with Wilson 95% interval and episode co
 | 2026-11-27_scripted_smoke50_drawer_v1_superseded.csv | scripted | 50 | f3370c5-dirty | - |
 | 2026-11-27_scripted_unseen_names_n10.csv | scripted | 30 | 6111203, f0b568e-dirty | - |
 | 2026-11-27_scripted_unseen_names_n10_drawer_v1_superseded.csv | scripted | 10 | f0b568e-dirty | - |
+| 2026-11-28_agent_plus_policy_vlm_qwen3vl8b_fs_mse_points_2d_20000_OpenDrawer.csv | agent_plus_policy | 10 | e92946c | - |
+| 2026-11-28_agent_plus_policy_vlm_qwen3vl8b_fs_mse_points_2d_20000_PickPlaceCounterToCabinet.csv | agent_plus_policy | 10 | e92946c | - |
+| 2026-11-28_agent_plus_policy_vlm_qwen3vl8b_fs_mse_points_2d_20000_TurnOnMicrowave.csv | agent_plus_policy | 10 | e92946c | - |
+| 2026-11-28_agent_plus_policy_vlm_qwen3vl8b_fs_mse_sentence_20000_OpenDrawer.csv | agent_plus_policy | 10 | e92946c | - |
+| 2026-11-28_agent_plus_policy_vlm_qwen3vl8b_fs_mse_sentence_20000_PickPlaceCounterToCabinet.csv | agent_plus_policy | 10 | e92946c | - |
+| 2026-11-28_agent_plus_policy_vlm_qwen3vl8b_fs_mse_sentence_20000_TurnOnMicrowave.csv | agent_plus_policy | 10 | e92946c | - |
+| 2026-11-28_agent_plus_policy_vlm_smoke_fs_mse_points_2d_20000_OpenDrawer.csv | agent_plus_policy | 1 | b180b55-dirty | - |
+| 2026-11-28_agent_plus_policy_vlm_smoke_fs_mse_sentence_20000_OpenDrawer.csv | agent_plus_policy | 1 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_20000_distractor10pct_TurnOnMicrowave.csv | policy_only | 50 | e92946c | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_20000_err20cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_20000_err20cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_20000_err20cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_20000_err40cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_20000_err40cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_20000_err40cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_drop_name_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_drop_name_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_drop_point_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_drop_source_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_drop_source_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_err20cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_err20cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_err20cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_err40cm_TurnOnMicrowave.csv | policy_only | 50 | e92946c | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_rename_thing_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed1_20000_rename_thing_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_OpenDrawer.csv | policy_only | 100 | b180b55-dirty | - |
@@ -470,9 +489,13 @@ Success rate (%) per task and condition, with Wilson 95% interval and episode co
 | 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err1cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err1cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err1cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err20cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err20cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err20cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err2cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err2cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err2cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err40cm_TurnOnMicrowave.csv | policy_only | 50 | e92946c | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err5cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err5cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_2d_seed2_20000_err5cm_TurnOnMicrowave.csv | policy_only | 50 | b180b55-dirty | - |
@@ -488,6 +511,9 @@ Success rate (%) per task and condition, with Wilson 95% interval and episode co
 | 2026-11-28_policy_only_fs_mse_points_3d_20000_rename_thing_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_3d_rgb_20000_drop_source_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_points_3d_rgb_20000_rename_thing_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_20000_err0cm_OpenDrawer.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_20000_err0cm_PickPlaceCounterToCabinet.csv | policy_only | 50 | b180b55-dirty | - |
+| 2026-11-28_policy_only_fs_mse_sentence_20000_err0cm_TurnOnMicrowave.csv | policy_only | 50 | e92946c | - |
 | 2026-11-28_policy_only_fs_mse_sentence_all18_150000_CloseBlenderLid.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_sentence_all18_150000_CloseFridge.csv | policy_only | 50 | b180b55-dirty | - |
 | 2026-11-28_policy_only_fs_mse_sentence_all18_150000_CloseToasterOvenDoor.csv | policy_only | 50 | b180b55-dirty | - |

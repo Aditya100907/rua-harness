@@ -99,3 +99,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 14:14 Relabel merged (502/514/543). TurnOnMicrowave old labels were about 20 cm off the test-time button point. Mark check resubmitted (absolute path).
 - 14:14 Queued P0 (fsc_points_2d seeds 0-2) and fsc_points_3d_dist, fsc_points_3d, fsc_points_3d_rgb, all on test-time labels (pool A).
 - 14:19 Mark check passed (0.0 px, all cameras incl. wrist); queued fsc_points_2d_p2 (P-2 arm). VLM batch, sentence checkpoint: drawer 2/10, pick 2/10, microwave 1/10 (perfect commands same seeds: 3/10, 3/10, 4/10); grasp error median 9.8 to 15.3 cm; points_2d batch still running.
+- 14:30 Partial referent/residual sweep (points_2d, old labels): drawer seed0 37 (0-10 cm) -> 28 (20 cm) -> 13 (40 cm) of 50; seed1 drawer flat 29 to 40 cm; seed2 microwave flat 34. 10%/30% wrong-object and controls still running. An 'interactive' job is Adi's (likely salloc for the Claude login): left alone.
