@@ -65,6 +65,12 @@ def horizon(task: str) -> int:
 
 
 def code_commit() -> str:
+    # The Bouchet copy is synced by rsync without .git (scripts/sync_bouchet.sh writes COMMIT), but it still
+    # holds a stale .git from the first setup (b180b55), so COMMIT must win over git when it exists.
+    # Before Nov 28 14:15, cluster results recorded "b180b55-dirty" because of this.
+    p = REPO / "COMMIT"
+    if p.exists():
+        return p.read_text().strip()
     try:
         c = subprocess.run(["git", "-C", str(REPO), "rev-parse", "--short", "HEAD"],
                            capture_output=True, text=True, timeout=5).stdout.strip()
