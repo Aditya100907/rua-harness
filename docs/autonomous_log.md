@@ -81,3 +81,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 13:32 Collected overnight results: format table (3 seeds for sentence, kv_text, points_2d), Part N sweeps, 18-task run 51.2% at 300k. Journal and findings updated.
 - 13:34 Morning report and STATUS rewritten with the results. Queued 8 runs: name dropout (points_2d, points_3d_rgb), held-out objects (sentence, points_2d), 18-task points_2d and kv_text, second seeds for points_3d(_rgb).
 - 13:35 Correction: timestamps 13:45, 13:50, 13:55 written in the journal, morning report and STATUS were ahead of the real clock; fixed to 13:32 to 13:34. The watcher is fine (cluster clock 13:34; next cycle 13:36).
+- 13:36 Watcher launched all 8 queued runs at 13:36 (8/8 GPUs).
