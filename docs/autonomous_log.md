@@ -102,3 +102,4 @@ Stock DEM trained here does not learn usable actions (run 1 20k: 0% drawer and p
 - 14:30 Partial referent/residual sweep (points_2d, old labels): drawer seed0 37 (0-10 cm) -> 28 (20 cm) -> 13 (40 cm) of 50; seed1 drawer flat 29 to 40 cm; seed2 microwave flat 34. 10%/30% wrong-object and controls still running. An 'interactive' job is Adi's (likely salloc for the Claude login): left alone.
 - 14:37 Twin array 34967215 + 34967024 done: 493 of 502 demos built (443 train, 50 held-out), 9 failed (8 no spot with 40 left-camera pixels, 1 no free counter spot). Median 89 s per demo, 12.8 CPU-hours. Relaxed second pass for the 9: job 34970787.
 - 14:40 Open-model pilot done: sentence 5/30 (perfect 10/30), points_2d 6/30 (perfect 17/30); error 10-16 cm. Journal and findings updated.
+- 14:48 Snap control built and launched (points_2d, 30 episodes). OpenDrawer kitchens hold many drawers (11 handles at seed 1000), relevant to P-1.
