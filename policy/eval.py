@@ -213,6 +213,8 @@ def main() -> None:
     ap.add_argument("--nshards", type=int, default=1)
     ap.add_argument("--point-error-cm", type=float, default=0.0, help="N1: shift command points by this much")
     ap.add_argument("--distractor", action="store_true", help="N2/F6: grasp point on a distractor object")
+    ap.add_argument("--distractor-rate", type=float, default=0.0,
+                    help="referent axis: per episode (by seed), put the grasp point on a distractor with this probability")
     ap.add_argument("--drop", default="", choices=["", "point", "name", "source"], help="N3: drop a field")
     ap.add_argument("--rename", default="", help="N4: call the object by this name")
     ap.add_argument("--no-determinism-fix", action="store_true",
@@ -315,7 +317,9 @@ def main() -> None:
                     env.rng = np.random.default_rng(seed)
                     obs0 = env.reset()
                 instr = env.get_ep_meta().get("lang", "")
-                opts = dict(point_error_cm=args.point_error_cm, distractor=args.distractor, drop=args.drop,
+                wrong = args.distractor or (args.distractor_rate > 0 and
+                                            np.random.default_rng(seed + 991).random() < args.distractor_rate)
+                opts = dict(point_error_cm=args.point_error_cm, distractor=wrong, drop=args.drop,
                             rename=args.rename)
                 cmd = runner.set_task(task, instr, env=env, cmd_opts=opts, rng=np.random.default_rng(seed + 7))
                 instr = cmd["text"]
@@ -330,7 +334,8 @@ def main() -> None:
                         track["true"].append(np.linalg.norm(e - g_true))
                 r = run_episode(env, task, seed, lambda o, t: runner.act(o), H, execute=args.execute,
                                 video=frames, reset_obs=obs0, record=args.save_traj, on_step=on_step)
-                mode = "distractor" if args.distractor else (f"drop_{args.drop}" if args.drop else
+                mode = ("distractor" if wrong else "perfect") + (f"_rate{args.distractor_rate:g}" if args.distractor_rate else "") \
+                    if (args.distractor or args.distractor_rate) else (f"drop_{args.drop}" if args.drop else
                                                              (f"rename" if args.rename else "perfect"))
                 extra_row.update(command_mode=mode if runner.format != "sentence" else "sentence",
                                  point_error_cm=args.point_error_cm,
