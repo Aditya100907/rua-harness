@@ -1,8 +1,8 @@
 # Morning report, Fri Nov 27
 
-Last update: Sat Nov 28, 13:55 ET.
+Last update: Sat Nov 28, 13:34 ET.
 
-## 1. Bottom line (updated Sat Nov 28, 13:55)
+## 1. Bottom line (updated Sat Nov 28, 13:34)
 DEM's MeanFlow recipe did not learn here, but the same model trained by plain regression works: 51.2% over all 18 tasks at 300k steps (paper: 55.6%), and the format study on 3 tasks now has 3-seed results. Drawing the grasp and place points on the camera images raises success on the drawer (65% vs 53%) and microwave (56% vs 44%) over the plain sentence, while structured text alone and learned 3D point tokens do not help. But the policy does not follow a point to a different object and collapses when the object name is removed: it relies on the text, so "points steer the policy" is not supported yet; a name-dropout test of that is running.
 
 ## 2. Numbers

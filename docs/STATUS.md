@@ -1,7 +1,7 @@
 # Status
 
 Keep this current. A new session reads it first and continues from "Next".
-Last updated: Sat Nov 28, 2026, 13:55 ET.
+Last updated: Sat Nov 28, 2026, 13:34 ET.
 
 ## Goal for Sun Nov 29, night
 Three conditions on RoboCasa's 18 atomic-seen tasks: policy alone, agent alone, agent plus policy. Success, seconds, LLM calls and tokens per episode.
@@ -35,11 +35,11 @@ Stock DEM trained with the MeanFlow recipe does not learn usable actions here: r
 - A policy that scores above 20% on any smoke task (the gate).
 - The container build and the GitHub workflow.
 
-## Results so far (Sat Nov 28, 13:55)
+## Results so far (Sat Nov 28, 13:34)
 - 18-task stock DEM with regression: 51.2% at 300k steps (paper 55.6% with MeanFlow).
 - Format study (3 tasks, 3 seeds for sentence, kv_text, points_2d): points_2d beats sentence on drawer (65 vs 53%) and microwave (56 vs 44%); kv_text no different; learned 3D point tokens worse (1 seed). Policies follow the name, not the point (distractor test). Full tables: `docs/MORNING_REPORT.md`, `docs/research_journal.md`.
 
-## Running (Sat Nov 28, 13:55; watcher queue)
+## Running (Sat Nov 28, 13:34; watcher queue)
 - Name dropout 0.5 for points_2d and points_3d_rgb (can points carry the object choice?); Part N sweeps follow automatically.
 - Held-out objects: sentence and points_2d on the object split, scored on held-out val scenes.
 - points_2d and kv_text on all 18 tasks (300k).

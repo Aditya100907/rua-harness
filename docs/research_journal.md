@@ -116,7 +116,7 @@ One entry per result: what was tested, the number with its episode count and int
 - The two formats that add learned point or path tokens start slower than the text and drawn-point formats (5k, one seed). Their new MLP starts from scratch while everything else is shared, so check again at 20k before reading anything into it.
 - pose_path is scored on a different protocol (held-out demo scenes with the demo's future path), so its numbers are not directly comparable with the others' fresh-seed scenes.
 
-## Nov 28, 13:45. FORMAT STUDY RESULTS (3 smoke tasks, regression objective, 20k steps, 100 episodes per seed per task, determinism fix on)
+## Nov 28, 13:32. FORMAT STUDY RESULTS (3 smoke tasks, regression objective, 20k steps, 100 episodes per seed per task, determinism fix on)
 Settings shared by every run: left + wrist cameras, shipped quantiles, held-out-50 split, batch 64, seed 0 unless noted. Brackets: pooled Wilson 95% CI.
 | Format | Seeds | OpenDrawer | PickPlace | Microwave |
 |---|---|---|---|---|
@@ -129,13 +129,13 @@ Settings shared by every run: left + wrist cameras, shipped quantiles, held-out-
 - **points_2d beats sentence** on the microwave (intervals clear) and on the drawer (intervals just touch at 0.59); same on pick-place. kv_text is not different from sentence anywhere.
 - **Learned point tokens (points_3d, points_3d_rgb) are worse** than sentence at 20k (one seed): the new token MLP may need more steps, or the point carries little the image does not.
 
-## Nov 28, 13:50. Part N sweeps (points formats, final checkpoints, 50 episodes per mode per task)
+## Nov 28, 13:32. Part N sweeps (points formats, final checkpoints, 50 episodes per mode per task)
 - **N1 point error (0, 1, 2, 5, 10 cm):** almost flat. points_2d seed 0 drawer 37, 37, 37, 36, 36 of 50; microwave 32, 31, 29, 31, 26; pick-place 15, 17, 19, 11, 11. Same flatness for the other seeds and for points_3d / points_3d_rgb.
 - **N2 distractor point (pick-place):** with the grasp point placed on a distractor object, the gripper came within 5 cm of the distractor in 5, 1, 4 of 50 episodes (points_2d seeds 0, 1, 2), 1 (points_3d), 2 (points_3d_rgb), and within 5 cm of the true target in 18, 27, 10, 11, 17. With the correct point, within 5 cm of the target in 31, 26, 30, 11, 19. **The policies do not follow the point to a different object; they follow the name and the image.** The wrong point does lower reaching of the true object (points_2d seed 2: 30 to 10).
 - **N3 dropped fields:** dropping the object name or renaming it to "thing" collapses OpenDrawer for points_2d seeds 0 and 2 (37 to 2, 36 to 0) and for points_3d / points_3d_rgb (to 0), but not seed 1 (28 to 24). Dropping the point: drawer 37 to 17 (seed 0), 36 to 5 (seed 2), 28 to 29 (seed 1). Dropping the source name: no change.
 - **Means:** in this training setup the policy uses the text far more than the point. Points help success on the drawer and microwave (seen in the format table), but they do not steer the policy to a different object. Point accuracy beyond about 10 cm is not the bottleneck, so an agent's pointing error (commander smoke test: 3 cm with a clear view) is not what would limit it. Caveat: training points come from the demo's own target, so the point and the name never disagree in training; the policy has no reason to prefer the point. A training set with look-alike distractors (Part Y) is the test of whether points can carry the choice.
 
-## Nov 28, 13:55. 18-task stock run (sentence, regression, left + wrist, 300k steps, one seed)
+## Nov 28, 13:32. 18-task stock run (sentence, regression, left + wrist, 300k steps, one seed)
 - Mean success over 18 tasks: 50k 37.0% (333/900), 100k 40.8%, 150k 47.8%, 200k 47.9%, 250k 49.8%, 300k **51.2% (921/1800)**. DEM paper (MeanFlow): 55.6%.
 - Per task at 300k (100 episodes each): OpenStandMixerHead 88, PickPlaceToasterToCounter 81, OpenCabinet 78, TurnOnElectricKettle 78, TurnOnSinkFaucet 75, OpenDrawer 73, SlideDishwasherRack 64, CloseToasterOvenDoor 61, CloseFridge 60, PickPlaceSinkToCounter 51, TurnOnMicrowave 51, CoffeeSetupMug 48, PickPlaceCounterToCabinet 41, PickPlaceDrawerToCounter 25, TurnOffStove 21, PickPlaceCounterToStove 16, CloseBlenderLid 10, NavigateKitchen 0.
 - **Means:** with regression in place of MeanFlow, DEM on our pipeline comes within 4.4 points of the paper's 18-task number. Training on all 18 tasks also helps the smoke tasks a lot (OpenDrawer 73% vs 46 to 67% for 3-task runs; pick-place 41% vs 11 to 28%).
